@@ -27,6 +27,12 @@
 	
 КонецПроцедуры
 
+Процедура ВводНового(Скопирован)
+	UUID = "";
+	applicationID = "";
+	Статус = "";
+КонецПроцедуры
+
 Процедура ПриОткрытии()
 	
 	Форма.ИспользоватьЗакладки(1);
@@ -120,7 +126,7 @@
 	Если ПустоеЗначение(UUID)=1 Тогда
 		Предупреждение("Не указан UUID документа ВСД");
 	Иначе
-		ЗапуститьПриложение("http://mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid="+UUID);	
+		ЗапуститьПриложение("http://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid="+UUID);	
 	КонецЕсли;
 КонецПроцедуры
 
