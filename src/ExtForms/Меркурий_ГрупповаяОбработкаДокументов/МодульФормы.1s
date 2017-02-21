@@ -2,6 +2,9 @@
 ѕерем ЁтоSQL;
 ѕерем  аталогќбработки;
 
+ѕерем цв расный, цв∆елтый, цв«еленый, цв√олубой;
+
+
 //*******************************************
 ‘ункци€ Ќайти’оз—убъект(¬ыб лиент)
 	
@@ -678,3 +681,8 @@
 //                    TransportationStorageType.CHILLED == 1 
 //                    TransportationStorageType.COOLED == 2
 //                    TransportationStorageType.VENTILATED ==3
+
+÷в∆елтый 	= "FONT[0]BRUSH[65535]FONT_S[0]BRUSH_S[65535]                       ";
+÷в«еленый 	= "FONT[0]BRUSH[65280]FONT_S[0]BRUSH_S[65280]                       ";
+÷в расный  	= "FONT[0]BRUSH[255]FONT_S[0]BRUSH_S[255]                           " ;
+÷в√олубой	= "FONT[0]BRUSH[13421619]FONT_S[0]BRUSH_S[13421619]                 ";
