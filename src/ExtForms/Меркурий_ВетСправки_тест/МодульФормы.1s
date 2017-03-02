@@ -10,8 +10,8 @@
 Перем ЭтоSQL; 
 Перем базаДанных;
 	
-Процедура ЗагрузитьXML_getStockEntryListResponse(имяФайла) Далее
-Процедура ЗагрузитьПартииXML( имяФайла, докПартия="" ) Далее
+Процедура ЗагрузитьXML_ВсеПартииОтвет( имяФайла, докПартия="" ) Далее
+//Процедура ЗагрузитьXML_Партия( имяФайла, докПартия="" ) Далее
 	
 //******************************************************************************
  // предопределенная процедура
@@ -89,7 +89,7 @@
 		
 	GUID_Упаковка = ВыпМодуль.GUID_Упаковка; //гофроящик
 	
-	ВСД_Экспертиза = "Произ.лабор Приосколье";
+	ВСД_Экспертиза = "Произ.лабор ";
 	ВСД_Местность = "местность благополучная по остро инфекционным заболеваниям с\х животных и птиц";
 	
 	КаталогЛогов = КаталогИБ()+"logs\";
@@ -309,8 +309,8 @@
 		СокрЛП(док.Продукция.Наименование),			//	названиеПродукции,
 		СокрЛП(док.ДатаИзготовления),				//  датаИзготовления,
 		СокрЛП(док.ДатаСрокГодности),				//	датаСрокГодности,
-		СокрЛП(док.Количество),						//	количествоКг,
-		СокрЛП(док.КоличествоКор),					//	количествоКор,
+		(док.Количество),						//	количествоКг,
+		(док.КоличествоКор),					//	количествоКор,
 		СокрЛП(док.ТтнСерия),						//	ТтнСерия,
 		СокрЛП(док.ТтнНомер),						//	ТтнНомер,
 		док.ТтнДата, //ТекущаяДата(),
@@ -325,7 +325,7 @@
 		GUID_Упаковка
 	);
 			
-	Отладка();
+	//Отладка();
 	
 	Попытка
 		ДокОб = СоздатьОбъект("Документ");
@@ -465,7 +465,7 @@
 		СокрЛП(док.Партия.ВсдМестность), //СокрЛП(док.ВсдМестность	),
 		СокрЛП(док.Партия.ОсобыеОтметки ),
 		СокрЛП(док.Партия.GUID	),		
-		(док.Партия.ТермическоеСостояние-1), // TransportationStorageType
+		(ТермическиеУсловияПеревозки-1), // TransportationStorageType
 		GUID_Упаковка, // упаковка = гофроящик - должно быть тоже самое что и во входящем ВСД
 		//"fedf5ad4-053c-11e1-99b4-d8d385fbc9e8" //упаковка = коробки 
 		ФормаВСД
@@ -645,22 +645,22 @@
 	
 КонецФункции
 
-Процедура ПолучитьПартииОтвет()
-
-	Результат = Компонента.GetStockListResult(СокрЛП(appID));
-
-	Отладка();
-	
-	Если Результат="COMPLETED" Тогда
-						
-		тз = ЗагрузитьТЗ(Компонента.ResultString);
-		//тз.ВыбратьСтроку();
-		ЗаписатьПартии(тз);
-				
-	КонецЕсли;		
-		
-	
-КонецПроцедуры
+//Процедура ПолучитьПартииОтвет()
+//
+//	Результат = Компонента.GetStockListResult(СокрЛП(appID));
+//
+//	Отладка();
+//	
+//	Если Результат="COMPLETED" Тогда
+//						
+//		тз = ЗагрузитьТЗ(Компонента.ResultString);
+//		//тз.ВыбратьСтроку();
+//		ЗаписатьПартии(тз);
+//				
+//	КонецЕсли;		
+//		
+//	
+//КонецПроцедуры
 
 Функция  ПолучитьПартииОтветXML()
 
@@ -670,9 +670,9 @@
 	
 	Если Результат="COMPLETED" Тогда
 						
-		тз = ЗагрузитьТЗ(Компонента.ResultString);
+		//тз = ЗагрузитьТЗ(Компонента.ResultString);
 		//тз.ВыбратьСтроку();
-		ЗагрузитьXML_getStockEntryListResponse( Компонента.LogFilename );
+		ЗагрузитьXML_ВсеПартииОтвет( Компонента.LogFilename );
 				
 	КонецЕсли;		
 		
@@ -750,7 +750,7 @@
 	Сообщить("Отправляем запрос ВСД_Входящий_Результат ["+докСсылка+"]" );
 	Результат = Компонента.Send_VSD_IN_Result( СокрЛП(докСсылка.applicationID));
 
-	Отладка();
+	//Отладка();
 	
 	Попытка
 		Ошибка = Компонента.ErrorMessage;
@@ -770,8 +770,12 @@
 		Сообщить(Док.RequestResult);		
 		
 		Если Результат="COMPLETED" Тогда
+			
+			Док.Провести();		
+
 			//ЗаписатьПартии(тз, док);
-			ЗагрузитьПартииXML( Компонента.LogFilename , докСсылка);
+			//ЗагрузитьXML_Партия( Компонента.LogFilename , докСсылка);
+			ЗагрузитьXML_ВсеПартииОтвет( Компонента.LogFilename , докСсылка);
 		КонецЕсли;
 
 	Исключение
@@ -806,7 +810,8 @@
 		док.Записать();
 		Если Результат="COMPLETED" Тогда
 			//ЗаписатьПартии(тз);
-			ЗагрузитьПартииXML( Компонента.LogFilename );
+			//ЗагрузитьXML_Партия( Компонента.LogFilename );
+			ЗагрузитьXML_ВсеПартииОтвет( Компонента.LogFilename );
 			
 			док.UUID = Компонента.DocUUID;
 			
@@ -1612,16 +1617,16 @@
 //	Возврат  Док;
 //КонецФункции
 
-Функция НайтиВхПартиюПоGUID(GUID)
-	Док = СоздатьОбъект("Документ.ВСД_входящаяПартия");	
+Функция НайтиПартиюПоGUID(GUID, ДокОснование)
+	Док = СоздатьОбъект("Документ.ВСД_Партия");	
 	Если ЭтоSQL=1 ТОгда 
 		RS = СоздатьОбъект("ODBCRecordset");
 		RS.УстБД1С();     	
 	
 		ТекстЗапроса = "
 		|select 	              
-	    |   ДокВ.iddoc [id $Документ.ВСД_входящаяПартия]
-	    |from $Документ.ВСД_входящаяПартия as ДокВ  
+	    |   ДокВ.iddoc [id $Документ.ВСД_Партия]
+	    |from $Документ.ВСД_Партия as ДокВ  
 	  	|where 
 	  	|	$ДокВ.GUID= :GUID
 	  	|";
@@ -1633,8 +1638,8 @@
 		Запрос = базаДанных.НовыйЗапрос();
 		ТекстЗапроса = "
 		|select 	              
-	    |   ДокВ.iddoc [id $Документ.ВСД_входящаяПартия]
-	    |from [Документ.ВСД_входящаяПартия] as ДокВ  
+	    |   ДокВ.iddoc [id $Документ.ВСД_Партия]
+	    |from [Документ.ВСД_Партия] as ДокВ  
 	  	|where 
 	  	|	ДокВ.GUID= :GUID
 	  	|";	
@@ -1645,6 +1650,7 @@
 	
 	Если ПустоеЗначение(тз)=1 Тогда 
 		Док.Новый();
+		Док.ДокОснование = ДокОснование;
 	Иначе
 		док.НайтиДокумент(тз.ПолучитьЗначение(1,1));
 		док.СделатьНеПроведенным();
@@ -1661,32 +1667,7 @@
 	возврат Дата(год, мес,день);
 КонецФункции
 
-//*********** работа с XML ********************************
-Процедура ЗагрузитьXML_getStockEntryListResponse(имяФайла)
-    
-    //tt1=_GetPerformanceCounter();
-    
-	Если ПустоеЗначение(имяФайла)=1 Тогда
-		
-	    ИмяФайла="C:\C#\logs\1.xml";
-		
-		Каталог = "";
-		Если ФС.ВыбратьФайл(0, ИмяФайла, Каталог, "Выберите файл", "XML (*.xml)|*.xml", , ) = 1 Тогда
-		    ИмяФайла = Каталог + ИмяФайла;
-		КонецЕсли;
-	КонецЕсли;	
-
-	//имяф=КаталогИБ()+"tovar3.xml";
-    Сообщить("Загрузка XML-файла: "+ИмяФайла);    
-    
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(ИмяФайла);    
-    
-//    о=СоздатьОбъект("Справочник.Товары");
-    stockEntryList = objDom.selectNodes("//vetd:stockEntry") ;
-    Для i1 = 0 По stockEntryList.length - 1 Цикл
-        stockEntry=stockEntryList.item(i1);
-		
+Процедура ЗаписатьПартию(stockEntry, докПартия)
 		t = stockEntry.text;	
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
 		guid = stockEntry.selectSingleNode("bs:guid").text;
@@ -1699,7 +1680,7 @@
 		
 		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
+		productItem = batch.selectSingleNode("vetd:productItem").text;
 		volume 		= batch.selectSingleNode("vetd:volume").text;
 		unit		= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
 		Попытка
@@ -1747,11 +1728,12 @@
 		//Сообщить(""+entryNumber+" "+volume);		
 	
 		//ДокВхПартия = НайтиВхПартиюПоНомеру(entryNumber);
-		ДокВхПартия = НайтиВхПартиюПоGUID(guid);
+		ДокВхПартия = НайтиПартиюПоGUID(guid, докПартия);
 		
 		Сообщить(""+ДокВхПартия.ТекущийДокумент()+" от "+createDate+" # "+entryNumber);
 		
 		ДокВхПартия.ДатаДок = СтрокаВДату(createDate);
+		ДокВхПартия.ДатаИзменения = СтрокаВДату( updateDate );
 		Производитель = НайтиПлощадку(producer);
 		
 		Если ПустоеЗначение(Производитель)=1 Тогда
@@ -1803,19 +1785,12 @@
 		ДокВхПартия.Комментарий = ДокВхПартия.Комментарий + ТекущаяДата()+" "+ТекущееВремя();
 		
 		ДокВхПартия.Записать();
-		
-    КонецЦикла;
-
-    
-    //tt2=_GetPerformanceCounter();
-    //Сообщить("Время выполнения: "+(tt2-tt1)/1000+" секунд");
-    
-    
+		ДокВхПартия.Провести();
 
 КонецПроцедуры
 
 //*********** работа с XML ********************************
-Процедура ЗагрузитьПартииXML(имяФайла, докПартия="" )
+Процедура ЗагрузитьXML_ВсеПартииОтвет(имяФайла, докПартия="")
     
     //tt1=_GetPerformanceCounter();
     
@@ -1835,127 +1810,172 @@
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(ИмяФайла);    
     
-//    о=СоздатьОбъект("Справочник.Товары");
+    stockEntryList = objDom.selectNodes("//vetd:stockEntry") ;
+    Для i1 = 0 По stockEntryList.length - 1 Цикл
+        stockEntry=stockEntryList.item(i1);
+		
+		ЗаписатьПартию(stockEntry, докПартия);
+			
+    КонецЦикла;
     stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
     Для i1 = 0 По stockEntryList.length - 1 Цикл
         stockEntry=stockEntryList.item(i1);
 		
-		t = stockEntry.text;	
-		uuid = stockEntry.selectSingleNode("bs:uuid").text;
-		guid = stockEntry.selectSingleNode("bs:guid").text;
-		st = stockEntry.selectSingleNode("bs:status").text;
-		entryNumber = stockEntry.selectSingleNode("vetd:entryNumber").text;
-		updateDate = stockEntry.selectSingleNode("bs:updateDate").text;
-		createDate = stockEntry.selectSingleNode("bs:createDate").text;
-		
-		batch = stockEntry.selectSingleNode("vetd:batch");
-		
-		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
-		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("vetd:productItem").text;
-		volume 		= batch.selectSingleNode("vetd:volume").text;
-		unit		= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
-//		packingListUuid	= batch.selectSingleNode("vetd:packingList").selectSingleNode("com:packingForm").selectSingleNode("bs:uuid").text;
-		//packingListName	= batch.selectSingleNode("vetd:packingList").selectSingleNode("argc:packingForm").selectSingleNode("argc:name").text;;
-		packingAmount = batch.selectSingleNode("vetd:packingAmount").text;
-		
-		//попытка
-		//	dateOfProduction 	= ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").text;
-		//Исключение
-		//	dateOfProduction 	= ""+batch.selectSingleNode("vetd:dateOfProduction").text;
-		//КонецПопытки;
-		//dateOfProduction = СтрЗаменить(dateOfProduction," ",".");
-		//попытка
-		//	dateOfProduction2 	= batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").text;;
-		//	dateOfProduction2 = СтрЗаменить(dateOfProduction2," ",".");
-		//	dateOfProduction = dateOfProduction +  " - "+ dateOfProduction2;
-		//Исключение			
-		//КонецПопытки;
-		//Попытка
-		//	expiryDate 	= batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").text;
-		//Исключение
-		//	expiryDate 	= batch.selectSingleNode("vetd:expiryDate").text;
-		//КонецПопытки;
-		//expiryDate = СтрЗаменить(expiryDate," ",".");
-		//Попытка
-		//	expiryDate2	= batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").text;
-		//	expiryDate2 = СтрЗаменить(expiryDate2," ",".");
-		//	expiryDate  = expiryDate +" - "+ expiryDate2; 
-		//Исключение			
-		//КонецПопытки;
-		
-		
-		//producer = batch.selectSingleNode("vetd:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
-		
-		//owner = batch.selectSingleNode("vetd:owner").selectSingleNode("bs:guid").text; //ХозСубъект
-
-		//Сообщить(""+entryNumber+" "+volume);		
-	
-		//ДокВхПартия = СоздатьОбъект("Документ.ВСД_входящаяПартия");	
-		Если ПустоеЗначение(докПартия)=1 Тогда 
-			ДокВхПартия = НайтиВхПартиюПоGUID( guid );
-		Иначе			
-			ДокВхПартия = СоздатьОбъект("Документ.ВСД_входящаяПартия");
-			ДокВхПартия.НайтиДокумент(докПартия);
-		КонецЕсли;
-		
-		Сообщить(""+ДокВхПартия.ТекущийДокумент()+" от "+createDate+" # "+entryNumber);
-		
-		//ДокВхПартия.ДатаДок =
-		//ДокВхПартия.Новый();
-		//ДокВхПартия.НомерДок = ;
-		ДокВхПартия.ДатаДок = СтрокаВДату(createDate);
-		//Производитель = НайтиПлощадку(producer);
-		//
-		//Если ПустоеЗначение(Производитель)=1 Тогда
-		//	Сообщить("Партия пропущена "+entryNumber,"!");
-		//	Продолжить;
-		//КонецЕсли;		
-		
-		//ДокВхПартия.Отправитель_ХозСубъект = ;
-		//ДокВхПартия.Отправитель_Площадка = ;
-		//ДокВхПартия.Получатель_ХозСубъект = Отправитель_ХозСубъект;
-		//ДокВхПартия.Получатель_Площадка = Отправитель_Площадка;
-		//ДокВхПартия.Производитель_Площадка = Производитель;
-		//ДокВхПартия.Производитель_ХозСубъект = Производитель.Владелец;
-		//ДокВхПартия.Перевозчик_ХозСубъект = ;
-		//ДокВхПартия.applicationID = ;
-		ДокВхПартия.Продукция = НайтиПродукцию(product, productItem);
-		ДокВхПартия.ВидПродукции = НайтиВидПродукции(subProduct, productItem);
-		ДокВхПартия.Количество = Число(volume);
-		ДокВхПартия.КоличествоКор = Число(packingAmount);
-		//ДокВхПартия.ДатаИзготовления = dateOfProduction;
-		//ДокВхПартия.ДатаСрокГодности = expiryDate;
-		ДокВхПартия.Статус = st;		
-		//ДокВхПартия.ТермическоеСостояние = ;
-		//ДокВхПартия.ОсобыеОтметки = ;
-		ДокВхПартия.GUID = guid;
-		ДокВхПартия.UUID = uuid;
-		ДокВхПартия.ДатаИзменения = updateDate;
-		ДокВхПартия.НомерЗаписи = entryNumber;
-		ДокВхПартия.НаименованиеПродукции = productItem;
-		//ДокВхПартия.Фирма = глПользователь.ОсновнаяФирма;
-		//ДокВхПартия.ЮрЛицо = ;
-		//ДокВхПартия.Проект = ;
-		//ДокВхПартия.Автор = глПользователь;
-		Если ПустоеЗначение(Филиал)=0 Тогда 
-			ДокВхПартия.Филиал = глПользователь.Филиал;
-		КонецЕсли;
-		//ДокВхПартия.Комментарий = ;
-		
-		ДокВхПартия.ВсдДата = ДокВхПартия.ДатаДок;
-		ДокВхПартия.ВсдЭкспертиза = ВСД_Экспертиза;
-		ДокВхПартия.ВсдМестность = ВСД_Местность;
-		
-		ДокВхПартия.Записать();
-		
+		ЗаписатьПартию(stockEntry, докПартия);
+			
     КонецЦикла;
-
     
     //tt2=_GetPerformanceCounter();
-    //Сообщить("Время выполнения: "+(tt2-tt1)/1000+" секунд");
-    
+    //Сообщить("Время выполнения: "+(tt2-tt1)/1000+" секунд");     
+
 КонецПроцедуры
+
+////*********** работа с XML ********************************
+//Процедура ЗагрузитьXML_Партия(имяФайла, докПартия="" )
+//    
+//    //tt1=_GetPerformanceCounter();
+//    
+//	Если ПустоеЗначение(имяФайла)=1 Тогда
+//		
+//	    ИмяФайла="C:\C#\logs\1.xml";
+//		
+//		Каталог = "";
+//		Если ФС.ВыбратьФайл(0, ИмяФайла, Каталог, "Выберите файл", "XML (*.xml)|*.xml", , ) = 1 Тогда
+//		    ИмяФайла = Каталог + ИмяФайла;
+//		КонецЕсли;
+//	КонецЕсли;	
+//
+//	//имяф=КаталогИБ()+"tovar3.xml";
+//    Сообщить("Загрузка XML-файла: "+ИмяФайла);    
+//    
+//    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+//    objDom.load(ИмяФайла);    
+//    
+////    о=СоздатьОбъект("Справочник.Товары");
+//    stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
+//    Для i1 = 0 По stockEntryList.length - 1 Цикл
+//        stockEntry=stockEntryList.item(i1);
+//		
+//		t = stockEntry.text;	
+//		uuid = stockEntry.selectSingleNode("bs:uuid").text;
+//		guid = stockEntry.selectSingleNode("bs:guid").text;
+//		st = stockEntry.selectSingleNode("bs:status").text;
+//		entryNumber = stockEntry.selectSingleNode("vetd:entryNumber").text;
+//		updateDate = stockEntry.selectSingleNode("bs:updateDate").text;
+//		createDate = stockEntry.selectSingleNode("bs:createDate").text;
+//		
+//		batch = stockEntry.selectSingleNode("vetd:batch");
+//		
+//		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
+//		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
+//		productItem = batch.selectSingleNode("vetd:productItem").text;
+//		volume 		= batch.selectSingleNode("vetd:volume").text;
+//		unit		= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
+////		packingListUuid	= batch.selectSingleNode("vetd:packingList").selectSingleNode("com:packingForm").selectSingleNode("bs:uuid").text;
+//		//packingListName	= batch.selectSingleNode("vetd:packingList").selectSingleNode("argc:packingForm").selectSingleNode("argc:name").text;;
+//		packingAmount = batch.selectSingleNode("vetd:packingAmount").text;
+//		
+//		попытка
+//			dateOfProduction 	= ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").text;
+//		Исключение
+//			dateOfProduction 	= ""+batch.selectSingleNode("vetd:dateOfProduction").text;
+//		КонецПопытки;
+//		dateOfProduction = СтрЗаменить(dateOfProduction," ",".");
+//		попытка
+//			dateOfProduction2 	= batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").text;;
+//			dateOfProduction2 = СтрЗаменить(dateOfProduction2," ",".");
+//			dateOfProduction = dateOfProduction +  " - "+ dateOfProduction2;
+//		Исключение			
+//		КонецПопытки;
+//		Попытка
+//			expiryDate 	= batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").text;
+//		Исключение
+//			expiryDate 	= batch.selectSingleNode("vetd:expiryDate").text;
+//		КонецПопытки;
+//		expiryDate = СтрЗаменить(expiryDate," ",".");
+//		Попытка
+//			expiryDate2	= batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").text;
+//			expiryDate2 = СтрЗаменить(expiryDate2," ",".");
+//			expiryDate  = expiryDate +" - "+ expiryDate2; 
+//		Исключение			
+//		КонецПопытки;
+//
+//		
+//		ДокВхПартия = НайтиПартиюПоGUID( guid, докПартия);
+//		
+//		Сообщить(""+ДокВхПартия.ТекущийДокумент()+" от "+createDate+" # "+entryNumber);
+//		
+//		//ДокВхПартия.ДатаДок =
+//		//ДокВхПартия.Новый();
+//		//ДокВхПартия.НомерДок = ;
+//		ДокВхПартия.ДатаДок = СтрокаВДату(createDate);
+//		//Производитель = НайтиПлощадку(producer);
+//		//
+//		//Если ПустоеЗначение(Производитель)=1 Тогда
+//		//	Сообщить("Партия пропущена "+entryNumber,"!");
+//		//	Продолжить;
+//		//КонецЕсли;		
+//		
+//		producer = batch.selectSingleNode("vetd:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+//		
+//		Производитель = НайтиПлощадку(producer);
+//		Если ПустоеЗначение(Производитель)=1 Тогда
+//			Сообщить("Партия пропущена "+entryNumber,"!");
+//			Возврат;
+//		КонецЕсли;
+//		ПроизводительХС = "";
+//		Попытка
+//			ПроизводительХС =  Производитель.Владелец;
+//		Исключение
+//			Сообщить(ОписаниеОшибки());
+//		КонецПопытки;
+//		
+//		
+//		ДокВхПартия.Получатель_ХозСубъект = Отправитель_ХозСубъект;
+//		ДокВхПартия.Получатель_Площадка = Отправитель_Площадка;
+//		ДокВхПартия.Производитель_Площадка = Производитель;
+//		ДокВхПартия.Производитель_ХозСубъект = ПроизводительХС;
+//		//ДокВхПартия.Производитель_Площадка = Производитель;
+//		//ДокВхПартия.Производитель_ХозСубъект = Производитель.Владелец;
+//		//ДокВхПартия.Перевозчик_ХозСубъект = ;
+//		//ДокВхПартия.applicationID = ;
+//		ДокВхПартия.Продукция = НайтиПродукцию(product, productItem);
+//		ДокВхПартия.ВидПродукции = НайтиВидПродукции(subProduct, productItem);
+//		ДокВхПартия.Количество = Число(volume);
+//		ДокВхПартия.КоличествоКор = Число(packingAmount);
+//		//ДокВхПартия.ДатаИзготовления = dateOfProduction;
+//		//ДокВхПартия.ДатаСрокГодности = expiryDate;
+//		ДокВхПартия.Статус = st;		
+//		//ДокВхПартия.ТермическоеСостояние = ;
+//		//ДокВхПартия.ОсобыеОтметки = ;
+//		ДокВхПартия.GUID = guid;
+//		ДокВхПартия.UUID = uuid;
+//		ДокВхПартия.ДатаИзменения = updateDate;
+//		ДокВхПартия.НомерЗаписи = entryNumber;
+//		ДокВхПартия.НаименованиеПродукции = productItem;
+//		//ДокВхПартия.Фирма = глПользователь.ОсновнаяФирма;
+//		//ДокВхПартия.ЮрЛицо = ;
+//		//ДокВхПартия.Проект = ;
+//		//ДокВхПартия.Автор = глПользователь;
+//		Если ПустоеЗначение(Филиал)=0 Тогда 
+//			ДокВхПартия.Филиал = глПользователь.Филиал;
+//		КонецЕсли;
+//		//ДокВхПартия.Комментарий = ;
+//		
+//		ДокВхПартия.ВсдДата = ДокВхПартия.ДатаДок;
+//		ДокВхПартия.ВсдЭкспертиза = ВСД_Экспертиза;
+//		ДокВхПартия.ВсдМестность = ВСД_Местность;
+//		
+//		ДокВхПартия.Записать();
+//		ДокВхПартия.Провести();
+//		
+//    КонецЦикла;
+//
+//    
+//    //tt2=_GetPerformanceCounter();
+//    //Сообщить("Время выполнения: "+(tt2-tt1)/1000+" секунд");
+//    
+//КонецПроцедуры
 //*******************************************
 
 Процедура ПриОткрытии()
@@ -2048,13 +2068,13 @@
 	Филиал="";
 КонецПопытки;
 
-//боевая версия
-ЗагрузитьВнешнююКомпоненту("SoapDLL_work.dll");
-Компонента = СоздатьОбъект("SoapDLL.WorkClass"); 		
+////боевая версия
+//ЗагрузитьВнешнююКомпоненту("SoapDLL_work.dll");
+//Компонента = СоздатьОбъект("SoapDLL.WorkClass"); 		
 	
-//// тестовый сервер
-//ЗагрузитьВнешнююКомпоненту("SoapDLL_test.dll");	
-//Компонента = СоздатьОбъект("SoapDLL.TestClass"); 		
+// тестовый сервер
+ЗагрузитьВнешнююКомпоненту("SoapDLL_test.dll");	
+Компонента = СоздатьОбъект("SoapDLL.TestClass"); 		
 
 //ПутьМодульПараметры = "ExtForms\Меркурий_МодульПараметры.txt";		// рабочая версия
 //ПутьМодульПараметры = "ExtForms\Меркурий_МодульПараметрыТест.txt"; // тестовая версия
@@ -2062,4 +2082,5 @@
 
 //настройки модуля хранятся в файле
 РасположениеФайла(КаталогОбработки, ИмяФайлаНастроек);
-ИмяФайлаНастроек=КаталогОбработки+"Меркурий_Константы_"+СокрЛП(глПользователь.Код)+".tx8";
+//ИмяФайлаНастроек=КаталогОбработки+"Меркурий_Константы_"+СокрЛП(глПользователь.Код)+".tx8";
+ИмяФайлаНастроек=КаталогОбработки+"Меркурий_Константы_ТЕСТ_"+СокрЛП(глПользователь.Код)+".tx8";
