@@ -1849,7 +1849,11 @@
 		updateDate = product.selectSingleNode("updateDate").text;
 		createDate = product.selectSingleNode("createDate").text;		
 		name = product.selectSingleNode("name").text;
-		code = product.selectSingleNode("code").text;
+		Попытка
+			code = product.selectSingleNode("code").text;
+		Исключение
+			code ="";
+		КонецПопытки;
 		productType = product.selectSingleNode("productType").text;
 		
 		Спр = СоздатьОбъект("Справочник.ВСД_Продукция");
@@ -2021,7 +2025,7 @@
 Процедура ПолучитьТовары()
 	
 	// http://help.vetrf.ru/wiki/ProductType
-	productType = 1; //мясо
+	
 	
 	Сообщить(" Запрос GetProductList ","i");		
 	Результат = Компонента.GetProductList( productType );
@@ -2177,3 +2181,5 @@
 РасположениеФайла(КаталогОбработки, ИмяФайлаНастроек);
 //ИмяФайлаНастроек=КаталогОбработки+"Меркурий_Константы_"+СокрЛП(глПользователь.Код)+".tx8";
 ИмяФайлаНастроек=КаталогОбработки+"Меркурий_Константы_ТЕСТ_"+СокрЛП(глПользователь.Код)+".tx8";
+
+productType = 1; //мясо 
