@@ -1742,8 +1742,11 @@
 		Исключение			
 		КонецПопытки;
 		
-		
-		producer = batch.selectSingleNode("vetd:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+		Попытка			
+			producer = batch.selectSingleNode("vetd:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+		Исключение
+			producer = "";
+		КонецПопытки;
 		
 		owner = batch.selectSingleNode("vetd:owner").selectSingleNode("bs:guid").text; //ХозСубъект
 
@@ -2107,8 +2110,8 @@
 		// РАБОЧАЯ
 		//настройки модуля хранятся в файле				
 		ИмяФайлаНастроек=КаталогОбработки+"Меркурий_Константы_"+СокрЛП(глПользователь.Код)+".tx8";
-		ПодключитьВнешнююКомпоненту("AddIn.SoapDLL_test");
-		Компонента = СоздатьОбъект("AddIn.SoapDLL_test"); 		
+		ПодключитьВнешнююКомпоненту("AddIn.SoapDLL_work");
+		Компонента = СоздатьОбъект("AddIn.SoapDLL_work"); 		
 		
 		Форма.Заголовок("Меркурий - РАБОЧАЯ");
 	Иначе	
