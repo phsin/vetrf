@@ -863,6 +863,18 @@
 			//ЗагрузитьXML_Партия( Компонента.LogFilename );
 			ЗагрузитьXML_ВсеПартииОтвет( Компонента.LogFilename );
 			
+		    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+		    objDom.load(Компонента.LogFilename);    
+		    
+		    stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
+		    Для i1 = 0 По stockEntryList.length - 1 Цикл
+		        stockEntry=stockEntryList.item(i1);
+				
+				entryNumber = stockEntry.selectSingleNode("vetd:entryNumber").text;
+					
+		    КонецЦикла;
+			
+			док.ВсдНомер = СокрЛП(entryNumber);			
 			док.UUID = Компонента.DocUUID;
 			
 			док.Записать();
