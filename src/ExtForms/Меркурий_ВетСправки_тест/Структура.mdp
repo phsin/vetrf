@@ -2,7 +2,7 @@ Main Metadata Stream:
 {
 	MainDataContDef: 
 	{
-		Next ID: 42380
+		Next ID: 42386
 		Версия: 10009
 		Unknown ID: 7120
 	}
@@ -11,7 +11,7 @@ Main Metadata Stream:
 		{
 			Идентификатор: "Комплексная конфигурация, редакция 4.5"
 			Комментарий: "7.70.544"
-			Синоним: "           "
+			Синоним: "            "
 			Param7: 864
 			Param10: 864
 		}
