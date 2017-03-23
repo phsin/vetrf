@@ -128,7 +128,14 @@
 	Если ПустоеЗначение(UUID)=1 Тогда
 		Предупреждение("Не указан UUID документа ВСД");
 	Иначе
-		ЗапуститьПриложение("http://mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid="+UUID);	
+		ВерсияСистемы = ВосстановитьЗначение("ВСД_ВерсияСистемы");	
+		Если ВерсияСистемы=2 Тогда 
+			//рабочая
+			ЗапуститьПриложение("http://mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid="+UUID);	
+		Иначе
+			//тестовая
+			ЗапуститьПриложение("http://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid="+UUID);	
+		КонецЕсли;
 	КонецЕсли;
 КонецПроцедуры
 
