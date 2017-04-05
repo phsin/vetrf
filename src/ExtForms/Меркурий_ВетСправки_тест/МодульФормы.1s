@@ -2042,7 +2042,7 @@
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
 			//Рез = Спр.ТекущийЭлемент();
 		Иначе
-			Сообщить("ВСД_Продукция GUID ["+guid+"] не найдена");
+			Сообщить("ВСД_Продукция GUID ["+name+"] не найдена");
 			Спр.Новый();
 			//рез = Спр.ТекущийЭлемент();
 		КонецЕсли;		
@@ -2051,6 +2051,43 @@
 			Спр.UUID = UUID;
 			Спр.КодМеркурий = code;
 			Спр.Тип = ProductType;
+			Спр.Записать();
+
+    КонецЦикла;
+КонецПроцедуры
+
+
+Процедура ЗагрузитьXML_ЕдиницыИзмерения(имяФайла)
+		
+    Сообщить("Загрузка XML-файла: "+ИмяФайла);    
+    
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ИмяФайла);    
+    
+    unitList = objDom.selectNodes("//unit") ;
+    Для i1 = 0 По unitList.length - 1 Цикл
+        unit=unitList.item(i1);
+		
+		uuid = unit.selectSingleNode("uuid").text;
+		guid = unit.selectSingleNode("guid").text;
+		//updateDate = unit.selectSingleNode("updateDate").text;
+		//createDate = unit.selectSingleNode("createDate").text;		
+		name = unit.selectSingleNode("name").text;
+		factor = unit.selectSingleNode("factor").text;
+		//commonUnitGuid = unit.selectSingleNode("commonUnitGuid").text;
+		
+		Спр = СоздатьОбъект("Справочник.ВСД_ЕдиницыИзмерения");
+		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
+			//Рез = Спр.ТекущийЭлемент();
+		Иначе
+			Сообщить("ВСД_ЕдиницыИзмерения GUID ["+name+"] не найдена");
+			Спр.Новый();
+			//рез = Спр.ТекущийЭлемент();
+		КонецЕсли;		
+			Спр.Наименование = name;
+			Спр.GUID = guid;
+			Спр.UUID = UUID;
+			Спр.Коэффициент = factor;
 			Спр.Записать();
 
     КонецЦикла;
@@ -2212,13 +2249,29 @@
 	Сообщить(" Запрос GetProductList ","i");		
 	Результат = Компонента.GetProductList( productType );
 	
-	Отладка();
+	//Отладка();
 	
 	Если Результат="SUCCESS" Тогда
 		
 		ЗагрузитьXML_Номенклатура( Компонента.LogFilename );
 
 	КонецЕсли;	
+	Сообщить("Загрузка завершена");
+КонецПроцедуры
+
+Процедура ПолучитьЕдиницыИзмерения()
+	
+	Сообщить(" Запрос GetUnitList ","i");		
+	Результат = Компонента.GetUnitList();
+	
+	//Отладка();
+	
+	Если Результат="SUCCESS" Тогда
+		
+		ЗагрузитьXML_ЕдиницыИзмерения( Компонента.LogFilename );
+
+	КонецЕсли;	
+	Сообщить("Загрузка завершена");
 КонецПроцедуры
 
 Процедура ЗаполнитьФормыУпаковки()
