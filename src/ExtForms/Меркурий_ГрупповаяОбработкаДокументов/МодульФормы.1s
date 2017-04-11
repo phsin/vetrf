@@ -388,7 +388,7 @@
 		|Left join 
 		|	$Документ.ВСД_исходящий as ДокВСД
 		|	ON SUBSTRING($ДокВСД.ДокОснование, 5, 8) = Жур.IDDoc
-		|		AND $ДокВСД.Статус = 'COMPLETED'
+	//	|		AND $ДокВСД.Статус = 'COMPLETED'
 		|WHERE
 		|    Жур.Date_Time_IDDoc BETWEEN :НачДата AND :КонДата~ AND
 		|    Жур.IDDocDef = $ВидДокумента.Реализация
@@ -480,7 +480,7 @@
 		|Left join 
 		|	[Документ.ВСД_исходящий] as ДокВСД
 		|	ON SUBSTR(ДокВСД.ДокОснование, 5, 8) = Жур.IDDoc
-		|		AND ДокВСД.Статус = 'COMPLETED'	
+		//|		AND ДокВСД.Статус = 'COMPLETED'	
 		|WHERE
 		|    Жур.idx_date_time_iddoc BETWEEN :НачДата AND :КонДата~ AND
 		|    Жур.IDDocDef = :ВидДокумента.Реализация
