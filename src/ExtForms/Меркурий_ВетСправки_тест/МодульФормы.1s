@@ -1907,96 +1907,177 @@
 	возврат Дата(год, мес,день);
 КонецФункции
 
+Функция getNode(Parent, name)
+	Рез="";
+	Попытка 
+		//рез = Parent.selectSingleNode("//*[local-name() = '"+name+"']");
+		рез = Parent.selectSingleNode(name);	
+	Исключение
+		Сообщить(""+name+" "+ОписаниеОшибки());
+	КонецПопытки;
+	возврат Рез;
+КонецФункции
+
 Функция ЗаписатьПартию(stockEntry)
+//		t = stockEntry.text;	
+//		
+//		uuid 	= getNode(stockEntry, "bs:uuid").text;
+//		guid 	= getNode(stockEntry, "bs:guid").text;
+//		st 		= getNode(stockEntry, "bs:status").text;
+//		entryNumber = getNode(stockEntry, "ns2:entryNumber").text;
+//		updateDate 	= getNode(stockEntry, "bs:updateDate").text;
+//		createDate 	= getNode(stockEntry, "bs:createDate").text;
+//		
+//		batch = getNode(stockEntry, "ns2:batch");
+//		
+//		product_ 	= getNode(batch, "ns2:product").selectSingleNode("bs:guid").text;
+//		subProduct 	= getNode(batch, "ns2:subProduct").selectSingleNode("bs:guid").text;
+//		productItem = getNode(batch, "ns2:productItem").text;
+//		volume 		= getNode(batch, "ns2:volume").text;
+//		//unit		= getNode(batch, "ns2:unit").selectSingleNode("bs:guid").text;
+//
+//		unitGuid	= getNode(batch, "ns2:unit").selectSingleNode("bs:guid").text;			
+//		unitUuid	= getNode(batch, "ns2:unit").selectSingleNode("bs:uuid").text;			
+//		
+//		packingList	= getNode(batch, "packingList");
+//		packingFormUuid	= getNode(packingList, "packingForm").selectSingleNode("bs:uuid").text;			
+//
+//		packingFormName	= getNode(packingList, "packingForm").selectSingleNode("//*[local-name() = 'name']").text;			
+//
+//		packingAmount = getNode(batch, "packingAmount").text;
+//				
+//		попытка
+//			dateOfProduction = ""+getNode(batch, "dateOfProduction").selectSingleNode("//*[local-name() = 'firstDate']").text;
+//		Исключение
+//			Попытка
+//				dateOfProduction = ""+getNode(batch, "dateOfProduction").text;
+//			Исключение
+//				dateOfProduction = "";
+//			КонецПопытки;
+//		КонецПопытки;
+//		dateOfProduction = СтрЗаменить(dateOfProduction," ",".");
+//		попытка
+//			dateOfProduction2 	= getNode(batch, "dateOfProduction").selectSingleNode("//*[local-name() = 'secondDate']").text;
+//			dateOfProduction2 = СтрЗаменить(dateOfProduction2," ",".");
+//			dateOfProduction = dateOfProduction +  " - "+ dateOfProduction2;
+//		Исключение			
+//		КонецПопытки;
+//		Попытка
+//			expiryDate 	= getNode(batch, "expiryDate").selectSingleNode("//*[local-name() = 'firstDate']").text;
+//		Исключение
+//			Попытка				
+//				expiryDate 	= getNode(batch, "expiryDate").text;
+//			Исключение
+//				expiryDate 	="";
+//			КонецПопытки;
+//		КонецПопытки;
+//		expiryDate = СтрЗаменить(expiryDate," ",".");
+//		Попытка
+//			expiryDate2	= getNode(batch, "expiryDate").selectSingleNode("//*[local-name() = 'secondDate']").text;
+//			expiryDate2 = СтрЗаменить(expiryDate2," ",".");
+//			expiryDate  = expiryDate +" - "+ expiryDate2; 
+//		Исключение			
+//		КонецПопытки;
+//		
+//		Попытка			
+//			producer = getNode(batch, "producerList").selectSingleNode("//*[local-name() = 'producer']").selectSingleNode("//*[local-name() = 'enterprise']").selectSingleNode("//*[local-name() = 'guid']").text;
+//		Исключение
+//			producer = "";
+//		КонецПопытки;
+//		
+//		owner = getNode(batch, "owner").selectSingleNode("//*[local-name() = 'guid']").text; //ХозСубъект
+//		ВладелецХС = НайтиХСпоGUID(owner);
+
 		t = stockEntry.text;	
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
 		guid = stockEntry.selectSingleNode("bs:guid").text;
 		st = stockEntry.selectSingleNode("bs:status").text;
-		entryNumber = stockEntry.selectSingleNode("vetd:entryNumber").text;
+		entryNumber = stockEntry.selectSingleNode("ns2:entryNumber").text;
 		updateDate = stockEntry.selectSingleNode("bs:updateDate").text;
 		createDate = stockEntry.selectSingleNode("bs:createDate").text;
 		
-		batch = stockEntry.selectSingleNode("vetd:batch");
+		batch = stockEntry.selectSingleNode("ns2:batch");
 		
-		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
-		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("vetd:productItem").text;
-		volume 		= batch.selectSingleNode("vetd:volume").text;
-		unit		= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
+		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
+		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
+		productItem = batch.selectSingleNode("ns2:productItem").text;
+		volume 		= batch.selectSingleNode("ns2:volume").text;
+		unit		= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:guid").text;
 
 		Попытка
-			unitGuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;			
+			unitGuid	= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:guid").text;			
 		Исключение
 			unitGuid = "";			
 		КонецПопытки;
 		Попытка
-			unitUuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:uuid").text;			
+			unitUuid	= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:uuid").text;			
 		Исключение
 			unitUuid = "";			
 		КонецПопытки;
 		
 		Попытка
-			packingFormUuid	= batch.selectSingleNode("vetd:packingList").selectSingleNode("argc:packingForm").selectSingleNode("bs:uuid").text;			
+			packingFormUuid	= batch.selectSingleNode("ns2:packingList").selectSingleNode("argc:packingForm").selectSingleNode("bs:uuid").text;			
 		Исключение
 			Попытка
-				packingFormUuid	= batch.selectSingleNode("vetd:packingList").selectSingleNode("com:packingForm").selectSingleNode("bs:uuid").text;			
+				packingFormUuid	= batch.selectSingleNode("ns2:packingList").selectSingleNode("com:packingForm").selectSingleNode("bs:uuid").text;			
 			Исключение
 				packingFormUuid = "";			
 			КонецПопытки;			
 		КонецПопытки;
 		Попытка
-			packingFormName	= batch.selectSingleNode("vetd:packingList").selectSingleNode("argc:packingForm").selectSingleNode("argc:name").text;			
+			packingFormName	= batch.selectSingleNode("ns2:packingList").selectSingleNode("argc:packingForm").selectSingleNode("argc:name").text;			
 		Исключение
 			Попытка
-				packingFormName	= batch.selectSingleNode("vetd:packingList").selectSingleNode("com:packingForm").selectSingleNode("argc:name").text;
+				packingFormName	= batch.selectSingleNode("ns2:packingList").selectSingleNode("com:packingForm").selectSingleNode("argc:name").text;
 			Исключение
 				packingFormName="";
 			КонецПопытки;
 		КонецПопытки;
 
-		packingAmount = batch.selectSingleNode("vetd:packingAmount").text;
+		packingAmount = batch.selectSingleNode("ns2:packingAmount").text;
 				
 		попытка
-			dateOfProduction 	= ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").text;
+			dateOfProduction 	= ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").text;
 		Исключение
 			Попытка
-				dateOfProduction = ""+batch.selectSingleNode("vetd:dateOfProduction").text;
+				dateOfProduction = ""+batch.selectSingleNode("ns2:dateOfProduction").text;
 			Исключение
 				dateOfProduction = "";
 			КонецПопытки;
 		КонецПопытки;
 		dateOfProduction = СтрЗаменить(dateOfProduction," ",".");
 		попытка
-			dateOfProduction2 	= batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").text;;
+			dateOfProduction2 	= batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").text;;
 			dateOfProduction2 = СтрЗаменить(dateOfProduction2," ",".");
 			dateOfProduction = dateOfProduction +  " - "+ dateOfProduction2;
 		Исключение			
 		КонецПопытки;
 		Попытка
-			expiryDate 	= batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").text;
+			expiryDate 	= batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").text;
 		Исключение
 			Попытка				
-				expiryDate 	= batch.selectSingleNode("vetd:expiryDate").text;
+				expiryDate 	= batch.selectSingleNode("ns2:expiryDate").text;
 			Исключение
 				expiryDate 	="";
 			КонецПопытки;
 		КонецПопытки;
 		expiryDate = СтрЗаменить(expiryDate," ",".");
 		Попытка
-			expiryDate2	= batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").text;
+			expiryDate2	= batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").text;
 			expiryDate2 = СтрЗаменить(expiryDate2," ",".");
 			expiryDate  = expiryDate +" - "+ expiryDate2; 
 		Исключение			
 		КонецПопытки;
 		
 		Попытка			
-			producer = batch.selectSingleNode("vetd:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+			producer = batch.selectSingleNode("ns2:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
 		Исключение
 			producer = "";
 		КонецПопытки;
 		
-		owner = batch.selectSingleNode("vetd:owner").selectSingleNode("bs:guid").text; //ХозСубъект
+		owner = batch.selectSingleNode("ns2:owner").selectSingleNode("bs:guid").text; //ХозСубъект
 		ВладелецХС = НайтиХСпоGUID(owner);
+
 
 		Партия = НайтиПартиюПоGUID(guid);
 		
@@ -2060,11 +2141,16 @@
 
     Сообщить("Загрузка XML-файла: "+ИмяФайла);    
     
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load(ИмяФайла);    
     
-    stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
+    objDom.setProperty("SelectionNamespaces", "xmlns:bs='http://api.vetrf.ru/schema/cdm/base' xmlns:argc='http://api.vetrf.ru/schema/cdm/argus/common' xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production' xmlns:ns2='http://api.vetrf.ru/schema/cdm/mercury/vet-document' xmlns:ns1='http://api.vetrf.ru/schema/cdm/mercury/applications' xmlns:vetd='http://api.vetrf.ru/schema/cdm/mercury/vet-document'" );
+	
+    stockEntryList = objDom.selectNodes("//*[local-name() = 'stockEntry']") ;	
+    //stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
     //stockEntryList = objDom.selectNodes("//vetd:stockEntry") ;
+	
+	Сообщить("Получено "+stockEntryList.length+" записей","i");
     Для i1 = 0 По stockEntryList.length - 1 Цикл
         stockEntry=stockEntryList.item(i1);
 					
@@ -2076,19 +2162,20 @@
 		КонецЕсли;
 			
 	КонецЦикла;
-		
-    stockEntryList = objDom.selectNodes("//vetd:stockEntry") ;
-    Для i1 = 0 По stockEntryList.length - 1 Цикл
-        stockEntry=stockEntryList.item(i1);
-					
-		Партия = ЗаписатьПартию(stockEntry);
-		
-		Если ПустоеЗначение(докОснование)=0 Тогда 
-			Партия.ДокОснование = докОснование;
-			Партия.Записать();
-		КонецЕсли;
-			
-	КонецЦикла;
+	
+    //stockEntryList = objDom.selectNodes("//vetd:stockEntry") ;
+	//Сообщить("Получено "+stockEntryList.length+" записей","i");
+    //Для i1 = 0 По stockEntryList.length - 1 Цикл
+    //    stockEntry=stockEntryList.item(i1);
+	//				
+	//	Партия = ЗаписатьПартию(stockEntry);
+	//	
+	//	Если ПустоеЗначение(докОснование)=0 Тогда 
+	//		Партия.ДокОснование = докОснование;
+	//		Партия.Записать();
+	//	КонецЕсли;
+	//		
+	//КонецЦикла;
 	
     //tt2=_GetPerformanceCounter();
     //Сообщить("Время выполнения: "+(tt2-tt1)/1000+" секунд");     
@@ -2289,10 +2376,15 @@
 	//имяф=КаталогИБ()+"tovar3.xml";
     Сообщить("Загрузка XML-файла: "+ИмяФайла);    
     
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    //objDom=СоздатьОбъект("MSXML2.DOMDocument");
+	objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load(ИмяФайла);    
-    
-    stockEntryList = objDom.selectNodes("//vetd:stockEntry") ;
+    objDom.setProperty("SelectionNamespaces", "xmlns:bs='http://api.vetrf.ru/schema/cdm/base' xmlns:argc='http://api.vetrf.ru/schema/cdm/argus/common' xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production' xmlns:ns2='http://api.vetrf.ru/schema/cdm/mercury/vet-document' xmlns:ns1='http://api.vetrf.ru/schema/cdm/mercury/applications'" );
+	
+    stockEntryList = objDom.selectNodes("//*[local-name() = 'stockEntry']") ;
+	//stockEntryList = objDom.selectNodes("//*:stockEntry") ;   --- не работает 
+	//stockEntryList = objDom.selectNodes("//ns2:stockEntry") ;
+	Сообщить("Получено "+stockEntryList.length+" записей","i");
     Для i1 = 0 По stockEntryList.length - 1 Цикл
         stockEntry=stockEntryList.item(i1);
 		
