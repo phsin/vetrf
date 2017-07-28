@@ -42,6 +42,16 @@
 	Компонента.Pause(ЗадержкаСекунд*1000); // в ms
 КонецПроцедуры
 
+Процедура УдалитьXML(ИмяФайла)
+	Если ОтладкаЗапросовXML=0 Тогда 
+		Попытка
+			ФС.УдалитьФайл(ИмяФайла);
+		Исключение
+			Сообщить(ОписаниеОшибки());
+		КонецПопытки;
+	КонецЕсли;
+	
+КонецПроцедуры
 
 Функция НайтиФормуУпаковки(guid, name)	
 	Рез="";
@@ -150,6 +160,8 @@
 		НазваниеРеквизитаГрузополучатель="Контрагент";
 	КонецЕсли;
 	
+	ОтладкаЗапросовXML  = СписокКонстант.Получить("ОтладкаЗапросовXML");
+	
 КонецПроцедуры
 
 Процедура Отладка();
@@ -251,8 +263,10 @@
 			
 	//Отладка();
 	
+	
 	Попытка
 		СохранитьСтатусЗапроса(док);
+		УдалитьXML( Компонента.LogFilename );
 		
 		Если Результат="ACCEPTED" Тогда 
 			//ВСД отправлен успешно, осталось получить ответ				
@@ -272,7 +286,9 @@
 					Результат = ПолучитьРезультат_ВходВСД( док );
 				КонецЕсли;
 			КонецЦикла;
-		КонецЕсли;		
+		КонецЕсли;	
+		
+		
 	Исключение
 		Сообщить("Не удалось записать ApplicationID в документ ВСД "+ОписаниеОшибки());
 	КонецПопытки;
@@ -448,6 +464,7 @@
 	Результат = Компонента.Send_VSD_OUT( док );
 	
 	//Отладка();
+	УдалитьXML( Компонента.LogFilename );
 	
 	Попытка
 		СохранитьСтатусЗапроса(док);
@@ -523,6 +540,8 @@
 		Сообщить(ОписаниеОшибки());
 	КонецПопытки;
 			
+	УдалитьXML( Компонента.LogFilename );
+	
 	Возврат Результат;
 КонецФункции
 
@@ -537,6 +556,7 @@
 	Результат = Компонента.Send_VSD_Production( док );
 	
 	//Отладка();
+	УдалитьXML( Компонента.LogFilename );
 	
 	Попытка
 		СохранитьСтатусЗапроса(док);
@@ -595,6 +615,7 @@
 	КонецЦикла;
 
 	//Отладка();
+	УдалитьXML( Компонента.LogFilename );
 	
 	Попытка
 		ДокОб = СоздатьОбъект("Документ");
@@ -643,6 +664,7 @@
 	Результат = Компонента.GetStockListResult(СокрЛП(appID));
 
 	//Отладка();
+	//УдалитьXML( Компонента.LogFilename);
 	
 	Если Результат="COMPLETED" Тогда
 
@@ -662,10 +684,9 @@
 			СпрПартия.Удалить(0);
 		КонецЦикла;
 		
-		//тз = ЗагрузитьТЗ(Компонента.ResultString);
-		//тз.ВыбратьСтроку();
 		ЗагрузитьXML_ВсеПартииОтвет( Компонента.LogFilename );
 				
+		УдалитьXML( Компонента.LogFilename);
 	КонецЕсли;		
 		
 	Возврат Результат;
@@ -685,6 +706,8 @@
 	Результат = Компонента.GetStockList(СокрЛП(Отправитель_Площадка.GUID), Смещение);
 
 	Отладка();
+	
+	УдалитьXML( Компонента.LogFilename);
 			
 	Если Результат="ACCEPTED" Тогда 
 		Пауза( ПаузаСек );			
@@ -698,6 +721,8 @@
 			КонецЕсли;
 		КонецЦикла;		
 	КонецЕсли;
+	
+	УдалитьXML( Компонента.LogFilename);
 	
 	Возврат Результат;
 	
@@ -762,7 +787,7 @@
 	//Отладка();
 	
 	Попытка		
-		СохранитьСтатусЗапроса(докСсылка);			
+		СохранитьСтатусЗапроса(докСсылка);					
 		
 		Если Результат="COMPLETED" Тогда
 
@@ -776,6 +801,8 @@
 	Исключение
 		Сообщить(ОписаниеОшибки());
 	КонецПопытки;
+
+	УдалитьXML( Компонента.LogFilename );
 	
 	Возврат Результат;
 		
@@ -815,12 +842,13 @@
 		Иначе
 			Сообщить(докСсылка.Комментарий);		
 		КонецЕсли;
-
 		
 	Исключение
 		Сообщить(ОписаниеОшибки());
 	КонецПопытки;
 			
+	УдалитьXML( Компонента.LogFilename );
+	
 	Возврат Результат;
 КонецФункции
 
@@ -1016,6 +1044,7 @@
 	спр.Записать();
 	Сообщить("Записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+Спр.Наименование+"] GUID = "+ Guid);		
 	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 Процедура ЗагрузитьПлощадкуПоGuidТЗ(GUID, ХС="", тзПлощадки)
@@ -1070,6 +1099,7 @@
 		
 	Сообщить("Загружена площадка ["+name+"] GUID = "+ guid,"i");		
 	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 
@@ -1097,6 +1127,8 @@
 	КонецЦикла;
 	
 	Сообщить("Загрузка площадок завершена","i");
+	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 Процедура ЗагрузитьПлощадкиТЗ(ХС)	
@@ -1141,6 +1173,7 @@
 
 	ОткрытьФорму("Отчет",СписокПараметров,КаталогОбработки+"Меркурий_ЗагрузкаПлощадок.ert");	
 	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 Функция НайтиПлощадку(Guid)
@@ -1257,6 +1290,7 @@
 		КонецЕсли;
 	КонецЕсли;
 	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 Процедура СоздатьНовуюПлощадку(ВыбХС)
@@ -1298,8 +1332,10 @@
 		active = businessEntity.selectSingleNode("base:active").text;		
 		enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("base:guid").text;		
 		Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
-		рез = Компонента.ResultString;				
+		//рез = Компонента.ResultString;				
 	КонецЕсли;	
+	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 Процедура СоздатьСвязьХозсубъектПлощадка(Площадка)
@@ -1320,6 +1356,7 @@
 	);
 	
 	Отладка();	
+	УдалитьXML( Компонента.LogFilename );
 	
 	Если Результат="ACCEPTED" Тогда
 		Пауза(ПаузаСек);
@@ -1369,6 +1406,7 @@
 			Сообщить("Пустой GUID Площадки");
 		КонецЕсли;
 			
+		УдалитьXML( Компонента.LogFilename );
 		Пауза(ПаузаСек);
 		
 		СоздатьСвязьХозсубъектПлощадка(Площадка);
@@ -1398,6 +1436,8 @@
 	);	
 	Отладка();	
 		
+	УдалитьXML( Компонента.LogFilename );
+	
 	Если Результат="ACCEPTED" Тогда
 		Состояние("Пауза "+ПаузаСек+" сек");
 		Пауза(ПаузаСек);
@@ -1496,6 +1536,7 @@
 		Сообщить("Пустой GUID ХозСубъекта");
 	КонецЕсли;
 
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 Процедура СоздатьХС(ХС)
@@ -1536,7 +1577,8 @@
 	);
 	
 	Отладка();	
-		
+	УдалитьXML( Компонента.LogFilename );
+	
 	Если Результат="ACCEPTED" Тогда
 		Состояние("Пауза "+ПаузаСек+" сек");
 		Пауза(ПаузаСек);
@@ -1585,6 +1627,8 @@
 		
 	КонецЕсли;	
 		
+	УдалитьXML( Компонента.LogFilename );
+	
 	Возврат Результат;
 	
 КонецФункции
@@ -1907,86 +1951,7 @@
 	возврат Дата(год, мес,день);
 КонецФункции
 
-Функция getNode(Parent, name)
-	Рез="";
-	Попытка 
-		//рез = Parent.selectSingleNode("//*[local-name() = '"+name+"']");
-		рез = Parent.selectSingleNode(name);	
-	Исключение
-		Сообщить(""+name+" "+ОписаниеОшибки());
-	КонецПопытки;
-	возврат Рез;
-КонецФункции
-
 Функция ЗаписатьПартию(stockEntry)
-//		t = stockEntry.text;	
-//		
-//		uuid 	= getNode(stockEntry, "bs:uuid").text;
-//		guid 	= getNode(stockEntry, "bs:guid").text;
-//		st 		= getNode(stockEntry, "bs:status").text;
-//		entryNumber = getNode(stockEntry, "ns2:entryNumber").text;
-//		updateDate 	= getNode(stockEntry, "bs:updateDate").text;
-//		createDate 	= getNode(stockEntry, "bs:createDate").text;
-//		
-//		batch = getNode(stockEntry, "ns2:batch");
-//		
-//		product_ 	= getNode(batch, "ns2:product").selectSingleNode("bs:guid").text;
-//		subProduct 	= getNode(batch, "ns2:subProduct").selectSingleNode("bs:guid").text;
-//		productItem = getNode(batch, "ns2:productItem").text;
-//		volume 		= getNode(batch, "ns2:volume").text;
-//		//unit		= getNode(batch, "ns2:unit").selectSingleNode("bs:guid").text;
-//
-//		unitGuid	= getNode(batch, "ns2:unit").selectSingleNode("bs:guid").text;			
-//		unitUuid	= getNode(batch, "ns2:unit").selectSingleNode("bs:uuid").text;			
-//		
-//		packingList	= getNode(batch, "packingList");
-//		packingFormUuid	= getNode(packingList, "packingForm").selectSingleNode("bs:uuid").text;			
-//
-//		packingFormName	= getNode(packingList, "packingForm").selectSingleNode("//*[local-name() = 'name']").text;			
-//
-//		packingAmount = getNode(batch, "packingAmount").text;
-//				
-//		попытка
-//			dateOfProduction = ""+getNode(batch, "dateOfProduction").selectSingleNode("//*[local-name() = 'firstDate']").text;
-//		Исключение
-//			Попытка
-//				dateOfProduction = ""+getNode(batch, "dateOfProduction").text;
-//			Исключение
-//				dateOfProduction = "";
-//			КонецПопытки;
-//		КонецПопытки;
-//		dateOfProduction = СтрЗаменить(dateOfProduction," ",".");
-//		попытка
-//			dateOfProduction2 	= getNode(batch, "dateOfProduction").selectSingleNode("//*[local-name() = 'secondDate']").text;
-//			dateOfProduction2 = СтрЗаменить(dateOfProduction2," ",".");
-//			dateOfProduction = dateOfProduction +  " - "+ dateOfProduction2;
-//		Исключение			
-//		КонецПопытки;
-//		Попытка
-//			expiryDate 	= getNode(batch, "expiryDate").selectSingleNode("//*[local-name() = 'firstDate']").text;
-//		Исключение
-//			Попытка				
-//				expiryDate 	= getNode(batch, "expiryDate").text;
-//			Исключение
-//				expiryDate 	="";
-//			КонецПопытки;
-//		КонецПопытки;
-//		expiryDate = СтрЗаменить(expiryDate," ",".");
-//		Попытка
-//			expiryDate2	= getNode(batch, "expiryDate").selectSingleNode("//*[local-name() = 'secondDate']").text;
-//			expiryDate2 = СтрЗаменить(expiryDate2," ",".");
-//			expiryDate  = expiryDate +" - "+ expiryDate2; 
-//		Исключение			
-//		КонецПопытки;
-//		
-//		Попытка			
-//			producer = getNode(batch, "producerList").selectSingleNode("//*[local-name() = 'producer']").selectSingleNode("//*[local-name() = 'enterprise']").selectSingleNode("//*[local-name() = 'guid']").text;
-//		Исключение
-//			producer = "";
-//		КонецПопытки;
-//		
-//		owner = getNode(batch, "owner").selectSingleNode("//*[local-name() = 'guid']").text; //ХозСубъект
-//		ВладелецХС = НайтиХСпоGUID(owner);
 
 		t = stockEntry.text;	
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
@@ -2492,6 +2457,9 @@
 
 	КонецЕсли;	
 	Сообщить("Загрузка завершена");
+	
+	УдалитьXML( Компонента.LogFilename );
+	
 КонецПроцедуры
 
 Процедура ПолучитьЕдиницыИзмерения()
@@ -2507,6 +2475,9 @@
 
 	КонецЕсли;	
 	Сообщить("Загрузка завершена");
+	
+	УдалитьXML( Компонента.LogFilename );
+	
 КонецПроцедуры
 
 Процедура ЗаполнитьФормыУпаковки()
@@ -2589,7 +2560,8 @@
         param_api_key, 		//string API_KEY = 
         param_intiator_login, 	//string USER_LOGIN = 
         param_vetdoctor_login, //string VETDOCTOR_LOGIN = 
-		КаталогЛогов // для логов
+		КаталогЛогов, // для логов
+		ОтладкаЗапросовXML
 		);
 		
 КонецПроцедуры
@@ -2810,6 +2782,8 @@
     КонецЦикла;
 
 	Сообщить("Загрузка завершена");
+	
+	УдалитьXML( Компонента.LogFilename );
 КонецПроцедуры
 
 
@@ -2853,6 +2827,9 @@
     КонецЦикла;
 
 	Сообщить("Загрузка завершена");
+	
+	УдалитьXML( Компонента.LogFilename );
+	
 КонецПроцедуры
 
 НачДата = ТекущаяДата();
