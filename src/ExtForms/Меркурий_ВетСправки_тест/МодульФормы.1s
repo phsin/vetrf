@@ -590,6 +590,99 @@
 КонецФункции
 
 
+Функция ПолучитьРезультат_ВСД_Инвентаризация( докСсылка ) 
+	
+
+	ДокОб = СоздатьОбъект("Документ");
+	ДокОб.НайтиДокумент(докСсылка);
+	applicationID = СокрЛП(ДокОб.applicationID);
+	Если ПустоеЗначение(applicationID)=1 Тогда
+		Возврат "Пустая ссылка applicationID";
+	КонецЕсли;
+
+	Сообщить("Отправляем запрос "+докСсылка.Вид()+" ["+докСсылка+"]" ,"i");
+	Результат = Компонента.Send_VSD_Inventory_Result( applicationID );
+
+	//Отладка();
+	
+	Попытка
+		СохранитьСтатусЗапроса(докСсылка);
+		
+		Если Результат="COMPLETED" Тогда
+
+			ЗагрузитьXML_Партии( Компонента.LogFilename );
+			
+			Если докСсылка.Вид()="ВСД_исходящий" Тогда 
+				ДокОснование = докСсылка.ДокОснование;
+			Иначе
+				ДокОснование = докСсылка;
+			КонецЕсли;
+			
+			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование);
+			
+			//проведём для красоты
+			ДокОб = СоздатьОбъект("Документ");
+			ДокОб.НайтиДокумент(докСсылка);
+			ДокОб.Провести();						
+			
+		Иначе
+			Сообщить(докСсылка.Комментарий);		
+		КонецЕсли;
+
+		
+	Исключение
+		Сообщить(ОписаниеОшибки());
+	КонецПопытки;
+			
+	УдалитьXML( Компонента.LogFilename );
+	
+	Возврат Результат;
+КонецФункции
+
+Функция Отправить_ВСД_Инвентаризация(док) 
+	
+	//Если ПроверкаИсхВСД(док)=0 Тогда 
+	//	Возврат 0;
+	//КонецЕсли;	
+	
+	Сообщить("Отправляем запрос "+док.Вид()+" ["+док+"]" ,"i");
+	Результат = Компонента.Send_VSD_Inventory( док );
+	
+	//Отладка();
+	УдалитьXML( Компонента.LogFilename );
+	
+	Попытка
+		СохранитьСтатусЗапроса(док);
+		
+		Если Результат="ACCEPTED" Тогда 
+			//ВСД отправлен успешно, осталось получить ответ				
+			Состояние("Пауза "+ПаузаСек+" сек");
+			Пауза( ПаузаСек );			
+			
+			//tt2=_GetPerformanceCounter();			
+			//Сообщить("Пауза = "+(tt2 - tt1));
+			
+			Результат = ПолучитьРезультат_ВСД_Инвентаризация( док );
+			Сообщить("Результат = "+Результат);
+			Для А=1 По 10 Цикл
+				Если (Результат="IN_PROGRESS") Тогда 
+					Состояние("Пауза "+ПаузаСек+" сек");
+					Пауза( ПаузаСек );
+					//Сообщить("Пауза = "+(tt2 - tt1));
+					Результат = ПолучитьРезультат_ВСД_Инвентаризация( док );
+				КонецЕсли;
+			КонецЦикла;
+
+		КонецЕсли;
+	Исключение
+		Сообщить("Не удалось записать ApplicationID в документ ВСД "+ОписаниеОшибки());
+	КонецПопытки;		
+
+	Возврат 1;
+	
+КонецФункции
+
+
 Функция Отправить_ВСД_транзакция(док) 
 	
 	Если ПроверкаИсхВСД_Транзакция(док)=0 Тогда 
@@ -1953,7 +2046,9 @@
 
 Функция ЗаписатьПартию(stockEntry)
 
-		t = stockEntry.text;	
+		//t = stockEntry.text;	
+		active = stockEntry.selectSingleNode("bs:active").text;
+		
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
 		guid = stockEntry.selectSingleNode("bs:guid").text;
 		st = stockEntry.selectSingleNode("bs:status").text;
@@ -2000,37 +2095,48 @@
 		КонецПопытки;
 
 		packingAmount = batch.selectSingleNode("ns2:packingAmount").text;
-				
-		попытка
-			dateOfProduction 	= ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").text;
+			
+		// dateOfProduction 1
+		ДатаИзготовления1="";
+		ДатаИзготовления="";
+		попытка			
+			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
+			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
+			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
+			ДатаИзготовления1 = Дата(год, мес, день);
 		Исключение
 			Попытка
-				dateOfProduction = ""+batch.selectSingleNode("ns2:dateOfProduction").text;
-			Исключение
-				dateOfProduction = "";
+				ДатаИзготовления = ""+batch.selectSingleNode("ns2:dateOfProduction").text;
+			Исключение				
 			КонецПопытки;
-		КонецПопытки;
-		dateOfProduction = СтрЗаменить(dateOfProduction," ",".");
+		КонецПопытки;				
+		ДатаИзготовления2="";
 		попытка
-			dateOfProduction2 	= batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").text;;
-			dateOfProduction2 = СтрЗаменить(dateOfProduction2," ",".");
-			dateOfProduction = dateOfProduction +  " - "+ dateOfProduction2;
+			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
+			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
+			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
+			ДатаИзготовления2 = Дата(год, мес, день);
 		Исключение			
 		КонецПопытки;
-		Попытка
-			expiryDate 	= batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").text;
+		
+		//ДатаСрокГодности
+		попытка			
+			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
+			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
+			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
+			ДатаСрокГодности1 = Дата(год, мес, день);
 		Исключение
-			Попытка				
-				expiryDate 	= batch.selectSingleNode("ns2:expiryDate").text;
-			Исключение
-				expiryDate 	="";
+			Попытка
+				ДатаСрокГодности = ""+batch.selectSingleNode("ns2:expiryDate").text;
+			Исключение				
 			КонецПопытки;
 		КонецПопытки;
-		expiryDate = СтрЗаменить(expiryDate," ",".");
-		Попытка
-			expiryDate2	= batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").text;
-			expiryDate2 = СтрЗаменить(expiryDate2," ",".");
-			expiryDate  = expiryDate +" - "+ expiryDate2; 
+		ДатаСрокГодности2="";
+		попытка
+			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
+			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
+			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
+			ДатаСрокГодности2 = Дата(год, мес, день);
 		Исключение			
 		КонецПопытки;
 		
@@ -2040,11 +2146,19 @@
 			producer = "";
 		КонецПопытки;
 		
-		owner = batch.selectSingleNode("ns2:owner").selectSingleNode("bs:guid").text; //ХозСубъект
-		ВладелецХС = НайтиХСпоGUID(owner);
-
+		Попытка				
+			owner = batch.selectSingleNode("ns2:owner").selectSingleNode("bs:guid").text; //ХозСубъект
+			ВладелецХС = НайтиХСпоGUID(owner);
+		Исключение
+			ВладелецХС = "";
+		КонецПопытки;
 
 		Партия = НайтиПартиюПоGUID(guid);
+		
+		Если active="false" Тогда 
+			Сообщить("Изменения в партию "+Партия+" uuid ["+uuid+"] не внесены. Признак партии = не активна","i");
+			Возврат Партия;
+		КонецЕсли;
 		
 		Сообщить(" ВСД_Партия от "+createDate+" # "+entryNumber);
 		
@@ -2067,12 +2181,16 @@
 
 		Партия.ЕдиницаИзмерения = НайтиЕдИзмерения( unitGuid, unitUUID );;
 		
-		Партия.ДатаИзготовления = dateOfProduction;
-		Партия.ДатаСрокГодности = expiryDate;
+		Партия.ДатаИзготовления1 = ДатаИзготовления1;
+		Партия.ДатаИзготовления2 = ДатаИзготовления2;
+		Партия.ДатаИзготовления =  ДатаИзготовления;
+		Партия.ДатаСрокГодности = ДатаСрокГодности;
+		Партия.ДатаСрокГодности1 = ДатаСрокГодности1;
+		Партия.ДатаСрокГодности2 = ДатаСрокГодности2;
 		Партия.Статус = st;		
 		Партия.GUID = guid;
 		Партия.UUID = uuid;
-		Партия.ДатаИзменения = updateDate;
+		//Партия.ДатаИзменения = updateDate;
 		Партия.НомерЗаписи = entryNumber;
 		Партия.НаименованиеПродукции = productItem;
 		Партия.Наименование = productItem;
