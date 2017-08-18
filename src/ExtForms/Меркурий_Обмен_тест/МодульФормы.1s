@@ -703,19 +703,12 @@
 	Отладка();
 	
 	УдалитьXML( Компонента.LogFilename);
-			
-	Если Результат="ACCEPTED" Тогда 
-		Пауза( ПаузаСек );			
-			
+
+	Результат = ПолучитьПартииОтветXML();
+	Пока Результат="IN_PROCESS" Цикл
+		Пауза( ПаузаСек );				
 		Результат = ПолучитьПартииОтветXML();
-		Для А=1 По 10 Цикл
-			Если (Результат="IN_PROGRESS") Тогда 
-			//Если ((Результат<>"COMPLETED") И (Результат<>"REJECTED")) Тогда 
-				Пауза( ПаузаСек );				
-				Результат = ПолучитьПартииОтветXML();
-			КонецЕсли;
-		КонецЦикла;		
-	КонецЕсли;
+	КонецЦикла;		
 	
 	УдалитьXML( Компонента.LogFilename);
 	
@@ -1288,7 +1281,14 @@
 		
 		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("ns2:productItem").text;
+		productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
+		
+		Попытка
+			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
+		Исключение
+			productItemUuid="";
+		КонецПопытки;
+		
 		volume 		= batch.selectSingleNode("ns2:volume").text;
 		unit		= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:guid").text;
 
@@ -1401,8 +1401,12 @@
 		Исключение
 			Сообщить(ОписаниеОшибки());
 		КонецПопытки;
-		Партия.Продукция 	= ВыпМодуль.НайтиПродукцию(product, productItem);
-		Партия.ВидПродукции = ВыпМодуль.НайтиВидПродукции(subProduct, productItem);
+		Партия.Продукция 	= ВыпМодуль.НайтиПродукцию(product);
+		Партия.ВидПродукции = ВыпМодуль.НайтиВидПродукции(subProduct);
+		
+		Партия.Продукция_Элемент = ВыпМодуль.Найти_Продукция_Элемент(productItem, productItemUuid, Партия.Продукция, Партия.ВидПродукции);
+		Партия.СвойствоНоменклатурыЗначение = Партия.Продукция_Элемент.СвойствоНоменклатурыЗначение;
+		
 		Партия.Количество 	= Число(volume);
 		Партия.КоличествоКор = Число(packingAmount);
 		Партия.ФормаУпаковки = ВыпМодуль.НайтиФормуУпаковки( packingFormUuid, packingFormName);;
@@ -1508,7 +1512,12 @@
 		
 		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("vetd:productItem").text;
+		productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
+		Попытка
+			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
+		Исключение
+			productItemUuid="";
+		КонецПопытки;
 		volume 		= batch.selectSingleNode("vetd:volume").text;
 		unitGuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
 		
@@ -1558,8 +1567,12 @@
 		//	Сообщить(ОписаниеОшибки());
 		//КонецПопытки;		
 		//ДокПартия.Перевозчик_ХозСубъект = ;
-		докОбъект.Продукция 	= ВыпМодуль.НайтиПродукцию(product, productItem);
-		докОбъект.ВидПродукции 	= ВыпМодуль.НайтиВидПродукции(subProduct, productItem);
+		докОбъект.Продукция 	= ВыпМодуль.НайтиПродукцию(product);
+		докОбъект.ВидПродукции 	= ВыпМодуль.НайтиВидПродукции(subProduct);
+		
+		докОбъект.Продукция_Элемент = ВыпМодуль.Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		докОбъект.СвойствоНоменклатурыЗначение = докОбъект.Продукция_Элемент.СвойствоНоменклатурыЗначение;
+		
 		докОбъект.Количество 	= Число(volume);
 		докОбъект.КоличествоКор = Число(packingAmount);
 		ФормаУпаковки 			= ВыпМодуль.НайтиФормуУпаковки( packingFormUuid, packingFormName);
