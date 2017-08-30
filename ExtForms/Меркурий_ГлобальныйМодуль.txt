@@ -1148,7 +1148,11 @@
 			Возврат;
 		КонецПопытки;
 		guid = be.selectSingleNode("guid").text;
-		name = be.selectSingleNode("name").text;
+		Попытка 
+			name = be.selectSingleNode("name").text;
+		Исключение 
+			name = be.selectSingleNode("fio").text;
+		КонецПопытки;
 		country = be.selectSingleNode("juridicalAddress").selectSingleNode("country").selectSingleNode("guid").text;
 		countryName = be.selectSingleNode("juridicalAddress").selectSingleNode("country").selectSingleNode("name").text;
 		region = be.selectSingleNode("juridicalAddress").selectSingleNode("region").selectSingleNode("guid").text;
