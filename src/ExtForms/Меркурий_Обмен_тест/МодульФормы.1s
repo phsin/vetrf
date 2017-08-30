@@ -1210,19 +1210,29 @@
 	    objDom.load(Компонента.LogFilename);    
 	    	
 		Попытка			
-		    enterprise=objDom.selectSingleNode("//businessEntity") ;
-			guid = enterprise.selectSingleNode("guid").text;
-			uuid = enterprise.selectSingleNode("uuid").text;
-			active = enterprise.selectSingleNode("active").text;
-		
-			Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
-			Спр.НайтиЭлемент(ХС);
-			спр.GUID = GUID;
-			спр.UUID = uuid;
-			спр.Записать();
-			Сообщить("Записан Эл ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID);			
+			businessEntityList = objDom.selectSingleNode("//businessEntityList");
+			total = businessEntityList.getAttribute("total");
+			
+			Если total="0" тогда 
+				Сообщить("ХозСубъект с ИНН "+ИНН+" не найден");
+			Иначе
+			//enterpriseList  = objDom.selectSingleNode("//businessEntity");
+			//Для i1 = 0 По businessEntityList.length - 1 Цикл
+			
+			    enterprise	= businessEntityList.selectSingleNode("//businessEntity") ;
+				guid 		= enterprise.selectSingleNode("guid").text;
+				uuid 		= enterprise.selectSingleNode("uuid").text;
+				active 		= enterprise.selectSingleNode("active").text;
+			
+				Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
+				Спр.НайтиЭлемент(ХС);
+				спр.GUID = GUID;
+				спр.UUID = uuid;
+				спр.Записать();
+				Сообщить("Записан Эл ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID);		
+			КонецЕсли;
 		Исключение			
-			Сообщить("Получен пустой ответ GetBusinessEntityByINN","!");
+			Сообщить("ошибка в ответе GetBusinessEntityByINN","!");
 			Сообщить(ОписаниеОшибки(),"!");
 		КонецПопытки;
 		
@@ -1267,7 +1277,8 @@
 		
 		Если ПустоеЗначение(тз.id.GUID)=0 Тогда
 			Сообщить("Получение площадок хозСубъекта = "+тз.id);
-			ВыпМодуль.ПолучитьПлощадкиПоНазванию(тз.id, 0 );
+			//ВыпМодуль.НайтиПлощадкиПоНазванию(тз.id, 0 );
+			ВыпМодуль.ЗагрузитьПлощадки( тз.id );
 		КонецЕсли;
 	КонецЦикла;	
 	
@@ -1297,7 +1308,7 @@
 		
 		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
+		productItem = batch.selectSingleNode("ns2:productItem").selectSingleNode("prod:name").text;
 		
 		Попытка
 			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
@@ -1449,6 +1460,18 @@
 		КонецЕсли;
 		
 		Партия.ВсдДата = СтрокаВДату(createDate);
+		
+		Если Партия.Количество=0 Тогда 
+			
+			Если ( ПустоеЗначение( Партия.ТекущийЭлемент() ) =0 ) Тогда
+				Сообщить("Количество партии guid ["+guid+"] uuid ["+uuid+"] = 0. Партия удалена. ");
+				Партия.Удалить(0);
+			Иначе
+				Сообщить("Количество партии guid ["+guid+"] uuid ["+uuid+"] = 0. Партия пропущена. ");
+				Возврат "";
+			КонецЕсли;
+		КонецЕсли;
+		
 		
 		Партия.Записать();
 
