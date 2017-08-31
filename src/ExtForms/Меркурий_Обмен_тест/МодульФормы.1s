@@ -413,7 +413,7 @@
 
 	//Отладка();
 	
-	Попытка
+	//Попытка
 		СохранитьСтатусЗапроса(докСсылка);
 		
 		Если Результат="COMPLETED" Тогда
@@ -438,9 +438,9 @@
 		КонецЕсли;
 
 		
-	Исключение
-		Сообщить(ОписаниеОшибки());
-	КонецПопытки;
+	//Исключение
+	//	Сообщить(ОписаниеОшибки());
+	//КонецПопытки;
 			
 	УдалитьXML( Компонента.LogFilename );
 	
@@ -460,7 +460,7 @@
 	//Отладка();
 	УдалитьXML( Компонента.LogFilename );
 	
-	Попытка
+	//Попытка
 		СохранитьСтатусЗапроса(док);
 		
 		Если Результат="ACCEPTED" Тогда 
@@ -483,9 +483,9 @@
 			КонецЦикла;
 
 		КонецЕсли;
-	Исключение
-		Сообщить("Не удалось записать ApplicationID в документ ВСД "+ОписаниеОшибки());
-	КонецПопытки;		
+	//Исключение
+	//	Сообщить("Не удалось записать ApplicationID в документ ВСД "+ОписаниеОшибки());
+	//КонецПопытки;		
 
 	Возврат 1;
 	
@@ -811,7 +811,7 @@
 
 	//Отладка();
 	
-	Попытка
+	//Попытка
 
 		СохранитьСтатусЗапроса(докСсылка);
 
@@ -831,9 +831,9 @@
 			Сообщить(докСсылка.Комментарий);		
 		КонецЕсли;
 		
-	Исключение
-		Сообщить(ОписаниеОшибки());
-	КонецПопытки;
+	//Исключение
+	//	Сообщить(ОписаниеОшибки());
+	//КонецПопытки;
 			
 	УдалитьXML( Компонента.LogFilename );
 	
@@ -1544,14 +1544,28 @@
 		
 		consignorBusinessEntity = vetDocument.selectSingleNode("vetd:consignor").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text;
 		consignorEnterprise 	= vetDocument.selectSingleNode("vetd:consignor").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
-		consigneeBusinessEntity = vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text;
-		consigneeEnterprise 	= vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+		
+		Попытка
+			consigneeBusinessEntity = vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text;
+		Исключение
+			consigneeBusinessEntity ="";
+		КонецПопытки;
+		Попытка
+			consigneeEnterprise 	= vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+		Исключение
+			consigneeEnterprise = "";
+		КонецПопытки;
 		
 		batch = vetDocument.selectSingleNode("vetd:batch");
 		
 		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
+		Попытка
+			productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("pro:name").text;
+		Исключение
+			Сообщить("Не удалось получить элемент [productItem]","!");
+		КонецПопытки;
+		
 		Попытка
 			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
 		Исключение
