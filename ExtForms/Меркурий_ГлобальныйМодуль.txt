@@ -677,13 +677,13 @@
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
 			Рез = Спр.ТекущийЭлемент();
 		Иначе
-			Сообщить("ВСД_ВидПродукции GUID ["+guid+"] не найдена. Выполните загрузку справочника Виды Продукции");
+			Сообщить("ВСД_ВидПродукции GUID ["+guid+"] не найдена. Выполните инициализацию", "!");
 			//создать 
-			Спр.Новый();
-			//Спр.Код = ;
-			Спр.Наименование = Guid;
-			Спр.GUID = guid;
-			Спр.Записать();
+			//Спр.Новый();
+			////Спр.Код = ;
+			//Спр.Наименование = Guid;
+			//Спр.GUID = guid;
+			//Спр.Записать();
 			
 		КонецЕсли;
 	Иначе
@@ -760,49 +760,6 @@
 КонецФункции
 
 
-Процедура ЗагрузитьXML_Номенклатура(имяФайла)
-		
-    Сообщить("Загрузка XML-файла: "+ИмяФайла);    
-    
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(ИмяФайла);    
-    
-    productList = objDom.selectNodes("//product") ;
-    Для i1 = 0 По productList.length - 1 Цикл
-        product=productList.item(i1);
-		
-		uuid = product.selectSingleNode("uuid").text;
-		guid = product.selectSingleNode("guid").text;
-		st = product.selectSingleNode("status").text;
-		updateDate = product.selectSingleNode("updateDate").text;
-		createDate = product.selectSingleNode("createDate").text;		
-		name = product.selectSingleNode("name").text;
-		Попытка
-			code = product.selectSingleNode("code").text;
-		Исключение
-			code ="";
-		КонецПопытки;
-		productType = product.selectSingleNode("productType").text;
-		
-		Спр = СоздатьОбъект("Справочник.ВСД_Продукция");
-		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
-			//Рез = Спр.ТекущийЭлемент();
-		Иначе
-			Сообщить("ВСД_Продукция GUID ["+name+"] не найдена");
-			Спр.Новый();
-			//рез = Спр.ТекущийЭлемент();
-		КонецЕсли;		
-			Спр.Наименование = name;
-			Спр.GUID = guid;
-			Спр.UUID = UUID;
-			Спр.КодМеркурий = code;
-			Спр.Тип = ProductType;
-			Спр.Записать();
-
-    КонецЦикла;
-КонецПроцедуры
-
-
 Процедура ЗагрузитьXML_ЕдиницыИзмерения(имяФайла)
 		
     Сообщить("Загрузка XML-файла: "+ИмяФайла);    
@@ -839,7 +796,58 @@
     КонецЦикла;
 КонецПроцедуры
 
-Процедура ПолучитьТовары(Тип)
+Процедура Загрузить_ВидПродукции(guid, Владелец)
+
+	Сообщить(" Запрос GetProductList ","i");		
+	Результат = Компонента.GetSubProductByProductList( guid );
+	
+	//Отладка();
+	
+	//Если Результат="SUCCESS" Тогда
+		
+		//ЗагрузитьXML_Номенклатура( Компонента.LogFilename );
+		Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);    
+		
+		objDom=СоздатьОбъект("MSXML2.DOMDocument");
+		objDom.load(Компонента.LogFilename);    
+		
+		Спр = СоздатьОбъект("Справочник.ВСД_ВидПродукции");
+		
+		List = objDom.selectNodes("//subProduct") ;
+		Для i1 = 0 По List.length - 1 Цикл
+		    item = List.item(i1);
+
+			uuid = item.selectSingleNode("uuid").text;
+			guid = item.selectSingleNode("guid").text;
+			st = item.selectSingleNode("status").text;
+			updateDate = item.selectSingleNode("updateDate").text;
+			createDate = item.selectSingleNode("createDate").text;		
+			name = item.selectSingleNode("name").text;
+			code = item.selectSingleNode("code").text;
+			
+			Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
+				//Рез = Спр.ТекущийЭлемент();
+			Иначе
+				Сообщить("ВСД_Продукция GUID ["+name+"] не найдена");
+				Спр.Новый();
+				//рез = Спр.ТекущийЭлемент();
+			КонецЕсли;		
+			Спр.Наименование = name;
+			Спр.GUID = guid;
+			Спр.UUID = UUID;
+			Спр.КодТНВЭД = code;
+			Спр.Владелец = Владелец;
+			Спр.Записать();
+			
+		КонецЦикла;
+	//КонецЕсли;
+
+
+КонецПроцедуры
+
+
+//Процедура ПолучитьТовары(Тип)
+Процедура Получить_Продукцию(Тип)
 	
 	// http://help.vetrf.ru/wiki/ProductType
 	
@@ -851,8 +859,49 @@
 	
 	Если Результат="SUCCESS" Тогда
 		
-		ЗагрузитьXML_Номенклатура( Компонента.LogFilename );
+		//ЗагрузитьXML_Номенклатура( Компонента.LogFilename );		
+		Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);    
+		
+		objDom=СоздатьОбъект("MSXML2.DOMDocument");
+		objDom.load(Компонента.LogFilename);    
 
+		Спр = СоздатьОбъект("Справочник.ВСД_Продукция");
+		
+		productList = objDom.selectNodes("//product") ;
+		Для i1 = 0 По productList.length - 1 Цикл
+		    product=productList.item(i1);
+			
+			uuid = product.selectSingleNode("uuid").text;
+			guid = product.selectSingleNode("guid").text;
+			st = product.selectSingleNode("status").text;
+			updateDate = product.selectSingleNode("updateDate").text;
+			createDate = product.selectSingleNode("createDate").text;		
+			name = product.selectSingleNode("name").text;
+			Попытка
+				code = product.selectSingleNode("code").text;
+			Исключение
+				code ="";
+			КонецПопытки;
+			productType = product.selectSingleNode("productType").text;
+			
+			Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
+				//Рез = Спр.ТекущийЭлемент();
+			Иначе
+				Сообщить("ВСД_Продукция GUID ["+name+"] не найдена");
+				Спр.Новый();
+				//рез = Спр.ТекущийЭлемент();
+			КонецЕсли;		
+			Спр.Наименование = name;
+			Спр.GUID = guid;
+			Спр.UUID = UUID;
+			Спр.КодМеркурий = code;
+			Спр.Тип = ProductType;
+			Спр.Записать();
+			
+			Сообщить("Загрузка [Видов продукции] "+name);
+			Загрузить_ВидПродукции(guid, Спр.ТекущийЭлемент());
+		КонецЦикла;
+		
 	КонецЕсли;	
 	Сообщить("Загрузка завершена");
 КонецПроцедуры
@@ -1111,7 +1160,7 @@
 	ПолучитьЕдиницыИзмерения();
 	
 	Для А=1 По 8 Цикл
-		ПолучитьТовары(А);
+		Получить_Продукцию(А);
 	КонецЦикла;
 	
 	Если ПустоеЗначение(Отправитель_ХозСубъект)=1 Тогда
