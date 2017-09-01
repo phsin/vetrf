@@ -823,7 +823,11 @@
 			updateDate = item.selectSingleNode("updateDate").text;
 			createDate = item.selectSingleNode("createDate").text;		
 			name = item.selectSingleNode("name").text;
-			code = item.selectSingleNode("code").text;
+			Попытка 
+				code = item.selectSingleNode("code").text;
+			Исключение
+				code ="";
+			КонецПопытки;
 			
 			Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
 				//Рез = Спр.ТекущийЭлемент();
