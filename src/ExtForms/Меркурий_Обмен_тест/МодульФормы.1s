@@ -9,7 +9,7 @@
 
 Процедура ЗагрузитьXML_ВсеПартииОтвет( имяФайла ) Далее
 Процедура ЗагрузитьXML_Партии(имяФайла, докОснование="") Далее
-Процедура ЗагрузитьXML_ВСД( имяФайла, докОснование ) Далее
+Процедура ЗагрузитьXML_ВСД( имяФайла, докОснование, ВидДокумента ) Далее
 Функция ПолучитьРезультат_ИсхВСД(докСсылка) Далее
 Функция ПолучитьРезультат_ВходВСД( докСсылка ) далее
 
@@ -426,7 +426,7 @@
 				ДокОснование = докСсылка;
 			КонецЕсли;
 			
-			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование);
+			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование, "ВСД_Производство");
 			
 			//проведём для красоты
 			ДокОб = СоздатьОбъект("Документ");
@@ -507,7 +507,7 @@
 
 	//Отладка();
 	
-	Попытка
+	//Попытка
 		СохранитьСтатусЗапроса(докСсылка);
 		
 		Если Результат="COMPLETED" Тогда
@@ -520,7 +520,7 @@
 				ДокОснование = докСсылка;
 			КонецЕсли;
 			
-			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование);
+			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование, "ВСД_Инвентаризация");
 			
 			//проведём для красоты
 			ДокОб = СоздатьОбъект("Документ");
@@ -531,10 +531,10 @@
 			Сообщить(докСсылка.Комментарий);		
 		КонецЕсли;
 
-		
-	Исключение
-		Сообщить(ОписаниеОшибки());
-	КонецПопытки;
+	//	
+	//Исключение
+	//	Сообщить(ОписаниеОшибки());
+	//КонецПопытки;
 			
 	УдалитьXML( Компонента.LogFilename );
 	
@@ -766,6 +766,7 @@
 	ДокОб.НайтиДокумент(докСсылка);
 	applicationID = СокрЛП(ДокОб.applicationID);
 	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Пустая ссылка applicationID","!");
 		Возврат "Пустая ссылка applicationID";
 	КонецЕсли;
 	
@@ -774,21 +775,23 @@
 
 	//Отладка();
 	
-	Попытка		
+	//Попытка		
 		СохранитьСтатусЗапроса(докСсылка);					
 		
 		Если Результат="COMPLETED" Тогда
 
 			ЗагрузитьXML_Партии( Компонента.LogFilename , докСсылка );
 		КонецЕсли;
-
+			
+		ЗагрузитьXML_ВСД( Компонента.LogFilename, докСсылка, "ВСД_входящий");
+			
 		//проведём для красоты
 		ДокОб = СоздатьОбъект("Документ");
 		ДокОб.НайтиДокумент(докСсылка);
 		ДокОб.Провести();
-	Исключение
-		Сообщить(ОписаниеОшибки());
-	КонецПопытки;
+	//Исключение
+	//	Сообщить(ОписаниеОшибки());
+	//КонецПопытки;
 
 	УдалитьXML( Компонента.LogFilename );
 	
@@ -803,6 +806,7 @@
 	ДокОб.НайтиДокумент(докСсылка);
 	applicationID = СокрЛП(ДокОб.applicationID);
 	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Пустая ссылка applicationID","!");
 		Возврат "Пустая ссылка applicationID";
 	КонецЕсли;
 
@@ -825,7 +829,7 @@
 				ДокОснование = докСсылка;
 			КонецЕсли;
 			
-			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование);
+			ЗагрузитьXML_ВСД( Компонента.LogFilename, ДокОснование, "ВСД_Исходящий");
 			
 		Иначе
 			Сообщить(докСсылка.Комментарий);		
@@ -1308,11 +1312,20 @@
 		
 		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
-		productItem = batch.selectSingleNode("ns2:productItem").selectSingleNode("prod:name").text;
+		Попытка
+			productItem = batch.selectSingleNode("ns2:productItem").selectSingleNode("prod:name").text;
+		Исключение
+			Попытка
+				productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
+			Исключение
+				productItem = "";
+				Сообщить("Не удалось получить [productItem] Проверьте xml","!");
+			КонецПопытки;
+		КонецПопытки;
 		
 		Попытка
 			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
-		Исключение
+		Исключение			
 			productItemUuid="";
 		КонецПопытки;
 		
@@ -1483,22 +1496,20 @@
     
     //tt1=_GetPerformanceCounter();
     
-	Если ПустоеЗначение(имяФайла)=1 Тогда
-		
-	    ИмяФайла="C:\C#\logs\1.xml";
-		
-		Каталог = "";
-		Если ФС.ВыбратьФайл(0, ИмяФайла, Каталог, "Выберите файл", "XML (*.xml)|*.xml", , ) = 1 Тогда
-		    ИмяФайла = Каталог + ИмяФайла;
-		КонецЕсли;
-	КонецЕсли;	
-
     Сообщить("Загрузка XML-файла: "+ИмяФайла);    
     
     objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load(ИмяФайла);    
     
-    objDom.setProperty("SelectionNamespaces", "xmlns:bs='http://api.vetrf.ru/schema/cdm/base' xmlns:argc='http://api.vetrf.ru/schema/cdm/argus/common' xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production' xmlns:ns2='http://api.vetrf.ru/schema/cdm/mercury/vet-document' xmlns:ns1='http://api.vetrf.ru/schema/cdm/mercury/applications' xmlns:vetd='http://api.vetrf.ru/schema/cdm/mercury/vet-document'" );
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+		|xmlns:argc='http://api.vetrf.ru/schema/cdm/argus/common' 
+		|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
+		|xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production' 
+		|xmlns:ns2='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
+		|xmlns:ns1='http://api.vetrf.ru/schema/cdm/mercury/applications' 
+		|xmlns:vetd='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
+		|" );
 	
     stockEntryList = objDom.selectNodes("//*[local-name() = 'stockEntry']") ;	
     //stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
@@ -1522,18 +1533,35 @@
 
 КонецПроцедуры
 
-Процедура ЗагрузитьXML_ВСД(имяФайла, докОснование)
+Процедура ЗагрузитьXML_ВСД(имяФайла, докОснование, ВидДокумента)
 	
-	objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(имяФайла);    		    	
+	//objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    //objDom.load(имяФайла);    		    	
 
-	applicationId = objDom.selectSingleNode("//applicationId").text ;
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom.load(ИмяФайла);    
+    
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+		|xmlns:argc='http://api.vetrf.ru/schema/cdm/argus/common' 
+		|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
+		|xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production' 
+		|xmlns:ns2='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
+		|xmlns:ns1='http://api.vetrf.ru/schema/cdm/mercury/applications' 
+		|xmlns:vetd='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
+		|xmlns:default='http://www.w3.org/2001/XMLSchema'
+		|" );
+		
+	applicationId = objDom.selectSingleNode("//*[local-name() = 'applicationId']").text ;
 	
 	//vetDocument = objDom.selectSingleNode("//merc:vetDocument") ;
-	vetDocumentList = objDom.selectNodes("//merc:vetDocument") ;    
+	//vetDocumentList = objDom.selectNodes("//merc:vetDocument") ;
+	vetDocumentList = objDom.selectNodes("//*[local-name() = 'vetDocument']") ;    
+	
     Для i1 = 0 По vetDocumentList.length - 1 Цикл
         vetDocument=vetDocumentList.item(i1);
-		uuid = vetDocument.selectSingleNode("bs:uuid").text;
+		//uuid = vetDocument.selectSingleNode("bs:uuid").text;
+		uuid = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
 				
 		uuid = vetDocument.selectSingleNode("bs:uuid").text;
 		//guid = vetDocument.selectSingleNode("bs:guid").text;
@@ -1560,10 +1588,12 @@
 		
 		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
+
 		Попытка
-			productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("pro:name").text;
+			productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
 		Исключение
 			Сообщить("Не удалось получить элемент [productItem]","!");
+			productItem = "";
 		КонецПопытки;
 		
 		Попытка
@@ -1575,22 +1605,16 @@
 		unitGuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
 		
 		Попытка
-			packingFormUuid	= batch.selectSingleNode("vetd:packingList").selectSingleNode("argc:packingForm").selectSingleNode("bs:uuid").text;			
+			packingFormUuid	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("bs:uuid").text;			
 		Исключение
-			Попытка
-				packingFormUuid	= batch.selectSingleNode("vetd:packingList").selectSingleNode("com:packingForm").selectSingleNode("bs:uuid").text;			
-			Исключение
-				packingFormUuid = "";			
-			КонецПопытки;			
+			Сообщить("Не удалось получить элемент [packingForm] [uuid]","!");
+			packingFormUuid = "";			
 		КонецПопытки;
 		Попытка
-			packingFormName	= batch.selectSingleNode("vetd:packingList").selectSingleNode("argc:packingForm").selectSingleNode("argc:name").text;			
+			packingFormName	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("*[local-name()='name']").text;			
 		Исключение
-			Попытка
-				packingFormName	= batch.selectSingleNode("vetd:packingList").selectSingleNode("com:packingForm").selectSingleNode("argc:name").text;
-			Исключение
-				packingFormName="";
-			КонецПопытки;
+			packingFormName="";
+			Сообщить("Не удалось получить элемент [packingForm] [name]","!");
 		КонецПопытки;
 
 		packingAmount = batch.selectSingleNode("vetd:packingAmount").text;
@@ -1604,7 +1628,7 @@
 		owner = batch.selectSingleNode("vetd:owner").selectSingleNode("bs:guid").text; //ХозСубъект
 		ВладелецХС = ВыпМодуль.НайтиХСпоGUID(owner);
 				
-		докОбъект = ВыпМодуль.НайтиВсдИсходящий(applicationId, uuid);
+		докОбъект = ВыпМодуль.НайтиВсд(applicationId, uuid, ВидДокумента);
 		докОбъект.UUID = uuid;
 		докОбъект.ДокОснование = докОснование;
 		//док.UUID = Компонента.DocUUID;					
