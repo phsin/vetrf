@@ -259,7 +259,7 @@
 		Сообщить("не указано Количество "+док,"!");
 		Результат = 0;
 	КонецЕсли;
-	Если док.КоличествоКор =0 Тогда 
+	Если док.КоличествоМест =0 Тогда 
 		Сообщить("не указано Количество коробов"+док,"!");
 		Результат = 0;
 	КонецЕсли;
@@ -327,7 +327,7 @@
 			Сообщить("не указано Количество "+док,"!");
 			Результат = 0;
 		КонецЕсли;
-		Если док.КоличествоКор =0 Тогда 
+		Если док.КоличествоМест =0 Тогда 
 			Сообщить("не указано Количество коробов"+док,"!");
 			Результат = 0;
 		КонецЕсли;
@@ -405,6 +405,7 @@
 	ДокОб.НайтиДокумент(докСсылка);
 	applicationID = СокрЛП(ДокОб.applicationID);
 	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Пустая ссылка applicationID");
 		Возврат "Пустая ссылка applicationID";
 	КонецЕсли;
 
@@ -499,6 +500,7 @@
 	ДокОб.НайтиДокумент(докСсылка);
 	applicationID = СокрЛП(ДокОб.applicationID);
 	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Пустая ссылка applicationID");
 		Возврат "Пустая ссылка applicationID";
 	КонецЕсли;
 
@@ -1312,15 +1314,12 @@
 		
 		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
+
 		Попытка
-			productItem = batch.selectSingleNode("ns2:productItem").selectSingleNode("prod:name").text;
+			productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
 		Исключение
-			Попытка
-				productItem = batch.selectSingleNode("vetd:productItem").selectSingleNode("prod:name").text;
-			Исключение
-				productItem = "";
-				Сообщить("Не удалось получить [productItem] Проверьте xml","!");
-			КонецПопытки;
+			Сообщить("Не удалось получить элемент [productItem]","!");
+			productItem = "";
 		КонецПопытки;
 		
 		Попытка
@@ -1344,22 +1343,16 @@
 		КонецПопытки;
 		
 		Попытка
-			packingFormUuid	= batch.selectSingleNode("ns2:packingList").selectSingleNode("argc:packingForm").selectSingleNode("bs:uuid").text;			
+			packingFormUuid	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("bs:uuid").text;			
 		Исключение
-			Попытка
-				packingFormUuid	= batch.selectSingleNode("ns2:packingList").selectSingleNode("com:packingForm").selectSingleNode("bs:uuid").text;			
-			Исключение
-				packingFormUuid = "";			
-			КонецПопытки;			
+			Сообщить("Не удалось получить элемент [packingForm] [uuid]","!");
+			packingFormUuid = "";			
 		КонецПопытки;
 		Попытка
-			packingFormName	= batch.selectSingleNode("ns2:packingList").selectSingleNode("argc:packingForm").selectSingleNode("argc:name").text;			
+			packingFormName	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("*[local-name()='name']").text;			
 		Исключение
-			Попытка
-				packingFormName	= batch.selectSingleNode("ns2:packingList").selectSingleNode("com:packingForm").selectSingleNode("argc:name").text;
-			Исключение
-				packingFormName="";
-			КонецПопытки;
+			packingFormName="";
+			Сообщить("Не удалось получить элемент [packingForm] [name]","!");
 		КонецПопытки;
 
 		packingAmount = batch.selectSingleNode("ns2:packingAmount").text;
@@ -1448,7 +1441,7 @@
 		Партия.СвойствоНоменклатурыЗначение = Партия.Продукция_Элемент.СвойствоНоменклатурыЗначение;
 		
 		Партия.Количество 	= Число(volume);
-		Партия.КоличествоКор = Число(packingAmount);
+		Партия.КоличествоМест = Число(packingAmount);
 		Партия.ФормаУпаковки = ВыпМодуль.НайтиФормуУпаковки( packingFormUuid, packingFormName);;
 
 		Партия.ЕдиницаИзмерения = ВыпМодуль.НайтиЕдИзмерения( unitGuid, unitUUID );;
@@ -1630,13 +1623,30 @@
 				
 		докОбъект = ВыпМодуль.НайтиВсд(applicationId, uuid, ВидДокумента);
 		докОбъект.UUID = uuid;
-		докОбъект.ДокОснование = докОснование;
+		Если докОбъект.ТекущийДокумент() <> докОснование Тогда 
+			докОбъект.ДокОснование = докОснование;
+		КонецЕсли;
 		//док.UUID = Компонента.DocUUID;					
 		
-		докОбъект.Отправитель_ХозСубъект 	= ВыпМодуль.НайтиХСпоGUID(consignorBusinessEntity);
-		докОбъект.Отправитель_Площадка 		= ВыпМодуль.НайтиПлощадку(consignorEnterprise);
-		докОбъект.Получатель_ХозСубъект 	= ВыпМодуль.НайтиХСпоGUID(consigneeBusinessEntity);
-		докОбъект.Получатель_Площадка 		= ВыпМодуль.НайтиПлощадку(consigneeEnterprise);
+		Попытка 
+			докОбъект.Отправитель_ХозСубъект 	= ВыпМодуль.НайтиХСпоGUID(consignorBusinessEntity);
+		Исключение			
+		КонецПопытки;
+		Попытка			
+			докОбъект.Отправитель_Площадка 		= ВыпМодуль.НайтиПлощадку(consignorEnterprise);
+		Исключение			
+		КонецПопытки;
+
+		Попытка
+			докОбъект.Получатель_ХозСубъект 	= ВыпМодуль.НайтиХСпоGUID(consigneeBusinessEntity);
+		Исключение			
+		КонецПопытки;
+
+		Попытка			
+			докОбъект.Получатель_Площадка 		= ВыпМодуль.НайтиПлощадку(consigneeEnterprise);
+		Исключение			
+		КонецПопытки;
+			
 		докОбъект.Производитель_Площадка 	= ВыпМодуль.НайтиПлощадку(producer);
 		//Попытка
 		//	докОбъект.Производитель_ХозСубъект = докОбъект.Производитель_Площадка.Контрагент;
@@ -1651,7 +1661,7 @@
 		докОбъект.СвойствоНоменклатурыЗначение = докОбъект.Продукция_Элемент.СвойствоНоменклатурыЗначение;
 		
 		докОбъект.Количество 	= Число(volume);
-		докОбъект.КоличествоКор = Число(packingAmount);
+		докОбъект.КоличествоМест = Число(packingAmount);
 		ФормаУпаковки 			= ВыпМодуль.НайтиФормуУпаковки( packingFormUuid, packingFormName);
 		докОбъект.ФормаУпаковки = ФормаУпаковки;	
 
@@ -1670,7 +1680,7 @@
 		докОбъект.Записать();
 		докОбъект.Провести();
 
-		Сообщить("Записан ВСД_исходящий от "+докОбъект.ДатаДок+" ["+uuid+"]");
+		Сообщить("Записан "+ВидДокумента+" от "+докОбъект.ДатаДок+" ["+uuid+"]");
 	КонецЦикла;
 
 		
