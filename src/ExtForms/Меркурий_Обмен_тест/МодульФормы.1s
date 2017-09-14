@@ -748,7 +748,146 @@
 	
 КонецФункции
 
+//******************************** Список ВСД ******************************************************************
 
+Функция  ПолучитьРезультат_Изменить_Продукцию(продукцияЭлемент)
+
+	Результат = ВыпМодуль.Компонента.GetVetDocumentListResult(СокрЛП(appID));
+	
+	Если Результат="COMPLETED" Тогда
+		
+	    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+	    objDom.load(ВыпМодуль.Компонента.LogFilename);    
+	    
+	    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/applications'
+		|xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production' 
+		|xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+		|
+		|" );
+			
+		applicationId = objDom.selectSingleNode("//*[local-name() = 'applicationId']").text ;
+	
+	//vetDocument = objDom.selectSingleNode("//merc:vetDocument") ;
+	//vetDocumentList = objDom.selectNodes("//merc:vetDocument") ;
+	productItemList = objDom.selectNodes("//*[local-name() = 'productItem']") ;    
+	
+    Для i1 = 0 По productItemList.length - 1 Цикл
+        productItem = productItemList.item(i1);
+		
+		//consignorEnterprise = oper.selectSingleNode("pr:enterprise").selectSingleNode("bs:guid").text;
+				
+		guid  	 = productItem.selectSingleNode("base:guid").text;
+		uuid  	 = productItem.selectSingleNode("base:uuid").text;
+		active 	 = productItem.selectSingleNode("base:active").text;
+		
+		Если active="false" Тогда
+			Продолжить;
+		КонецЕсли;
+		
+		st  	 = productItem.selectSingleNode("base:status").text;
+		name     = productItem.selectSingleNode("prod:name").text;
+		//code 	 = productItem.selectSingleNode("prod:code").text;
+		prodType = productItem.selectSingleNode("prod:productType").text;		
+		
+		product 	= productItem.selectSingleNode("prod:product").selectSingleNode("base:guid").text;
+		subProduct 	= productItem.selectSingleNode("prod:subProduct").selectSingleNode("base:guid").text;
+
+		correspondToGost = productItem.selectSingleNode("prod:correspondToGost").text;
+		Попытка
+			gost = productItem.selectSingleNode("prod:gost").text;				
+		Исключение
+			gost = "";
+		КонецПопытки;
+		
+		
+		Продукция 	 = ВыпМодуль.НайтиПродукцию(product);
+		ВидПродукции = ВыпМодуль.НайтиВидПродукции(subProduct);
+		
+		
+		//СпрСсылка = ВыпМодуль.Найти_Продукция_Элемент(name, uuid, Продукция, ВидПродукции);
+		
+		СпрОбъект = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
+		СпрОбъект.НайтиЭлемент(продукцияЭлемент);
+		СпрОбъект.UUID = uuid;
+		СпрОбъект.GUID = guid;	
+
+		//СпрОбъект.Площадка 		= ВыпМодуль.НайтиПлощадку(consigneeEnterprise);
+		//СпрОбъект.Гост = gost;
+		//СпрОбъект.СоответствуетГОСТу = correspondToGost;
+			
+		//СпрОбъект.Продукция 	= ВыпМодуль.НайтиПродукцию(product);
+		//СпрОбъект.ВидПродукции 	= ВыпМодуль.НайтиВидПродукции(subProduct);
+		//СпрОбъект.Продукция_Элемент = ВыпМодуль.Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		//СпрОбъект.СвойствоНоменклатурыЗначение = докОбъект.Продукция_Элемент.СвойствоНоменклатурыЗначение;
+						
+		СпрОбъект.Записать();
+
+		Сообщить("Записан ["+СпрОбъект.ТекущийЭлемент()+"] uuid =["+uuid+"]");
+	КонецЦикла;
+				
+		УдалитьXML( ВыпМодуль.Компонента.LogFilename);
+	КонецЕсли;		
+		
+	Возврат Результат;
+КонецФункции
+
+Функция  Изменить_Продукцию( продукцияЭлемент , RegisterModificationType)
+	//Если ПустоеЗначение(ВыбПлощадка)=1 Тогда 
+	//	Предупреждение("Выберите Площадку");
+	//	Возврат;
+	//КонецЕсли;
+
+	Если ПустоеЗначение(продукцияЭлемент.Площадка.GUID)=1 Тогда 
+		Сообщить("В продукцияЭлемент.Площадка пустой GUID");
+		Возврат "REJECTED";
+	КонецЕсли;
+
+    //public enum RegisterModificationType {
+    //    
+    //    /// <remarks/>
+    //    CREATE,
+    //    
+    //    /// <remarks/>
+    //    FIND_OR_CREATE,
+    //    
+    //    /// <remarks/>
+    //    UPDATE,
+    //    
+    //    /// <remarks/>
+    //    DELETE,
+    //    
+    //    /// <remarks/>
+    //    MERGE,
+    //    
+    //    /// <remarks/>
+    //    ATTACH,
+    //    
+    //    /// <remarks/>
+    //    SPLIT,
+    //    
+    //    /// <remarks/>
+    //    FORK,
+    //}	
+	
+	Результат = ВыпМодуль.Компонента.ModifyProducerStockList( продукцияЭлемент, RegisterModificationType);
+
+	appID = ВыпМодуль.Компонента.ApplicationId;
+	//Отладка();
+	
+	УдалитьXML( ВыпМодуль.Компонента.LogFilename);
+
+	Результат = ПолучитьРезультат_Изменить_Продукцию(продукцияЭлемент);
+	Пока Результат="IN_PROCESS" Цикл
+		Пауза( ПаузаСек );				
+		Результат = ПолучитьРезультат_Изменить_Продукцию(продукцияЭлемент);
+	КонецЦикла;		
+	
+	УдалитьXML( ВыпМодуль.Компонента.LogFilename);
+	
+	Возврат Результат;
+	
+КонецФункции
 
 //******************************** Список ВСД ******************************************************************
 
