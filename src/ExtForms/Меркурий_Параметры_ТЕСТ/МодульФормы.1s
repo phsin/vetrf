@@ -33,6 +33,9 @@
  		|regasm "+КаталогОбработки+ИмяDLL+".dll /codebase
  		|pause)
  		|exit /b 99");
+
+
+// 		|regasm "+КаталогОбработки+ИмяDLL+".dll /codebase
  		
  		текстБАТ.Записать(КаталогОбработки + "setupdll.bat");  
  		ЗапуститьПриложение(КаталогОбработки + "setupdll.bat");
