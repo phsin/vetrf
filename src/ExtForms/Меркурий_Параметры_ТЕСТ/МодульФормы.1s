@@ -27,7 +27,7 @@
  		|cd %systemroot%\Microsoft.NET\Framework
  		|for /d %%d in (v4*.*) do (
  		|cd %%%d 
- 		|regasm "+КаталогОбработки+ГМ.ИмяDLL+".dll /codebase
+ 		|regasm """+КаталогОбработки+ГМ.ИмяDLL+".dll"" /codebase 		
  		|pause)
  		|exit /b 99");
 		
@@ -217,10 +217,6 @@
 	ЗаполнитьФормыУпаковки();
 	
 	ГМ.ИнициализацияХС_ЗагрузитьСтраны();
-
-	ГМ.ИнициализацияХС_ЗагрузитьРегионы();	
-	
-	ГМ.ИнициализацияХС_ЗагрузитьЕдиницыИзмерения();
 	
 	Для А=1 По 8 Цикл
 		ГМ.ИнициализацияХС_ЗагрузитьПродукцию(А);
@@ -247,7 +243,7 @@
 		КонецЕсли;		
 	КонецЕсли;
 	
-	Результат = ГМ.ПолучитьGuidХС(Отправитель_ХозСубъект);
+	Результат = ГМ.ХС_ПолучитьGuid(Отправитель_ХозСубъект);
 	
 	ИмяФайла = ГМ.Компонента.LogFilename;
 	Если Результат="SUCCESS" Тогда
@@ -269,6 +265,11 @@
 		countryName = be.selectSingleNode("juridicalAddress").selectSingleNode("country").selectSingleNode("name").text;
 		
 		Страна 	= ГМ.НайтиСтрануПоGUID(country, countryName);
+		
+		ГМ.ИнициализацияХС_ЗагрузитьРегионы(Страна);	
+	
+		ГМ.ИнициализацияХС_ЗагрузитьЕдиницыИзмерения();
+			
 
 		region = be.selectSingleNode("juridicalAddress").selectSingleNode("region").selectSingleNode("guid").text;
 		regionName = be.selectSingleNode("juridicalAddress").selectSingleNode("region").selectSingleNode("name").text;
