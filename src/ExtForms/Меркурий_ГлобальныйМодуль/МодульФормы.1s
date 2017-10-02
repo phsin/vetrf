@@ -832,19 +832,19 @@
 			//RS.Отладка(1);
 			тз = RS.ВыполнитьИнструкцию(ТекстЗапроса);
 			
-			Если тз.КоличествоСтрок()=0 Тогда 
-				ТекстЗапроса = "
-				|select 	              
-			    |   ДокВСД.iddoc [id $Документ."+ВидДокумента+"]
-			    |from $Документ."+ВидДокумента+" as ДокВСД  
-			  	|where 
-			  	|($ДокВСД.applicationId = :applicationId) 
-			  	|";
-				RS.УстановитьТекстовыйПараметр("applicationId", applicationId);
-				RS.УстановитьТекстовыйПараметр("uuid", uuid);  
-				//RS.Отладка(1);
-				тз = RS.ВыполнитьИнструкцию(ТекстЗапроса);			
-			КонецЕсли;
+			//Если тз.КоличествоСтрок()=0 Тогда 
+			//	ТекстЗапроса = "
+			//	|select 	              
+			//    |   ДокВСД.iddoc [id $Документ."+ВидДокумента+"]
+			//    |from $Документ."+ВидДокумента+" as ДокВСД  
+			//  	|where 
+			//  	|($ДокВСД.applicationId = :applicationId) 
+			//  	|";
+			//	RS.УстановитьТекстовыйПараметр("applicationId", applicationId);
+			//	RS.УстановитьТекстовыйПараметр("uuid", uuid);  
+			//	//RS.Отладка(1);
+			//	тз = RS.ВыполнитьИнструкцию(ТекстЗапроса);			
+			//КонецЕсли;
 		Иначе
 			ТекстЗапроса = "
 			|select 	              
@@ -872,19 +872,19 @@
 			Запрос.Подставлять("uuid", uuid);
 			//тз.Отладка();
 			ТЗ = Запрос.ВыполнитьЗапрос(ТекстЗапроса);
-			Если тз.КоличествоСтрок()=0 Тогда 
-				ТекстЗапроса = "
-				|select 	              
-			    |   ДокВСД.iddoc [id $Документ."+ВидДокумента+"]
-			    |from [Документ."+ВидДокумента+"] as ДокВСД  
-			  	|where 
-			  	|	(ДокВСД.applicationId= :applicationId) 
-			  	|";	
-				Запрос.Подставлять("applicationId", applicationId);
-				Запрос.Подставлять("uuid", uuid);
-				//тз.Отладка();
-				ТЗ = Запрос.ВыполнитьЗапрос(ТекстЗапроса);
-			КонецЕсли;			
+			//Если тз.КоличествоСтрок()=0 Тогда 
+			//	ТекстЗапроса = "
+			//	|select 	              
+			//    |   ДокВСД.iddoc [id $Документ."+ВидДокумента+"]
+			//    |from [Документ."+ВидДокумента+"] as ДокВСД  
+			//  	|where 
+			//  	|	(ДокВСД.applicationId= :applicationId) 
+			//  	|";	
+			//	Запрос.Подставлять("applicationId", applicationId);
+			//	Запрос.Подставлять("uuid", uuid);
+			//	//тз.Отладка();
+			//	ТЗ = Запрос.ВыполнитьЗапрос(ТекстЗапроса);
+			//КонецЕсли;			
 		Иначе
 			Запрос = базаДанных.НовыйЗапрос();
 			ТекстЗапроса = "
@@ -1920,7 +1920,7 @@
         vetDocument=vetDocumentList.item(i1);
 		uuid = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
 				
-		uuid = vetDocument.selectSingleNode("bs:uuid").text;
+		//uuid = vetDocument.selectSingleNode("bs:uuid").text;
 		st 	 = vetDocument.selectSingleNode("vetd:status").text;
 		type = vetDocument.selectSingleNode("vetd:type").text;
 		
