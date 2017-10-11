@@ -169,6 +169,16 @@
 				Param15: 2
 				Param22: 0
 			}
+			STATIC: ApplicationID
+			{
+				Заголовок: "ApplicationID"
+				ИдентификаторМетаданных: Журнал.ВСД.ApplicationID
+				ТипКолонки: 1
+				Ширина: 113
+				ПорядокОбхода: 4165
+				Param15: 2
+				Param22: 0
+			}
 		}
 	}
 	Элементы: 
