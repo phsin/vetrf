@@ -93,17 +93,19 @@
 	Результат = ГМ.Компонента.CreateActivityLocationsOperationResult( СокрЛП(applicationID));
 	//Отладка();
 	
-	Если Результат="COMPLETED" Тогда			
-	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-	    objDom.load(ГМ.Компонента.LogFilename);    	        
-        businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;									
-		guid = businessEntity.selectSingleNode("base:guid").text;
-		uuid = businessEntity.selectSingleNode("base:uuid").text;			
-		active = businessEntity.selectSingleNode("base:active").text;		
-		enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("base:guid").text;		
-		Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
-		//рез = Компонента.ResultString;				
-	КонецЕсли;	
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ГМ.Компонента.LogFilename);    	        
+	
+	Если ГМ.НайтиОшибки(objDom)>0 Тогда 
+		Возврат;
+	КонецЕсли;		
+	
+    businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;									
+	guid = businessEntity.selectSingleNode("base:guid").text;
+	uuid = businessEntity.selectSingleNode("base:uuid").text;			
+	active = businessEntity.selectSingleNode("base:active").text;		
+	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("base:guid").text;		
+	Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
 	
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
 КонецПроцедуры
@@ -148,40 +150,40 @@
 
 	//Отладка();
 	
-	Если Результат="COMPLETED" Тогда
-			
-	   Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);    
-	    
-	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-	    objDom.load(ГМ.Компонента.LogFilename);        
+   	Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);    
     
-        enterprise=objDom.selectSingleNode("//merc:enterprise") ;
-									
-		guid = enterprise.selectSingleNode("base:guid").text;
-		uuid = enterprise.selectSingleNode("base:uuid").text;
-		name = enterprise.selectSingleNode("ent:name").text;
-		active = enterprise.selectSingleNode("base:active").text;
-					
-		если ПустоеЗначение(GUID)=0 Тогда			
-			Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
-			Спр.НайтиЭлемент(Площадка);
-			спр.GUID = GUID;
-			спр.uuid = uuid;
-			спр.Записать();
-			Сообщить("Успешно записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
-			
-			Площадка = Спр.ТекущийЭлемент();
-		Иначе
-			Сообщить("Пустой GUID Площадки");
-		КонецЕсли;
-			
-		ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
-		ГМ.Пауза();
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ГМ.Компонента.LogFilename);        
+    
+	Если ГМ.НайтиОшибки(objDom)>0 Тогда 
+		Возврат;
+	КонецЕсли;		
 		
-		СоздатьСвязьХозсубъектПлощадка(Площадка);
+    enterprise=objDom.selectSingleNode("//merc:enterprise") ;
+								
+	guid = enterprise.selectSingleNode("base:guid").text;
+	uuid = enterprise.selectSingleNode("base:uuid").text;
+	name = enterprise.selectSingleNode("ent:name").text;
+	active = enterprise.selectSingleNode("base:active").text;
+				
+	если ПустоеЗначение(GUID)=0 Тогда			
+		Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
+		Спр.НайтиЭлемент(Площадка);
+		спр.GUID = GUID;
+		спр.uuid = uuid;
+		спр.Записать();
+		Сообщить("Успешно записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
 		
-	КонецЕсли;	
-
+		Площадка = Спр.ТекущийЭлемент();
+	Иначе
+		Сообщить("Пустой GUID Площадки");
+	КонецЕсли;
+		
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+	ГМ.Пауза();
+	
+	СоздатьСвязьХозсубъектПлощадка(Площадка);
+		
 		
 КонецПроцедуры
 
@@ -246,6 +248,10 @@
     Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);        
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(ГМ.Компонента.LogFilename);    
+	
+	Если ГМ.НайтиОшибки(objDom)>0 Тогда 
+		Возврат;
+	КонецЕсли;
     
     enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
 	guid = enterprise.selectSingleNode("base:guid").text;
@@ -366,13 +372,11 @@
 
    //{ Глобальный модуль + Интеграционный модуль для переопределения функций, плюс несколько базовых функций
     глМеркурийИнтеграция 		= СоздатьОбъект("МеркурийИнтеграция");
-    ТестовыйРежимРаботыМодуля   = глМеркурийИнтеграция.ОпределитьРежимРаботыМодуля(ИмяФайла);    	// определение режима работы модуля
-    КаталогБиблиотек            = глМеркурийИнтеграция.КаталогБиблиотек();                         	// путь к хранилищу стандартных библиотек DLL
-    КаталогМодуля               = глМеркурийИнтеграция.КаталогМодуля(КаталогОбработки);            	// путь к каталогу обработок модуля меркурий
 
     ГМ = СоздатьОбъект("Меркурий_ГлобальныйМодуль");
-    ГМ.Инициализация(КаталогМодуля, КаталогБиблиотек, ТестовыйРежимРаботыМодуля);        
-    ГМ.ЗагрузитьПараметры(Контекст);
+    ГМ.Инициализация();        
+	ГМ.ЗагрузитьПараметры();
+    ГМ.ЗагрузитьПараметрыВФорму(Контекст);
 
     //Переопределение функций, если они определены в модуле
     глМеркурийИнтеграция.Инициализация(ГМ);    
