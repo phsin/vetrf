@@ -3311,7 +3311,7 @@
 	Док.ВыбратьСтроки();
 	Пока Док.ПолучитьСтроку() = 1 Цикл
 		consignment = consignment+ "
-		|          <vd:consignment id='id1'>
+		|          <vd:consignment id='id"+ док.НомерСтроки +"'>
 		|            <vd:productType>"+ док.Партия.Продукция.Тип +"</vd:productType>
 		|            <vd:product>
 		|              <bs:guid>"+ СокрЛП(док.Партия.Продукция.GUID) +"</bs:guid>
@@ -3340,6 +3340,9 @@
 		|            </vd:packingList>
 		|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
 		|            <vd:dateOfProduction>
+		|";
+		Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
+			consignment = consignment+ "
 		|              <vd:firstDate>
 		|                <bs:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</bs:year>
 		|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</bs:month>
@@ -3347,6 +3350,7 @@
 		|                <bs:hour>0</bs:hour>
 		|              </vd:firstDate>
 		|";
+	КонецЕсли;
 		Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и 
 				(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
 			consignment=consignment+"		
@@ -3362,13 +3366,18 @@
 		|              <vd:informalDate />
 		|            </vd:dateOfProduction>
 		|            <vd:expiryDate>
-		|              <vd:firstDate>
-		|                <bs:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</bs:year>
-		|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</bs:month>
-		|                <bs:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</bs:day>
-		|                <bs:hour>0</bs:hour>
-		|              </vd:firstDate>
 		|";
+		
+		Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
+			consignment=consignment+"
+			|              <vd:firstDate>
+			|                <bs:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</bs:year>
+			|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</bs:month>
+			|                <bs:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</bs:day>
+			|                <bs:hour>0</bs:hour>
+			|              </vd:firstDate>
+			|";
+		КонецЕсли;
 		Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и 
 				(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
 			consignment=consignment+"				
@@ -3399,7 +3408,7 @@
 		|";
 			
 		vetCertificate  = vetCertificate + "
-		|            <vd:vetCertificate for='id1'>
+		|            <vd:vetCertificate for='id"+ док.НомерСтроки +"'>
 		|              <vd:issueSeries />
 		|              <vd:issueNumber />
 		|              <vd:issueDate>"+ ДатаXML(док.ДатаДок) +"</vd:issueDate>
@@ -3449,13 +3458,18 @@
 		|            </vd:packingList>
 		|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
 		|            <vd:dateOfProduction>
-		|              <vd:firstDate>
-		|                <bs:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</bs:year>
-		|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</bs:month>
-		|                <bs:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</bs:day>
-		|                <bs:hour>0</bs:hour>
-		|              </vd:firstDate>
 		|";
+		
+		Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
+			vetCertificate=vetCertificate+"				
+			|              <vd:firstDate>
+			|                <bs:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</bs:year>
+			|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</bs:month>
+			|                <bs:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</bs:day>
+			|                <bs:hour>0</bs:hour>
+			|              </vd:firstDate>
+			|";
+		КонецЕсли;
 		Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и 
 				(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
 			vetCertificate=vetCertificate+"		
@@ -3471,13 +3485,17 @@
 		|              <vd:informalDate />
 		|            </vd:dateOfProduction>
 		|            <vd:expiryDate>
-		|              <vd:firstDate>
-		|                <bs:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</bs:year>
-		|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</bs:month>
-		|                <bs:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</bs:day>
-		|                <bs:hour>0</bs:hour>
-		|              </vd:firstDate>
 		|";
+		Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
+			vetCertificate=vetCertificate+"						
+			|              <vd:firstDate>
+			|                <bs:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</bs:year>
+			|                <bs:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</bs:month>
+			|                <bs:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</bs:day>
+			|                <bs:hour>0</bs:hour>
+			|              </vd:firstDate>
+			|";
+		КонецЕсли;
 		Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и 
 				(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
 			vetCertificate=vetCertificate+"				
