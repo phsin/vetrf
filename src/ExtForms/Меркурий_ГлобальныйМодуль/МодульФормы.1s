@@ -1905,7 +1905,7 @@
 		Возврат Результат;
 	КонецЕсли;		
 	
-	Спр = СоздатьОбъект("Справочник.ВСД_Район");
+	Спр = СоздатьОбъект("Справочник.ВСД_Регион");
     regionList = objDom.selectNodes("//region") ;
     Для i1 = 0 По regionList.length - 1 Цикл
         region=regionList.item(i1);
