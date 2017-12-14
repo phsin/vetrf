@@ -5465,19 +5465,26 @@
 		Сообщить("Внимание: каталог log файлов не определен","!");
 	КонецЕсли;
 	
-	Компонента.Init(      
-		СписокКонстант.Получить("param_username"),  		//string USERNAME 
-        СписокКонстант.Получить("param_password"), 			//string PASSWORD = 
-        СписокКонстант.Получить("param_issuer_id"), 		//string ISSUER_ID 
-        СписокКонстант.Получить("param_service_id"), 		// string SERVICE_ID = 
-        СписокКонстант.Получить("param_api_key"), 			//string API_KEY = 
-        СписокКонстант.Получить("param_intiator_login"), 	//string USER_LOGIN = 
-        СписокКонстант.Получить("param_vetdoctor_login"), 	//string VETDOCTOR_LOGIN = 
-		СписокКонстант.Получить("КаталогЛогов"),  			// для логов
-		СписокКонстант.Получить("ОтладкаЗапросовXML"),
-		СписокКонстант.Получить("param_vetdoctor_fio"),
-		СписокКонстант.Получить("param_vetdoctor_post")
-		);
+	Опции = Компонента.GetOptions();
+	
+	Опции.USERNAME 			= СписокКонстант.Получить("param_username");
+    Опции.PASSWORD 			= СписокКонстант.Получить("param_password");
+    Опции.ISSUER_ID 		= СписокКонстант.Получить("param_issuer_id");
+    Опции.SERVICE_ID 		= СписокКонстант.Получить("param_service_id");
+    Опции.API_KEY 			= СписокКонстант.Получить("param_api_key");
+    Опции.INITIATOR_LOGIN 	= СписокКонстант.Получить("param_intiator_login");
+    Опции.VETDOCTOR_LOGIN 	= СписокКонстант.Получить("param_vetdoctor_login");
+	Опции.LogsDir 			= СписокКонстант.Получить("КаталогЛогов");
+	Опции.VETDOCTOR_FIO 	= СписокКонстант.Получить("param_vetdoctor_fio");
+	Опции.VETDOCTOR_POST 	= СписокКонстант.Получить("param_vetdoctor_post");
+
+	Если СписокКонстант.Получить("ОтладкаЗапросовXML")=1 Тогда 
+		Опции.DEBUG 				= Компонента.TRUE();
+	Иначе
+		Опции.DEBUG 				= Компонента.FALSE();
+	КонецЕсли;
+		
+	Компонента.Init(Опции);
 	
 КонецПроцедуры // Инициализация
 
