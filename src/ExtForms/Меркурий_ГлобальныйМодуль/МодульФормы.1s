@@ -2472,8 +2472,8 @@
 		докОбъект.ЕдиницаИзмерения = НайтиЕдИзмерения( unitGuid );
 		
 		докОбъект.Статус = st;	
-		докОбъект.Форма = form;
-		докОбъект.тип = type;
+		докОбъект.ФормаВСД = form;
+		докОбъект.типВСД = type;
 		докОбъект.НаименованиеПродукции = productItem;
 		докОбъект.ДатаИзготовления1 = ДатаИзготовления1;
 		докОбъект.ДатаИзготовления2 = ДатаИзготовления2;
@@ -3384,7 +3384,7 @@
 			|                <vd:lowGradeCargo>false</vd:lowGradeCargo>
 			|              </vd:batch>
 			|              <vd:purpose>
-			|                <bs:guid>"+ СокрЛП( СписокКонстант.Получить("Цель") ) +"</bs:guid>
+			|                <bs:guid>"+ СокрЛП( СписокКонстант.Получить("Цель").Guid ) +"</bs:guid>
 			|              </vd:purpose>
 			|              <vd:broker>
 			|                <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
@@ -3556,33 +3556,60 @@
 			|                <bs:hour>0</bs:hour>
 			|              </vd:secondDate>
 			|";
-		КонецЕсли;
+		КонецЕсли;  
+		
 		Запрос = Запрос + "
 			|              <vd:informalDate />
 			|            </vd:expiryDate>
-			|            <vd:perishable>false</vd:perishable>
+			|			<vd:perishable>"+булево(док.скоропортящийся)+"</vd:perishable>
 			|            <vd:countryOfOrigin>
 			|              <bs:uuid>"+ СокрЛП( СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
 			|            </vd:countryOfOrigin>
 			|";
 		
-		Если ПустоеЗначение(док.Производитель_Площадка.GUID)=0 Тогда 
+		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда     //Дима
 			Запрос=Запрос+"
 			|      		 <vd:producerList>
-			|        		<ent:producer>
-			|          			<ent:enterprise>
-			|            			<bs:guid>"+ СокрЛП(док.Производитель_Площадка.GUID) +"</bs:guid>
-			|          			</ent:enterprise>
-			|					<ent:role>PRODUCER</ent:role>
-			|        		</ent:producer>
+			|";
+			СпПроизводители = ЗначениеИзСтроки(Док.ПроизводительСписок);
+			к=0;
+			Для к = 1 По СпПроизводители.РазмерСписка() Цикл
+				Запрос=Запрос+"
+				|        		<ent:producer>
+				|          			<ent:enterprise>
+				|            			<bs:guid>"+ СокрЛП(СпПроизводители.ПолучитьЗначение(к).GUID) +"</bs:guid>
+				|          			</ent:enterprise>
+				|					<ent:role>PRODUCER</ent:role>
+				|        		</ent:producer>
+				|"; 
+			КонецЦикла;
+			Запрос=Запрос+"
 			|      		 </vd:producerList>
 			|";
 		КонецЕсли;
+		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда     //Дима
+			Запрос=Запрос+"
+			|      		 <vd:productMarkingList>
+			|";
+			МаркировкаСписок = ЗначениеИзСтроки(Док.МаркировкаСписок);
+			к=0;
+			Для к = 1 По МаркировкаСписок.РазмерСписка() Цикл
+				Запрос = Запрос + "
+				|              <vd:productMarking>"+  МаркировкаСписок.Получитьзначение(к) +"</vd:productMarking>
+				|"; 
+			КонецЦикла;	
+			Запрос=Запрос+"
+			|      		 </vd:productMarkingList>
+			|"; 
+		Иначе
+			Запрос=Запрос+"
+			|      		 <vd:productMarkingList />
+			|"; 
+		КонецЕсли;
 		Запрос=Запрос+"
-			|            <vd:productMarkingList />
-			|            <vd:lowGradeCargo>false</vd:lowGradeCargo>
-			|            <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
-			|      		 <vd:sourceStockEntry />
+			|			<vd:lowGradeCargo>"+булево(док.некачественный)+"</vd:lowGradeCargo>
+			|           <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
+			|      		<vd:sourceStockEntry />
 			|      </vd:consignment>
 			|
 			|    <vd:accompanyingForms>
@@ -3599,41 +3626,71 @@
 			|          <ent:businessEntity />
 			|          <ent:enterprise />
 			|        </sh:consignee>
+			|";
+		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда  //Дима
+			Запрос=Запрос+"			
 			|        <sh:broker>
 			|          <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
 			|        </sh:broker>
+			|";
+		КонецЕсли;
+		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда  //Дима
+			Запрос=Запрос+"			
 			|        <sh:transportInfo>
-			|          <sh:transportType>1</sh:transportType>
+			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
 			|          <sh:transportNumber>
+			|"; 
+			Если СокрЛП(Док.ТипТС) = "1" Тогда
+			    Запрос = Запрос+"
 			|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
+			|";
+			иначеЕсли СокрЛП(Док.ТипТС) = "2" Тогда
+		    Запрос = Запрос+"
+			|            <sh:wagonNumber>"+ СокрЛП(док.номерАвто) +"</sh:wagonNumber>
+			|"; 
+			иначеЕсли СокрЛП(Док.ТипТС) = "3" Тогда
+		    Запрос = Запрос+"
+			|            <sh:flightNumber>"+ СокрЛП(док.номерАвто) +"</sh:flightNumber>
+			|";
+			иначеЕсли (СокрЛП(Док.ТипТС) = "4") или (СокрЛП(Док.ТипТС) = "5") или (СокрЛП(Док.ТипТС) = "6") Тогда
+		    Запрос = Запрос+"
+			|            <sh:shipName>"+ СокрЛП(док.номерАвто) +"</sh:shipName>
+			|";
+			
+			КонецЕсли;	
+			Запрос=Запрос+"
 			|          </sh:transportNumber>
 			|        </sh:transportInfo>
-			|        <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
-			|        <sh:cargoReloadingPointList />
-			|      </vd:waybill>
-			|      <vd:vetCertificate>
-			|        <bs:uuid>"+ СокрЛП(док.UUID) +"</bs:uuid>
-			|      </vd:vetCertificate>
-			|    </vd:accompanyingForms>
-			|  </delivery>
-			|  <deliveryFacts>
-			|    <vd:vetCertificatePresence>ELECTRONIC</vd:vetCertificatePresence>
-			|    <vd:docInspection>
-			|      <vd:responsible>
-			|        <co:login>"+ СокрЛП( СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|      </vd:responsible>
-			|      <vd:result>CORRESPONDS</vd:result>
-			|    </vd:docInspection>
-			|    <vd:vetInspection>
-			|      <vd:responsible>
-			|        <co:login>"+ СокрЛП( СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|      </vd:responsible>
-			|      <vd:result>CORRESPONDS</vd:result>
-			|    </vd:vetInspection>
-			|    <vd:decision>ACCEPT_ALL</vd:decision>
-			|  </deliveryFacts>
-			|</processIncomingConsignmentRequest>";
+			|";
 		КонецЕсли;
+		
+		Запрос=Запрос+"
+		|        <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+		|        <sh:cargoReloadingPointList />
+		|      </vd:waybill>
+		|      <vd:vetCertificate>
+		|        <bs:uuid>"+ СокрЛП(док.UUID) +"</bs:uuid>
+		|      </vd:vetCertificate>
+		|    </vd:accompanyingForms>
+		|  </delivery>
+		|  <deliveryFacts>
+		|    <vd:vetCertificatePresence>ELECTRONIC</vd:vetCertificatePresence>
+		|    <vd:docInspection>
+		|      <vd:responsible>
+		|        <co:login>"+ СокрЛП( СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
+		|      </vd:responsible>
+		|      <vd:result>CORRESPONDS</vd:result>
+		|    </vd:docInspection>
+		|    <vd:vetInspection>
+		|      <vd:responsible>
+		|        <co:login>"+ СокрЛП( СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
+		|      </vd:responsible>
+		|      <vd:result>CORRESPONDS</vd:result>
+		|    </vd:vetInspection>
+		|    <vd:decision>ACCEPT_ALL</vd:decision>
+		|  </deliveryFacts>
+		|</processIncomingConsignmentRequest>";
+	КонецЕсли;
 	
 	Возврат Запрос;
 КонецФункции
@@ -4059,7 +4116,7 @@
 			|                <vd:lowGradeCargo>false</vd:lowGradeCargo>
 			|              </vd:batch>
 			|              <vd:purpose>
-			|                <bs:guid>"+ СокрЛП( СписокКонстант.Получить("Цель") ) +"</bs:guid>
+			|                <bs:guid>"+ СокрЛП( СписокКонстант.Получить("Цель").Guid ) +"</bs:guid>
 			|              </vd:purpose>
 			|              <vd:broker>
 			|                <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
@@ -4888,7 +4945,7 @@
 		|              <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
 		|              <vd:productCode />
 		|              <vd:purpose>
-		|                <bs:guid>"+ СокрЛП( СписокКонстант.Получить("Цель") ) +"</bs:guid>
+		|                <bs:guid>"+ СокрЛП( СписокКонстант.Получить("Цель").Guid ) +"</bs:guid>
 		|              </vd:purpose>
 		|              <vd:broker>
 		|                <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
