@@ -4209,150 +4209,173 @@
 		|        <productionOperation>
 		|";
 		
+		Если Док.ЗавершитьОперацию=0 Тогда 
+			Запрос=Запрос+"
+			|        <vd:operationId>"+ СокрЛП(Док.operationId) +"</vd:operationId>
+			|";
+		КонецЕсли;
+		
 		Док.ВыбратьСтроки();
 		Пока Док.ПолучитьСтроку() = 1 Цикл
 				
-			Запрос=Запрос+"			
-			|          <vd:productiveBatch>
-			|            <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-			|            <vd:product>
-			|              <bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
-			|            </vd:product>
-			|            <vd:subProduct>
-			|              <bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
-			|            </vd:subProduct>
-			|            <vd:productItem>
-			|";
-			Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
-				Запрос = Запрос+ "
-				|              <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>
+			Если док.ВидДвижения=1 Тогда 
+				Запрос=Запрос+"			
+				|          <vd:productiveBatch>
+				|            <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
+				|            <vd:product>
+				|              <bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
+				|            </vd:product>
+				|            <vd:subProduct>
+				|              <bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
+				|            </vd:subProduct>
+				|            <vd:productItem>
 				|";
-			КонецЕсли;
-			Запрос = Запрос+ "
-			|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
-			|            </vd:productItem>
-			|            <vd:volume>"+ Док.Количество +"</vd:volume>
-			|            <vd:unit>
-			|              <bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</bs:guid>
-			|            </vd:unit>			
-			|";
-			Если Док.КоличествоМест>0 Тогда 
-				Запрос=Запрос+"
-				|            <vd:packingList>
-				|              <co:packingForm>
-				|                <bs:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</bs:uuid>
-				|              </co:packingForm>
-				|            </vd:packingList>
-				|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
-				|";				
-			КонецЕсли;
-			Запрос=Запрос+"
-			|            <vd:dateOfProduction>
-			|";
-			Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
+				Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
+					Запрос = Запрос+ "
+					|              <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>
+					|";
+				КонецЕсли;
 				Запрос = Запрос+ "
-			|              <vd:firstDate>
-			|                <bs:year>"+ДатаГод(док.ДатаИзготовления1)+"</bs:year>
-			|                <bs:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</bs:month>
-			|                <bs:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</bs:day>
-			|                <bs:hour>0</bs:hour>
-			|              </vd:firstDate>
-			|";
-			КонецЕсли;
-			Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и 
-					(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-				Запрос=Запрос+"		
-				|              <vd:secondDate>
-				|                <bs:year>"+ ДатаГод(док.ДатаИзготовления2) +"</bs:year>
-				|                <bs:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</bs:month>
-				|                <bs:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</bs:day>
-				|                <bs:hour>0</bs:hour>
-				|              </vd:secondDate>
+				|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
+				|            </vd:productItem>
+				|            <vd:volume>"+ Док.Количество +"</vd:volume>
+				|            <vd:unit>
+				|              <bs:uuid>"+ СокрЛП(док.ЕдиницаИзмерения.UUID) +"</bs:uuid>
+				|            </vd:unit>			
 				|";
-			КонецЕсли;
-			Запрос=Запрос+"
-			|              <vd:informalDate />
-			|            </vd:dateOfProduction>
-			|            <vd:expiryDate>
-			|";
-			
-			Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
+				Если Док.КоличествоМест>0 Тогда 
+					Запрос=Запрос+"
+					|            <vd:packingList>
+					|              <co:packingForm>
+					|                <bs:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</bs:uuid>
+					|              </co:packingForm>
+					|            </vd:packingList>
+					|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
+					|";				
+				КонецЕсли;
 				Запрос=Запрос+"
+				|            <vd:dateOfProduction>
+				|";
+				Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
+					Запрос = Запрос+ "
 				|              <vd:firstDate>
-				|                <bs:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</bs:year>
-				|                <bs:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</bs:month>
-				|                <bs:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</bs:day>
+				|                <bs:year>"+ДатаГод(док.ДатаИзготовления1)+"</bs:year>
+				|                <bs:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</bs:month>
+				|                <bs:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</bs:day>
 				|                <bs:hour>0</bs:hour>
 				|              </vd:firstDate>
 				|";
-			КонецЕсли;
-			Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и 
-					(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-				Запрос=Запрос+"				
-				|              <vd:secondDate>
-				|                <bs:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</bs:year>
-				|                <bs:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</bs:month>
-				|                <bs:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</bs:day>
-				|                <bs:hour>0</bs:hour>
-				|              </vd:secondDate>
+				КонецЕсли;
+				Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и 
+						(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
+					Запрос=Запрос+"		
+					|              <vd:secondDate>
+					|                <bs:year>"+ ДатаГод(док.ДатаИзготовления2) +"</bs:year>
+					|                <bs:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</bs:month>
+					|                <bs:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</bs:day>
+					|                <bs:hour>0</bs:hour>
+					|              </vd:secondDate>
+					|";
+				КонецЕсли;
+				Запрос=Запрос+"
+				|              <vd:informalDate />
+				|            </vd:dateOfProduction>
+				|            <vd:expiryDate>
 				|";
+				
+				Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
+					Запрос=Запрос+"
+					|              <vd:firstDate>
+					|                <bs:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</bs:year>
+					|                <bs:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</bs:month>
+					|                <bs:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</bs:day>
+					|                <bs:hour>0</bs:hour>
+					|              </vd:firstDate>
+					|";
+				КонецЕсли;
+				Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и 
+						(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
+					Запрос=Запрос+"				
+					|              <vd:secondDate>
+					|                <bs:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</bs:year>
+					|                <bs:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</bs:month>
+					|                <bs:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</bs:day>
+					|                <bs:hour>0</bs:hour>
+					|              </vd:secondDate>
+					|";
+				КонецЕсли;
+				Запрос=Запрос+"
+				|              <vd:informalDate />
+				|            </vd:expiryDate>
+				|            <vd:perishable>false</vd:perishable>
+				|            <vd:countryOfOrigin>
+				|              <bs:uuid>"+ СокрЛП( СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
+				|            </vd:countryOfOrigin>
+				|            <vd:productMarkingList />
+				|            <vd:lowGradeCargo>false</vd:lowGradeCargo>
+				|          </vd:productiveBatch>			
+				|";
+			Иначе
+				//расход
+				Запрос=Запрос+"
+				| <vd:rawBatch>
+				|    <vd:sourceStockEntry>
+				|       <bs:guid>" + СокрЛП(док.Партия.guid) + "</bs:guid>
+				|    </vd:sourceStockEntry>
+				|    <vd:volume>"+ док.Количество +"</vd:volume>
+				|    <vd:unit>
+				|       <bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.Guid) +"</bs:guid>
+				|    </vd:unit>
+				| </vd:rawBatch>
+				|";
+				
 			КонецЕсли;
-			Запрос=Запрос+"
-			|              <vd:informalDate />
-			|            </vd:expiryDate>
-			|            <vd:perishable>false</vd:perishable>
-			|            <vd:countryOfOrigin>
-			|              <bs:uuid>"+ СокрЛП( СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
-			|            </vd:countryOfOrigin>
-			|            <vd:productMarkingList />
-			|            <vd:lowGradeCargo>false</vd:lowGradeCargo>
-			|          </vd:productiveBatch>			
-			|";
+			
 		КонецЦикла;
 		Запрос=Запрос+"
 		|          <vd:finalizeOperation>"+булево(док.ЗавершитьОперацию)+"</vd:finalizeOperation>
 		|        </productionOperation>
 		|        <vetDocument>
-		|          <vd:consignor>
-		|            <ent:businessEntity />
-		|            <ent:enterprise />
-		|          </vd:consignor>
-		|          <vd:consignee>
-		|            <ent:businessEntity />
-		|            <ent:enterprise />
-		|          </vd:consignee>
-		|          <vd:batch>
-		|            <vd:product />
-		|            <vd:subProduct />
-		|            <vd:productItem />
-		|            <vd:unit />
-		|            <vd:packingList />
-		|            <vd:dateOfProduction>
-		|              <vd:firstDate />
-		|              <vd:secondDate />
-		|            </vd:dateOfProduction>
-		|            <vd:expiryDate>
-		|              <vd:firstDate />
-		|              <vd:secondDate />
-		|            </vd:expiryDate>
-		|            <vd:countryOfOrigin />
-		|            <vd:producerList />
-		|            <vd:productMarkingList />
-		|          </vd:batch>
-		|          <vd:purpose />
-		|          <vd:broker />
-		|          <vd:transportInfo>
-		|            <sh:transportNumber />
-		|          </vd:transportInfo>
-		|          <vd:cargoReloadingPointList />
+		//|          <vd:consignor>
+		//|            <ent:businessEntity />
+		//|            <ent:enterprise />
+		//|          </vd:consignor>
+		//|          <vd:consignee>
+		//|            <ent:businessEntity />
+		//|            <ent:enterprise />
+		//|          </vd:consignee>
+		//|          <vd:batch>
+		//|            <vd:product />
+		//|            <vd:subProduct />
+		//|            <vd:productItem />
+		//|            <vd:unit />
+		//|            <vd:packingList />
+		//|            <vd:dateOfProduction>
+		//|              <vd:firstDate />
+		//|              <vd:secondDate />
+		//|            </vd:dateOfProduction>
+		//|            <vd:expiryDate>
+		//|              <vd:firstDate />
+		//|              <vd:secondDate />
+		//|            </vd:expiryDate>
+		//|            <vd:countryOfOrigin />
+		//|            <vd:producerList />
+		//|            <vd:productMarkingList />
+		//|          </vd:batch>
+		//|          <vd:purpose />
+		//|          <vd:broker />
+		//|          <vd:transportInfo>
+		//|            <sh:transportNumber />
+		//|          </vd:transportInfo>
+		//|          <vd:cargoReloadingPointList />
 		|          <vd:cargoInspected>true</vd:cargoInspected>
 		|          <vd:cargoExpertized>true</vd:cargoExpertized>
 		|          <vd:expertiseInfo>Произ.лабор</vd:expertiseInfo>
-		|          <vd:confirmedBy />
-		|          <vd:importPermit />
-		|          <vd:transferPermit />
-		|          <vd:withdrawedBy />
-		|          <vd:utilizedBy />
+		//|          <vd:confirmedBy />
+		//|          <vd:importPermit />
+		//|          <vd:transferPermit />
+		//|          <vd:withdrawedBy />
+		//|          <vd:utilizedBy />
 		|        </vetDocument>
 		|      </registerProductiveBatchRequest>
 		|";
