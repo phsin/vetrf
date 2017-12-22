@@ -1,0 +1,1 @@
+for /R %1 %%i in (.) do call C:\1C\Меркурий\txt.cmd %%i
