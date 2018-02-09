@@ -392,6 +392,7 @@
 		КонецПопытки;
 
 		//<dt:packaging> Фасовка. - В чем отличие от упаковки? packageList 
+		ФасУИД =""; ФасГУИД ="";ФасУН ="";ФасИмя ="";КолФас ="";ОбъемФас ="";ЕдФас ="";
 		Попытка
 			packaging = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:packaging");
 			// 	Тип упаковки. 
@@ -402,26 +403,26 @@
 			КонецПопытки;
 			// 	Идентификатор версии типа упаковки.
 			Попытка
-				ФасУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:uuid");
+				ФасУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:uuid").text;
 			Исключение
 				ФасУИД ="";
 			КонецПопытки;
 			//  	Глобальный идентификатор типа упаковки.
 			Попытка
-				ФасГУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid");   // ВСД_ФормыУпаковки
+				ФасГУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid").text;   // ВСД_ФормыУпаковки
 			Исключение
 				ФасГУИД ="";
 			КонецПопытки;
 			Попытка
 				//  	Уникальный идентификатор упаковки. 
-				ФасУН =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:globalID");
+				ФасУН =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:globalID").text;
 			Исключение
 				ФасУН ="";
 			КонецПопытки;
 			
 			// Наименование упаковки.
 			Попытка
-				ФасИмя =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name");
+				ФасИмя =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name").text;
 			Исключение
 				ФасИмя ="";
 			КонецПопытки;
@@ -445,7 +446,7 @@
 				ЕдФас ="";
 			КонецПопытки;			
 		Исключение
-			
+			packaging = "";
 		КонецПопытки;
 		// Объем продукции
 
@@ -558,7 +559,9 @@
 		Попытка
 			Pl = batch.selectSingleNode("*[local-name()='packageList']");
 			PList = Pl.selectNodes("dt:package") ;
-		Исключение КонецПопытки;
+		Исключение 
+			PList = "";
+		КонецПопытки;
 		Попытка
 		    Для l1 = 0 По PList.length - 1 Цикл
 				Узел = PList.item(l1);
@@ -658,7 +661,7 @@
 		
 		Партия.Количество 	= Число(volume);
 		// ЖД - Фасовка в партии - Нужно ли? 
-		// 23/01/18 - Фасовка в ВСД_ПродукцияЭлемент - в Партию не загружаем
+		// 23/01/18 - Фасовка в ВСД_ПродукцияЭлемент - в Партию не загружаем    Нужно определиться
 		
 		попытка
 			Партия.КоличествоМест = Число(КолФас);
@@ -668,10 +671,10 @@
 			Партия.ФормаУпаковки = ФормаУпаковкиФас;	
 		Исключение	КонецПопытки;
 		попытка	
-			Партия.ОбъемФас = Число(ОбъемФас);
+			Партия.ОбъемФас = Число(ОбъемФас);                         //ЖД реквизит отсутствует
 		Исключение	КонецПопытки;
 		попытка	
-			Партия.ЕдиницаИзмеренияФас = ГМ.НайтиЕдИзмерения( ЕдФас );
+			Партия.ЕдиницаИзмеренияФас = ГМ.НайтиЕдИзмерения( ЕдФас );    //ЖД реквизит отсутствует
 		Исключение	КонецПопытки;
 	
 		попытка	
@@ -744,7 +747,7 @@
 КонецФункции // ЗаписатьПартию2
 
 
-Функция ЗагрузитьXML_Партии2(имяФайла, докОснование="") //ЖД - все читает, нужно ли делать изменения в ВСД_Партия ?
+Функция ЗагрузитьXML_Партии2(имяФайла, докОснование="") Экспорт//ЖД - все читает, нужно ли делать изменения в ВСД_Партия ?
 
 	//стандартное поведение функции    
     Сообщить("Загрузка XML-файла: "+ИмяФайла);    
@@ -785,7 +788,7 @@
 //================= Отправка ВСД ======================
 
 // Дмитрий Жуков 2018-01
-Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="")
+Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="") Экспорт
 	// 
 
 	//стандартное поведение функции	
@@ -857,7 +860,7 @@
 				batch = vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:batch");  //ЖД Транспортный ВСД -другая структура ответа буду делать отдельно
 				ЭтоТранспортныйВСД=1;
 			Исключение
-			
+			 	batch = "";
 			КонецПопытки;
 		КонецПопытки; 
 		
@@ -877,7 +880,36 @@
 			Исключение
 				consigneeEnterprise = "";
 			КонецПопытки;
-			
+			Попытка //Перевозчик
+				ПеревозчикГУИД 	= vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:broker").selectSingleNode("bs:guid").text;
+			Исключение
+				ПеревозчикГУИД = "";
+			КонецПопытки;
+			Попытка
+				transportInfo = vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportInfo");
+				ТипТС = transportInfo.selectSingleNode("vd:transportType").text;//("*[local-name()='transportType'] ").text;
+				Если ТипТС = "1" Тогда
+					номеравто = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:vehicleNumber").text;//("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='vehicleNumber']").text; 
+				Иначеесли ТипТС = "2" Тогда
+					номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='wagonNumber']").text;
+				Иначеесли ТипТС = "3" Тогда
+					номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='flightNumber']").text;
+				Иначеесли (ТипТС = "4") или (ТипТС = "5") или (ТипТС = "6") Тогда
+					номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='shipName']").text;
+	//			Иначеесли ТЗВСД.ТипТС = "7" Тогда
+//					ТЗВСД.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='shipName']").text;
+				
+				КонецЕсли;
+			исключение
+				transportInfo = "";
+				номеравто = "";
+			КонецПопытки;
+			Попытка
+				термическоесостояние = vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportStorageType").text;
+			Исключение
+				термическоесостояние ="";
+			КонецПопытки;
+				
 			
 		КонецЕсли;
 			
@@ -919,6 +951,7 @@
 		
 		//<dt:packaging> Фасовка. - В чем отличие от упаковки? packageList 
 		// Фасовка м.б. указана по требованию сети, Параметры фасовки привязаны к ВД_ПродукцияЭлемент
+		ФасУИД =""; ФасГУИД ="";ФасУН ="";ФасИмя ="";КолФас ="";ОбъемФас ="";ЕдФас ="";
 		Попытка
 			packaging = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:packaging");
 			// 	Тип упаковки. 
@@ -929,26 +962,26 @@
 			КонецПопытки;
 			// 	Идентификатор версии типа упаковки.
 			Попытка
-				ФасУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:uuid");
+				ФасУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:uuid").text;
 			Исключение
 				ФасУИД ="";
 			КонецПопытки;
 			//  	Глобальный идентификатор типа упаковки.
 			Попытка
-				ФасГУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid");   // ВСД_ФормыУпаковки
+				ФасГУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid").text;   // ВСД_ФормыУпаковки
 			Исключение
 				ФасГУИД ="";
 			КонецПопытки;
 			Попытка
 				//  	Уникальный идентификатор упаковки. 
-				ФасУН =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:globalID");
+				ФасУН =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:globalID").text;;
 			Исключение
 				ФасУН ="";
 			КонецПопытки;
 			
 			// Наименование упаковки.
 			Попытка
-				ФасИмя =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name");
+				ФасИмя =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name").text;;
 			Исключение
 				ФасИмя ="";
 			КонецПопытки;
@@ -972,7 +1005,7 @@
 				ЕдФас ="";
 			КонецПопытки;			
 		Исключение
-			
+			packaging = "";	
 		КонецПопытки;
 		// Объем продукции
 		volume 		= batch.selectSingleNode("vd:volume").text; 
@@ -1080,7 +1113,9 @@
 		Попытка
 			Pl = batch.selectSingleNode("*[local-name()='packageList']");
 			PList = Pl.selectNodes("dt:package") ;
-		Исключение КонецПопытки;
+		Исключение 
+			PList = "";
+		КонецПопытки;
 		Попытка
 		    Для l1 = 0 По PList.length - 1 Цикл
 				Узел = PList.item(l1);
@@ -1165,9 +1200,61 @@
 			cargoExpertized = "";	
 		КонецПопытки;
 		Попытка
-			ПримВСД = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text;
+			особыеотметки = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text;
 		Исключение
-			ПримВСД = "";	
+			особыеотметки = "";	
+		КонецПопытки;
+		//ЖД вставить в модуль Обмен2
+		Попытка
+			ВСДместность = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:locationProsperity").text;
+		Исключение
+			ВСДместность = "";	
+		КонецПопытки;  
+        // след блок Сделать ЖД
+		//·······<vd:laboratoryResearch> 	vd:LaboratoryResearchEvent 	[0..*] 	Сведения о проведенных лабораторных исследованиях. 
+
+		
+		// Связанные документы
+		Попытка
+			Попытка
+				// 1 	Товарно-транспортная накладная см. dt:DocumentType 
+				ТипДокумента =  vetDocument.selectSingleNode("vd:referencedDocument").selectSingleNode("vd:type").text;;	
+			Исключение
+				ТипДокумента = "";	
+			КонецПопытки;
+			Попытка
+				НомерДокумента =  vetDocument.selectSingleNode("vd:referencedDocument").selectSingleNode("vd:issueNumber").text;;	
+			Исключение
+				НомерДокумента = "";	
+			КонецПопытки;
+			Попытка
+				СерияДокумента =  vetDocument.selectSingleNode("vd:referencedDocument").selectSingleNode("vd:issueSeries").text;;	
+			Исключение
+				СерияДокумента = "";	
+			КонецПопытки;
+			Попытка
+				ДатаДокумента =  vetDocument.selectSingleNode("vd:referencedDocument").selectSingleNode("vd:issueDate").text;;	
+			Исключение
+				ДатаДокумента = "";	
+			КонецПопытки;
+			
+			Попытка
+				//1 	Сопроводительный документ. 	Complementary accompanying document.
+				//2 	Предшествующий документ. 	Preceding document (Ancestor).
+				//3 	Следующий документ. 	Subsequent/following document (Child).
+				//4 	Документ, взамен которого выдан текущий документ. 	Replaced document.
+				//5 	Документ, заменяющий текущий документ. 	Replaced by document.
+				//6 	Связанный документ. 	Related document. 				
+				ТипОтношенияДок =  vetDocument.selectSingleNode("vd:referencedDocument").selectSingleNode("vd:relationshipType").text;;	
+			Исключение
+				ТипОтношенияДок = "";	
+			КонецПопытки;
+		Исключение
+			НомерДокумента="";
+			ТипДокумента = "";
+			СерияДокумента = "";
+			ДатаДокумента = "";
+			ТипОтношенияДок = "";
 		КонецПопытки;
 		
 // ЖД - нет этих данных в ответе на производствнный ВСД
@@ -1230,7 +1317,11 @@
 			докОбъект.КоличествоМестФас = Число(КолФас);
 		Исключение	КонецПопытки;
         попытка
-			ФормаУпаковкиФас 			= ГМ.НайтиФормуУпаковки( ФасГУИД, ФасИмя);
+			Если ПустоеЗначение(ФасГУИД) = 0 Тогда
+				ФормаУпаковкиФас 			= ГМ.НайтиФормуУпаковки( ФасГУИД, ФасИмя); 
+			Иначе
+				ФормаУпаковкиФас = "";
+			КонецЕсли;
 		Исключение	КонецПопытки;
 		попытка	
 			докОбъект.ФормаУпаковкиФас = ФормаУпаковкиФас;	
@@ -1238,9 +1329,15 @@
 		попытка	
 			докОбъект.ОбъемФас = Число(ОбъемФас);
 		Исключение	КонецПопытки;
-		попытка
-			докОбъект.ЕдиницаИзмеренияФас = ГМ.НайтиЕдИзмерения( ЕдФас );
+		попытка 
+			Если ПустоеЗначение(ЕдФас) = 0 Тогда
+				докОбъект.ЕдиницаИзмеренияФас = ГМ.НайтиЕдИзмерения( ЕдФас );
+			Иначе
+				докОбъект.ЕдиницаИзмеренияФас = "";
+			КонецЕсли;			
+			
 		Исключение	КонецПопытки;
+		
 		
 		докОбъект.ЕдиницаИзмерения = ГМ.НайтиЕдИзмерения( unitGuid );
 		
@@ -1251,7 +1348,26 @@
 		докОбъект.ДатаИзготовления1 = ДатаИзготовления1;
 		докОбъект.ДатаИзготовления2 = ДатаИзготовления2;
 		докОбъект.ДатаСрокГодности1 = ДатаСрокГодности1;
-		докОбъект.ДатаСрокГодности2 = ДатаСрокГодности2;
+		докОбъект.ДатаСрокГодности2 = ДатаСрокГодности2; 
+		
+		Если ЭтоТранспортныйВСД = 1 Тогда   //+ связанные документы, в трансп это ТТН
+			докОбъект.номеравто = номеравто;
+
+			докОбъект.термическоесостояние =  ГМ.ТермическиеУсловияПеревозки.найтизначение(термическоесостояние);
+			докОбъект.ттнСерия = СерияДокумента;
+			докОбъект.ттнномер = НомерДокумента;
+			докОбъект.ттндата = СтрокаВДату(ДатаДокумента);
+		
+			Если ПустоеЗначение(ПеревозчикГУИД)=0 Тогда
+	       	 докОбъект.Перевозчик_ХозСубъект 	= ГМ.НайтиХСпоGUID(ПеревозчикГУИД);
+				Если ПустоеЗначение(докОбъект.Перевозчик_ХозСубъект)=1 Тогда
+					Сообщить("- Остутствует в БД Перевозчик_ХС с ГУИД "+ПеревозчикГУИД);    
+				КонецЕсли;
+			КонецЕсли;
+		КонецЕсли;
+		докОбъект.Местность = ВСДместность;
+		докОбъект.особыеотметки = особыеотметки;
+		
 		
 		//докОбъект.Фирма = глПользователь.ОсновнаяФирма; //ЖД Фирма
 		//Вариант1   ЖД
@@ -2202,4 +2318,215 @@
 	Возврат appID;
 	
 КонецФункции  
+
+
+
+//******************* Проверка условий Регионализации
+Функция РегионализацияМаршрута_2_ЗапросXML(док)
+	//СокрЛП(док.Партия.Продукция.GUID)
+	//СокрЛП(док.Партия.ВидПродукции.GUID)
+	//СокрЛП(док.Партия.Продукция_Элемент.GUID) 
+	//? что подставлять - написано 3 уровень
+Запрос = "
+	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+	|xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
+	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+	|  <SOAP-ENV:Header/>
+	|  <SOAP-ENV:Body>
+	|    <apldef:submitApplicationRequest>
+	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+	|      <apl:application>
+	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+	|        <apl:issueDate>" + ГМ.ДатаXML(док.ДатаДок, "T00:00:00") + "</apl:issueDate>
+	|        <apl:data>
+	|          <merc:checkShipmentRegionalizationRequest>
+	|            <merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
+	|            <merc:initiator>
+	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|            </merc:initiator>
+	|";
+	Док.ВыбратьСтроки();
+	Пока Док.ПолучитьСтроку()=1 Цикл
+		Запрос = Запрос+"
+		|            <dt:cargoType>
+		|              <bs:guid>"+ СокрЛП(док.Партия.ВидПродукции.GUID) +"</bs:guid>       
+		|            </dt:cargoType>";	    
+	КонецЦикла;
+	//<vd:sqnId>1</vd:sqnId>
+	//Порядовый номер точки маршрута.
+    //Не обязателен для заполнения, будет сгенерирован автоматически в ответе	
+	
+	// <vd:enterprise>
+	//Сведения о предприятии, которое является точкой маршрута.
+    //Указывается в случае, если не указано значение location 	
+	
+	Запрос = Запрос+"
+	|            <vd:shipmentRoute>
+	|              <vd:routePoint>
+	|                <vd:sqnId>1</vd:sqnId>
+	|                <vd:enterprise>
+	|                  <bs:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</bs:guid>
+	|                </vd:enterprise>
+	|              </vd:routePoint>
+	|              <vd:routePoint>
+	|                <vd:sqnId>2</vd:sqnId>
+	|                <vd:enterprise>
+	|                  <bs:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</bs:guid>
+	|                </vd:enterprise>
+	|              </vd:routePoint>
+//	|              <vd:routePoint>
+//	|                <vd:sqnId>2</vd:sqnId>
+//	|                <vd:location>
+//	|                  <dt:address>
+//	|                    <dt:country>
+//	|                      <bs:guid>74a3cbb1-56fa-94f3-ab3f-e8db4940d96b</bs:guid>
+//	|                    </dt:country>
+//	|                    <dt:region>
+//	|                      <bs:guid>d00e1013-16bd-4c09-b3d5-3cb09fc54bd8</bs:guid>
+//	|                    </dt:region>
+//	|                    <dt:district>
+//	|                      <bs:guid>f4ab6f10-4f56-4ebd-a881-4b767dbf4473</bs:guid>
+//	|                    </dt:district>
+//	|                    <dt:locality>
+//	|                      <bs:guid>6f039940-2e3b-4857-a30e-c142865d859e</bs:guid>
+//	|                    </dt:locality>
+//	|                  </dt:address>
+//	|                </vd:location>
+//	|              </vd:routePoint>
+	|            </vd:shipmentRoute>
+	|          </merc:checkShipmentRegionalizationRequest>
+	|        </apl:data>
+	|      </apl:application>
+	|    </apldef:submitApplicationRequest>
+	|  </SOAP-ENV:Body>
+	|</SOAP-ENV:Envelope>	
+	|";
+	Возврат Запрос;	
+КонецФункции
+
+Функция ЗагрузитьXML_ПеревозкаРазрешена_2(имяФайла)
+	//<dt:decision> 	dt:RegionalizationDecision
+	//1 	Перемещение разрешено.
+	//2 	Перемещение разрешено при обязательном соблюдении условий.
+	//3 	Перемещение запрещено. 
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom.load(ИмяФайла);    
+
+
+//                  <vd:r13nRouteSection>
+//                     <vd:sqnId>1</vd:sqnId>
+//                     <vd:appliedR13nRule>
+//                        <dt:cargoType>
+//                           <bs:guid>55d3c8dc-432d-58c8-151f-cda720795add</bs:guid>
+//                        </dt:cargoType>
+//                        <dt:decision>1</dt:decision>
+//                     </vd:appliedR13nRule>
+//                  </vd:r13nRouteSection>
+	
+	
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+		|xmlns:default='http://www.w3.org/2001/XMLSchema'
+		|" );
+	
+		
+	Попытка		
+		applicationId = objDom.selectSingleNode("//*[local-name() = 'applicationId']").text ;
+	
+		RouteSectionList = objDom.selectNodes("//*[local-name() = 'r13nRouteSection']") ;
+	Исключение
+		Сообщить("Не удалось прочитать ответ о разрешении");
+		Возврат "";
+		//Пример на ветисе корявый...
+		applicationId = objDom.selectSingleNode("//*[local-name() = 'apl:application']").selectSingleNode("applicationId").text ;
+	
+		RouteSectionList = objDom.selectSingleNode("//*[local-name() = 'apl:application']").selectNodes("r13nRouteSection") ;
+	КонецПопытки;
+		
+		
+	Сообщить("Получено "+RouteSectionList.length+" записей","i");
+    Для i1 = 0 По RouteSectionList.length - 1 Цикл     // по продукции - какая разрешена, какая нет
+        RouteSection = RouteSectionList.item(i1);
+		decision = RouteSection.selectSingleNode("vd:appliedR13nRule").selectSingleNode("dt:decision").text;
+		Решение = Число(decision);
+		Если Решение = 1 Тогда
+			Сообщить("Перемещение разрешено.");    
+		ИначеЕсли Решение = 2 Тогда
+			Сообщить("Перемещение разрешено при обязательном соблюдении условий.");    
+		Иначе
+			Сообщить("Перемещение запрещено.");    
+		КонецЕсли;
+	КонецЦикла;
+
+	Возврат Решение;
+	
+КонецФункции
+
+
+
+Функция ПолучитьРезультат_Регион_2(applicationID, докСсылка ) Экспорт
+	
+	//стандартное поведение функции
+	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Пустая ссылка applicationID","!");
+		Возврат "Пустая ссылка applicationID";
+	КонецЕсли;
+	
+	ГМ.Пауза( );
+	
+	Сообщить("Отправляем запрос ["+докСсылка+"]" );
+	Результат = ГМ.Компонента.SendRequestResult( applicationID );
+
+	Если ПустоеЗначение(докСсылка)=0 Тогда 
+	//	ГМ.СохранитьСтатусЗапроса(докСсылка);
+	//	ЗагрузитьXML_ПеревозкаРазрешена_2( ГМ.Компонента.LogFilename, докСсылка);  
+	КонецЕсли;
+
+    МожноВезти = ЗагрузитьXML_ПеревозкаРазрешена_2( ГМ.Компонента.LogFilename ); 
+		
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+	
+	Возврат Результат;
+КонецФункции
+
+
+Функция ПроверитьВозможностьПеремещения(док) Экспорт
+
+	ГМ.Инициализация(док.Фирма);
+	
+	ЗапросXML = РегионализацияМаршрута_2_ЗапросXML(док);
+
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";	
+	
+	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+		
+	appID = Получить_ApplicationID(ГМ.Компонента.LogFilename);
+	
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
+
+	Если ПустоеЗначение(appID)=0 Тогда
+		
+		Результат = ПолучитьРезультат_Регион_2(appID,док); 
+		Сообщить("Результат = "+Результат);
+		Для А=1 По 10 Цикл
+			Если (Результат="IN_PROCESS") Тогда 
+				Результат = ПолучитьРезультат_Регион_2(appID,док); 
+			КонецЕсли;
+		КонецЦикла;
+	КонецЕсли;
+	
+	Возврат appID;
+КонецФункции
+// Конец Регионализация
+//***************************************************
 
