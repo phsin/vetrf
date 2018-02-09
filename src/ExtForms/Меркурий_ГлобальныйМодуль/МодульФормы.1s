@@ -3009,20 +3009,22 @@
 
 Функция Получить_ApplicationID(LogFilename) Экспорт
 
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(LogFilename);    
-    
-	//Если НайтиОшибки()>0 Тогда 
-	//	Возврат Результат;
-	//КонецЕсли;		
+	Попытка
+		
+	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+	    objDom.load(LogFilename);    
+	    		
+	    item = objDom.selectSingleNode("//application") ;        
+		
+		applicationId = item.selectSingleNode("applicationId").text;
+		st = item.selectSingleNode("status").text;
 	
-    item = objDom.selectSingleNode("//application") ;        
-	
-	applicationId = item.selectSingleNode("applicationId").text;
-	st = item.selectSingleNode("status").text;
-
-	Сообщить("Ответ: ["+applicationId+"] ["+st+"]");
-	
+		Сообщить("Ответ: ["+applicationId+"] ["+st+"]");
+	Исключение
+		//Сообщить("Не удалось получить applicationId");
+		applicationId="";
+	КонецПопытки;
+		
 	возврат applicationId;
 КонецФункции
 
