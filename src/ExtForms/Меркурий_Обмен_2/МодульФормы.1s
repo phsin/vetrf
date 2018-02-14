@@ -68,6 +68,20 @@
 	
 КонецПроцедуры
 
+Процедура Клик_условия()
+	текСтр = тзУсловияПеревозки.ТекущаяСтрока();
+	текКол = тзУсловияПеревозки.ТекущаяКолонка();
+	
+	Если текКол="Пометка" Тогда		
+		Пометка = тзУсловияПеревозки.ПолучитьЗначение(ТекСтр,"Пометка");
+		Если Пометка = 2 Тогда
+			тзУсловияПеревозки.Пометка=1;
+		Иначе
+			тзУсловияПеревозки.Пометка=2;
+		КонецЕсли;
+	КонецЕсли;
+	
+КонецПроцедуры
 
 //=========================== Площадки =================================
 
@@ -482,12 +496,94 @@
 	
 КонецПроцедуры
 
+Функция ЗагрузитьXML_ПеревозкаРазрешена_2(имяФайла) Экспорт 
+	//<dt:decision> 	dt:RegionalizationDecision
+	//1 	Перемещение разрешено.
+	//2 	Перемещение разрешено при обязательном соблюдении условий.
+	//3 	Перемещение запрещено. 
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom.load(ИмяФайла);    
 
+
+//                  <vd:r13nRouteSection>
+//                     <vd:sqnId>1</vd:sqnId>
+//                     <vd:appliedR13nRule>
+//                        <dt:cargoType>
+//                           <bs:guid>55d3c8dc-432d-58c8-151f-cda720795add</bs:guid>
+//                        </dt:cargoType>
+//                        <dt:decision>1</dt:decision>
+//                     </vd:appliedR13nRule>
+//                  </vd:r13nRouteSection>
+	
+	
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+		|xmlns:default='http://www.w3.org/2001/XMLSchema'
+		|" );
+	
+		
+	Попытка		
+		applicationId = objDom.selectSingleNode("//*[local-name() = 'applicationId']").text ;
+	
+		RouteSectionList = objDom.selectNodes("//*[local-name() = 'r13nRouteSection']") ;
+	Исключение
+		Сообщить("Не удалось прочитать ответ о разрешении");
+		Возврат "";
+		//Пример на ветисе корявый...
+		applicationId = objDom.selectSingleNode("//*[local-name() = 'apl:application']").selectSingleNode("applicationId").text ;
+	
+		RouteSectionList = objDom.selectSingleNode("//*[local-name() = 'apl:application']").selectNodes("r13nRouteSection") ;
+	КонецПопытки;
+		
+	УсловияПеревозки = СоздатьОбъект("ТаблицаЗначений");
+	УсловияПеревозки.НоваяКолонка("Пометка", , , , ,3,);
+	УсловияПеревозки.НоваяКолонка("Название", , , , ,5,);
+	УсловияПеревозки.НоваяКолонка("UUID", , , , ,3,);
+	УсловияПеревозки.НоваяКолонка("GUID", , , , ,3,);
+		
+	Сообщить("Получено "+RouteSectionList.length+" записей","i");
+    Для i1 = 0 По RouteSectionList.length - 1 Цикл     // по продукции - какая разрешена, какая нет
+        RouteSection = RouteSectionList.item(i1);
+		decision = RouteSection.selectSingleNode("vd:appliedR13nRule").selectSingleNode("dt:decision").text;
+		Решение = Число(decision);
+		Если Решение = 1 Тогда
+			Сообщить("Перемещение разрешено.");    
+		ИначеЕсли Решение = 2 Тогда
+			Сообщить("Перемещение разрешено при обязательном соблюдении условий.");    
+		Иначе
+			Сообщить("Перемещение запрещено.");    
+		КонецЕсли;
+				
+		requirements = RouteSection.selectSingleNode("vd:appliedR13nRule").selectNodes("dt:requirement");
+		Для i2 = 0 По requirements.length - 1 Цикл 
+			conditionGroup = requirements.item(i2).selectNodes("dt:conditionGroup");
+			Для i3=0 По conditionGroup.length - 1 Цикл 
+				condition = conditionGroup.item(i3).selectSingleNode("dt:condition");
+				УсловияПеревозки.НоваяСтрока();
+				УсловияПеревозки.Пометка = 2;
+				УсловияПеревозки.Название = condition.selectSingleNode("dt:text").text;
+				УсловияПеревозки.UUID = condition.selectSingleNode("bs:uuid").text;
+				УсловияПеревозки.GUID = condition.selectSingleNode("bs:guid").text;
+			КонецЦикла;
+		КонецЦикла;
+		
+	КонецЦикла;
+
+	Возврат УсловияПеревозки;
+	
+КонецФункции
 
 //Регионализация
 //тест с формы Чтение ответа
 Функция ПрочестьХМЛРегион()
-	ГМ2.ЗагрузитьXML_ПеревозкаРазрешена_2(ФайлОтвета);    
+	//ГМ2.ЗагрузитьXML_ПеревозкаРазрешена_2(ФайлОтвета);
+	тз = ЗагрузитьXML_ПеревозкаРазрешена_2(ФайлОтвета);    
+	тзУсловияПеревозки.Загрузить(тз);
+	тзУсловияПеревозки.ВыводитьПиктограммы("Пометка");
+	тзУсловияПеревозки.ТекущаяСтрока(1);
 КонецФункции
 
 
@@ -619,3 +715,9 @@ productType = 1; //мясо
 	Сообщить("Ошибка при загрузке 1cpp.dll");
 	Сообщить(ОписаниеОшибки());
 КонецПопытки;
+
+тзУсловияПеревозки.НоваяКолонка("Пометка");
+тзУсловияПеревозки.НоваяКолонка("Название");
+тзУсловияПеревозки.НоваяКолонка("UUID");
+тзУсловияПеревозки.НоваяКолонка("GUID");
+тзУсловияПеревозки.ВыводитьПиктограммы("Пометка");
