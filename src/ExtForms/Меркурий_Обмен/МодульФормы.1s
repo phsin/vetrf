@@ -425,44 +425,6 @@
 
 //=========================================================================
 
-Функция Продукция_Инфо_ЗапросXML( продукция )
-	Запрос = "
-	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' 
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions' 
-	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'>
-	|  <soapenv:Header/>
-	|  <soapenv:Body>
-	|    <ws:getProductItemByGuidRequest>
-	|      <base:guid>"+ СокрЛП(продукция.GUID) +"</base:guid>
-	|    </ws:getProductItemByGuidRequest>
-	|  </soapenv:Body>
-	|</soapenv:Envelope>
-	|";
-	
-	Возврат запрос;
-КонецФункции
-
-Процедура Получить_Инфо_Продукции( Продукция )
-	ЗапросXML = Продукция_Инфо_ЗапросXML( Продукция );
-
-	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/services/ProductService";
-    метод.Action = "GetProductItemByGuid";	
-	
-	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
-		
-	//appID = Получить_ApplicationID(ГМ.Компонента.LogFilename);
-	
-	//ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
-
-	Результат = ГМ.ПолучитьРезультат_Список_Продукции(Продукция);
-	
-	ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
-	
-	//Возврат appID;
-	
-КонецПроцедуры
-
 //================================================================
 Функция Список_Улиц_ЗапросXML( Город )
 

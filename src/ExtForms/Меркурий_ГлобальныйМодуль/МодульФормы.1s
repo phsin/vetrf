@@ -15,6 +15,8 @@
 Функция Этот(Конт) 	Возврат Конт; КонецФункции
 Функция Сам() 	Возврат Этот(Контекст); КонецФункции
 
+Функция ПолучитьРезультат_Список_Продукции(продукцияЭлемент="") Экспорт Далее
+
 Процедура Конструктор()
 	//Служебная таблица для перекрытия переопределенных функций
 	ТаблицаПереопределенныхФункций = СоздатьОбъект("ТаблицаЗначений");
@@ -736,6 +738,49 @@
 	Компонента.Init(Опции);	
 КонецПроцедуры
 
+// ================== ВСД отправка ===================
+
+Функция Получить_ApplicationID(LogFilename) Экспорт
+
+	Попытка
+		
+	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+	    objDom.load(LogFilename);    
+	    		
+	    item = objDom.selectSingleNode("//application") ;        
+		
+		applicationId = item.selectSingleNode("applicationId").text;
+		st = item.selectSingleNode("status").text;
+	
+		Сообщить("Ответ: ["+applicationId+"] ["+st+"]");
+	Исключение
+		//Сообщить("Не удалось получить applicationId");
+		applicationId="";
+	КонецПопытки;
+		
+	возврат applicationId;
+КонецФункции
+
+Функция  ОтправитьЗапросSoap( ЗапросXML, метод ) Экспорт
+	////{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+	//ОбъектВыполнения = ПроверитьПереопределениеФункции("ОтправитьЗапросXML");
+	//Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+	//	Возврат ОбъектВыполнения.ОтправитьЗапросXML(ЗапросXML, док);
+	//КонецЕсли;	
+	////}
+	
+	Сообщить("Отправляем запрос" ,"i");
+	результат = Компонента.SendRequestSoap(метод, ЗапросXML);
+
+	//Сообщить(Компонента.ApplicationId);
+	appID = Получить_ApplicationID(Компонента.LogFilename);
+			
+	//УдалитьXML( ГМ.Компонента.LogFilename);
+	
+	Возврат appID;
+	
+КонецФункции
+
 
 //======= ФУНКЦИИ ПО ПОИСКУ ИНФОРМАЦММ ==============
 
@@ -848,43 +893,152 @@
 	Возврат рез;
 КонецФункции
 
-Функция Найти_Продукция_Элемент(Название, Uuid="", ВСД_Продукция, ВСД_ВидПродукции) Экспорт
+//Функция Найти_Продукция_Элемент(Название, Uuid="", ВСД_Продукция, ВСД_ВидПродукции) Экспорт
+//
+//	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+//	ОбъектВыполнения = ПроверитьПереопределениеФункции("Найти_Продукция_Элемент");
+//	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+//		Возврат ОбъектВыполнения.Найти_Продукция_Элемент(Название, Uuid, ВСД_Продукция, ВСД_ВидПродукции);
+//	КонецЕсли;	
+//	//}
+//
+//	//стандартное поведение функции
+//
+//	Рез = "";
+//	Uuid = СокрЛП(Uuid);
+//	Спр = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
+//	если ПустоеЗначение(Uuid)=0 Тогда			
+//		
+//		Если Спр.НайтиПоРеквизиту("Uuid",Uuid,1)=0 Тогда 
+//			Сообщить("ВСД_Продукция_Элемент UUID ["+Uuid+"] не найдена. Создан новый элемент. ");
+//			//создать 
+//			Спр.Новый();
+//			//Спр.Код = ;
+//			Спр.Наименование = Название;
+//			Спр.Uuid = Uuid;
+//			Спр.Продукция = ВСД_Продукция;
+//			Спр.ВидПродукции = ВСД_ВидПродукции;
+//			Спр.Записать();
+//			
+//		КонецЕсли;
+//	Иначе
+//		Если Спр.НайтиПоНаименованию(Название,0,0)=0 Тогда 
+//			Сообщить("ВСД_Продукция_Элемент название ["+Название+"] не найдена. Создан новый элемент.");
+//			//создать 
+//			Спр.Новый();
+//			//Спр.Код = ;
+//			Спр.Наименование = Название;
+//			Спр.Продукция = ВСД_Продукция;
+//			Спр.ВидПродукции = ВСД_ВидПродукции;
+//			//Спр.Uuid = Uuid;
+//			Спр.Записать();
+//		КонецЕсли;
+//	КонецЕсли;
+//	рез = Спр.ТекущийЭлемент();
+//	
+//	Возврат рез;
+//КонецФункции
+
+
+Функция Продукция_Инфо_ЗапросXML( продукция )
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' 
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions' 
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getProductItemByGuidRequest>
+	|      <base:guid>"+ СокрЛП(продукция.GUID) +"</base:guid>
+	|    </ws:getProductItemByGuidRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	
+	Возврат запрос;
+КонецФункции
+
+Процедура Получить_Инфо_Продукции( Продукция )
+	ЗапросXML = Продукция_Инфо_ЗапросXML( Продукция );
+
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/services/ProductService";
+    метод.Action = "GetProductItemByGuid";	
+	
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+		
+	//appID = Получить_ApplicationID(ГМ.Компонента.LogFilename);
+	
+	//ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
+
+	Результат = ПолучитьРезультат_Список_Продукции(Продукция);
+	
+	УдалитьXML( Компонента.LogFilename);
+	
+	//Возврат appID;
+	
+КонецПроцедуры
+
+Функция Найти_Продукция_Элемент2(productItem, ВСД_Продукция, ВСД_ВидПродукции) Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
-	ОбъектВыполнения = ПроверитьПереопределениеФункции("Найти_Продукция_Элемент");
+	ОбъектВыполнения = ПроверитьПереопределениеФункции("Найти_Продукция_Элемент2");
 	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
-		Возврат ОбъектВыполнения.Найти_Продукция_Элемент(Название, Uuid, ВСД_Продукция, ВСД_ВидПродукции);
+		Возврат ОбъектВыполнения.Найти_Продукция_Элемент2(productItem, ВСД_Продукция, ВСД_ВидПродукции);
 	КонецЕсли;	
 	//}
 
 	//стандартное поведение функции
+	Попытка
+		productItemName = productItem.selectSingleNode("*[local-name()='name']").text;
+	Исключение
+		//Сообщить("Не удалось получить элемент [productItem]","!");
+		productItemName = "";
+	КонецПопытки;
 
-	Рез = "";
-	Uuid = СокрЛП(Uuid);
-	Спр = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
-	если ПустоеЗначение(Uuid)=0 Тогда			
+	Попытка
+		productItemGuid = productItem.selectSingleNode("bs:guid").text;
+	Исключение			
+		productItemGuid="";
+	КонецПопытки;
+
+	Попытка
+		productItemUuid = productItem.selectSingleNode("bs:uuid").text;
+	Исключение			
+		productItemUuid="";
+	КонецПопытки;
+	
 		
-		Если Спр.НайтиПоРеквизиту("Uuid",Uuid,1)=0 Тогда 
-			Сообщить("ВСД_Продукция_Элемент UUID ["+Uuid+"] не найдена. Создан новый элемент. ");
+	Рез = "";
+	//Uuid = СокрЛП(Uuid);
+	Спр = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
+	если ПустоеЗначение(productItemGuid)=0 Тогда			
+		
+		Если Спр.НайтиПоРеквизиту("Guid",productItemGuid,1)=0 Тогда 
+			Сообщить("ВСД_Продукция_Элемент GUID ["+productItemGuid+"] не найдена. Создан новый элемент. ");
 			//создать 
 			Спр.Новый();
 			//Спр.Код = ;
-			Спр.Наименование = Название;
-			Спр.Uuid = Uuid;
+			Спр.Наименование = productItemGuid;
+			Спр.GUID = productItemGuid;
+			Спр.Uuid = productItemUuid;
 			Спр.Продукция = ВСД_Продукция;
 			Спр.ВидПродукции = ВСД_ВидПродукции;
+			Спр.ТермическиеУсловияПеревозки=1;
 			Спр.Записать();
 			
+			//получим наименование и все остальные реквизиты
+			Получить_Инфо_Продукции(Спр.ТекущийЭлемент())
 		КонецЕсли;
 	Иначе
-		Если Спр.НайтиПоНаименованию(Название,0,0)=0 Тогда 
-			Сообщить("ВСД_Продукция_Элемент название ["+Название+"] не найдена. Создан новый элемент.");
+		Если Спр.НайтиПоНаименованию(productItemName,0,0)=0 Тогда 
+			Сообщить("ВСД_Продукция_Элемент название ["+productItemName+"] не найдена. Создан новый элемент.");
 			//создать 
 			Спр.Новый();
 			//Спр.Код = ;
-			Спр.Наименование = Название;
+			Спр.Наименование = productItemName;
 			Спр.Продукция = ВСД_Продукция;
 			Спр.ВидПродукции = ВСД_ВидПродукции;
+			Спр.ТермическиеУсловияПеревозки=1;
 			//Спр.Uuid = Uuid;
 			Спр.Записать();
 		КонецЕсли;
@@ -1415,19 +1569,96 @@
 	address = enterprise.selectSingleNode("address").selectSingleNode("addressView").text;
 	
 	Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
-	Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=0 Тогда 
-		Спр.Новый();
-		Спр.УстановитьНовыйКод("00");
+	//Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=0 Тогда 
+	//	Спр.Новый();
+	//	Спр.УстановитьНовыйКод("00");
+	//	
+	//КонецЕсли;
+	//
+	//Спр.Наименование = name;
+	//Спр.Адрес = address;
+	//Спр.GUID = guid;
+	//Спр.UUID = uuid;	
+	//
+	ВыбОбъект="";	
+	// не работает!!!
+	//Если Спр.ВыбратьЭлементыПоРеквизиту("GUID",Guid,0,0)=0 Тогда 
+	//	Если (ХС<>"") Тогда 
+	//		Если  (Сокрлп(спр.GuidХозСубъекта) = Сокрлп(ХС.GUID)) или (Сокрлп(спр.GuidХозСубъекта) = "") Тогда 
+	//			ВыбОбъект = Спр;
+	//		КонецЕсли;
+	//	Иначе
+	//		ВыбОбъект = Спр;
+	//	КонецЕсли;		
+	//КонецЕсли;
+	Если ЭтоSQL=1 Тогда 	
+		RS = СоздатьОбъект("ODBCRecordset");
+		RS.УстБД1С();     
+
+		ТекстЗапроса = "select 
+		|	СпрПл.ID [id $Справочник.ВСД_Площадка],
+		|	СпрПл.descr,
+		|	$СпрПл.GUID,
+		|	$СпрПл.Контрагент
+		|from $Справочник.ВСД_Площадка as СпрПл 
+		|where 
+		|	$СпрПл.Guid=:GUID 
+		|	%Отбор_по_ХС%
+		|";
+		RS.УстановитьТекстовыйПараметр("GUID", GUID);
 		
+		Если ПустоеЗначение(ХС)=0 Тогда 
+			ТекстЗапроса = СтрЗаменить(ТекстЗапроса, "%Отбор_по_ХС%", "AND RTRIM($СпрПл.GuidХозСубъекта)=:GuidХозСубъекта");
+			RS.УстановитьТекстовыйПараметр("GuidХозСубъекта", ХС.GUID);  
+		Иначе
+			ТекстЗапроса = СтрЗаменить(ТекстЗапроса, "%Отбор_по_ХС%", "");
+		КонецЕсли;
+		//RS.Отладка(1);
+		тз = RS.ВыполнитьИнструкцию(ТекстЗапроса);			
+	  	
+	Иначе	
+		Запрос = базаДанных.НовыйЗапрос();
+	
+		ТекстЗапроса = "select 
+		|	СпрПл.ID [id $Справочник.ВСД_Площадка],
+		|	СпрПл.descr,
+		|	СпрПл.GUID,
+		|	СпрПл.Контрагент
+		|from [Справочник.ВСД_Площадка] as СпрПл 
+		|where 
+		|	СпрПл.GuidХозСубъекта=:GUID 
+		|	OR RTRIM(СпрПл.GuidХозСубъекта)='' 
+		|";
+		
+		Запрос.Подставлять("GUID", GUID);
+	
+		//тз.Отладка();
+		ТЗ = Запрос.ВыполнитьЗапрос(ТекстЗапроса);
+		//ТЗ.ВыбратьСтроку();
 	КонецЕсли;
 	
+	Тз.ВыбратьСтроки();
+	Пока ТЗ.ПолучитьСТроку()=1 Цикл
+		Спр.НайтиЭлемент(тз.id);
+		Спр.Наименование = name;
+		Спр.Адрес = address;
+		Спр.GUID = guid;
+		Спр.UUID = uuid;	
+		Спр.Записать();
+		ВыбОбъект = Спр;
+	КонецЦикла;
+	Если ВыбОбъект="" Тогда 
+		Спр.Новый();
+		Спр.УстановитьНовыйКод("00");		
+	КонецЕсли;
+
 	Спр.Наименование = name;
 	Спр.Адрес = address;
 	Спр.GUID = guid;
 	Спр.UUID = uuid;	
 	
 	Если ПустоеЗначение(ХС)=1 Тогда
-		Сообщить("Внимание: создана площадка ["+GUID+"] без указания ХозСубъекта ","!!");
+		Сообщить("создана площадка ["+GUID+"] без указания ХозСубъекта ","!!");
 		//Возврат;
 	Иначе 
 		Спр.GUIDХозСубъекта = ХС.GUID;
@@ -2319,6 +2550,28 @@
 	возврат Дата(год, мес,день);
 КонецФункции
 
+Функция Дата_из_XML(dateXML, Дата1, Дата2, ДатаСтрока ) Экспорт
+	попытка			
+		год = ""+dateXML.selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
+		мес = ""+dateXML.selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
+		день = ""+dateXML.selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
+		Дата1 = Дата(год, мес, день);
+	Исключение
+		Попытка
+			ДатаСтрока = ""+dateXML.text;
+		Исключение				
+		КонецПопытки;
+	КонецПопытки;				
+	попытка
+		год = ""+dateXML.selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
+		мес = ""+dateXML.selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
+		день = ""+dateXML.selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
+		Дата2 = Дата(год, мес, день);
+	Исключение			
+	КонецПопытки;
+
+КонецФункции
+
 Функция СохранитьСтатусЗапроса(док) Экспорт 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("СохранитьСтатусЗапроса");
@@ -2440,18 +2693,21 @@
 		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
 
-		Попытка
-			productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
-		Исключение
-			Сообщить("Не удалось получить элемент [productItem]","!");
-			productItem = "";
-		КонецПопытки;
+		//Попытка
+		//	productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
+		//Исключение
+		//	Сообщить("Не удалось получить элемент [productItem]","!");
+		//	productItem = "";
+		//КонецПопытки;
+		//
+		//Попытка
+		//	productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
+		//Исключение
+		//	productItemUuid="";
+		//КонецПопытки;
 		
-		Попытка
-			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
-		Исключение
-			productItemUuid="";
-		КонецПопытки;
+		productItem = batch.selectSingleNode("vetd:productItem");
+		
 		volume 		= batch.selectSingleNode("vetd:volume").text;
 		unitGuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
 		
@@ -2468,50 +2724,56 @@
 			//Сообщить("Не удалось получить элемент [packingForm] [name]","!");
 		КонецПопытки;
 
-		packingAmount = batch.selectSingleNode("vetd:packingAmount").text;
-
-		ДатаИзготовления1="";
-		ДатаИзготовления="";
-		попытка			
-			год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-			ДатаИзготовления1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ДатаИзготовления = ""+batch.selectSingleNode("vetd:dateOfProduction").text;
-			Исключение				
-			КонецПопытки;
-		КонецПопытки;				
-		ДатаИзготовления2="";
-		попытка
-			год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-			ДатаИзготовления2 = Дата(год, мес, день);
-		Исключение			
-		КонецПопытки;
+		packingAmount = batch.selectSingleNode("vetd:packingAmount").text;		
+		
+		ДатаИзготовления1=""; ДатаИзготовления2="";	ДатаИзготовления="";
+		dateOfProduction = batch.selectSingleNode("vetd:dateOfProduction");		
+		Дата_из_XML(dateOfProduction, ДатаИзготовления1, ДатаИзготовления2, ДатаИзготовления);
+		
+		ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодности="";
+		expiryDate = batch.selectSingleNode("vetd:expiryDate");
+		Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);
+		
+		//попытка			
+		//	год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
+		//	мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
+		//	день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
+		//	ДатаИзготовления1 = Дата(год, мес, день);
+		//Исключение
+		//	Попытка
+		//		ДатаИзготовления = ""+batch.selectSingleNode("vetd:dateOfProduction").text;
+		//	Исключение				
+		//	КонецПопытки;
+		//КонецПопытки;				
+		//ДатаИзготовления2="";
+		//попытка
+		//	год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
+		//	мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
+		//	день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
+		//	ДатаИзготовления2 = Дата(год, мес, день);
+		//Исключение			
+		//КонецПопытки;
 		
 		//ДатаСрокГодности
-		попытка			
-			год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-			ДатаСрокГодности1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ДатаСрокГодности = ""+batch.selectSingleNode("vetd:expiryDate").text;
-			Исключение				
-			КонецПопытки;
-		КонецПопытки;
-		ДатаСрокГодности2="";
-		попытка
-			год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-			ДатаСрокГодности2 = Дата(год, мес, день);
-		Исключение			
-		КонецПопытки;
+		//попытка			
+		//	год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
+		//	мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
+		//	день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
+		//	ДатаСрокГодности1 = Дата(год, мес, день);
+		//Исключение
+		//	Попытка
+		//		ДатаСрокГодности = ""+batch.selectSingleNode("vetd:expiryDate").text;
+		//	Исключение				
+		//	КонецПопытки;
+		//КонецПопытки;
+		//ДатаСрокГодности2="";
+		//попытка
+		//	год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
+		//	мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
+		//	день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
+		//	ДатаСрокГодности2 = Дата(год, мес, день);
+		//Исключение			
+		//КонецПопытки;
 
 		
 		Попытка			
@@ -2576,7 +2838,8 @@
 		докОбъект.Продукция 	= НайтиПродукцию(product);
 		докОбъект.ВидПродукции 	= НайтиВидПродукции(subProduct);
 		
-		докОбъект.Продукция_Элемент = Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		//докОбъект.Продукция_Элемент = Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		докОбъект.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, докОбъект.Продукция, докОбъект.ВидПродукции);
 		
 		докОбъект.Количество 	= Число(volume);
 		докОбъект.КоличествоМест = Число(packingAmount);
@@ -2588,7 +2851,7 @@
 		докОбъект.Статус = st;	
 		докОбъект.ФормаВСД = form;
 		докОбъект.типВСД = type;
-		докОбъект.НаименованиеПродукции = productItem;
+		докОбъект.НаименованиеПродукции = докОбъект.Продукция_Элемент.Наименование;
 		докОбъект.ДатаИзготовления1 = ДатаИзготовления1;
 		докОбъект.ДатаИзготовления2 = ДатаИзготовления2;
 		докОбъект.ДатаСрокГодности1 = ДатаСрокГодности1;
@@ -2681,18 +2944,20 @@
 		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
 
-		Попытка
-			productItemName = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
-		Исключение
-			//Сообщить("Не удалось получить элемент [productItem]","!");
-			productItemName = "";
-		КонецПопытки;
+		//Попытка
+		//	productItemName = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
+		//Исключение
+		//	//Сообщить("Не удалось получить элемент [productItem]","!");
+		//	productItemName = "";
+		//КонецПопытки;
 		
-		Попытка
-			productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
-		Исключение			
-			productItemUuid="";
-		КонецПопытки;
+		//Попытка
+		//	productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
+		//Исключение			
+		//	productItemUuid="";
+		//КонецПопытки;
+		//
+		productItem = batch.selectSingleNode("vetd:productItem");
 		
 		volume 		= batch.selectSingleNode("ns2:volume").text;
 		unit		= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:guid").text;
@@ -2796,15 +3061,11 @@
 		Партия.Получатель_ХозСубъект = ВладелецХС;
 		Партия.Получатель_Площадка = СписокКонстант.Получить("Отправитель_Площадка"); 
 		Партия.Производитель_Площадка = НайтиПлощадку(producer);
-		//Попытка
-		//	Партия.Производитель_ХозСубъект = Партия.Производитель_Площадка.Контрагент;
-		//Исключение
-		//	Сообщить(ОписаниеОшибки());
-		//КонецПопытки;
 		Партия.Продукция 	= НайтиПродукцию(product);
 		Партия.ВидПродукции = НайтиВидПродукции(subProduct);
 		
-		Партия.Продукция_Элемент = Найти_Продукция_Элемент(productItemName, productItemUuid, Партия.Продукция, Партия.ВидПродукции);
+		//Партия.Продукция_Элемент = Найти_Продукция_Элемент(productItemName, productItemUuid, Партия.Продукция, Партия.ВидПродукции);
+		Партия.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, Партия.Продукция, Партия.ВидПродукции);
 		
 		Партия.Количество 	= Число(volume);
 		Партия.КоличествоМест = Число(packingAmount);
@@ -2823,17 +3084,12 @@
 		Партия.UUID = uuid;
 		//Партия.ДатаИзменения = updateDate;
 		Партия.НомерЗаписи = entryNumber;
-		Партия.НаименованиеПродукции = productItemName;
-		Если ПустоеЗначение(productItemName)=0 Тогда 
-			Партия.Наименование = productItemName;
-		Иначе
-			Партия.Наименование = Партия.Продукция_Элемент.Наименование;
-		КонецЕсли;
+		Партия.Наименование = Партия.Продукция_Элемент.Наименование;
+		
 		Партия.Фирма = глПользователь.ОсновнаяФирма;
 		Если ПустоеЗначение(Партия.Автор)=1 Тогда
 			Партия.Автор = глПользователь;
-		КонецЕсли;
-		
+		КонецЕсли;		
 		Попытка
 			Партия.Филиал = глПользователь.Филиал;
 		Исключение
@@ -2850,8 +3106,7 @@
 				Сообщить("Количество партии guid ["+guid+"] uuid ["+uuid+"] = 0. Партия пропущена. ");
 				Возврат "";
 			КонецЕсли;
-		КонецЕсли;
-		
+		КонецЕсли;		
 		
 		Партия.Записать();
 
@@ -3002,47 +3257,6 @@
 			КонецЕсли;
 		КонецЦикла;
 	КонецЕсли;
-	
-	Возврат appID;
-	
-КонецФункции
-
-Функция Получить_ApplicationID(LogFilename) Экспорт
-
-	Попытка
-		
-	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-	    objDom.load(LogFilename);    
-	    		
-	    item = objDom.selectSingleNode("//application") ;        
-		
-		applicationId = item.selectSingleNode("applicationId").text;
-		st = item.selectSingleNode("status").text;
-	
-		Сообщить("Ответ: ["+applicationId+"] ["+st+"]");
-	Исключение
-		//Сообщить("Не удалось получить applicationId");
-		applicationId="";
-	КонецПопытки;
-		
-	возврат applicationId;
-КонецФункции
-
-Функция  ОтправитьЗапросSoap( ЗапросXML, метод ) Экспорт
-	////{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
-	//ОбъектВыполнения = ПроверитьПереопределениеФункции("ОтправитьЗапросXML");
-	//Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
-	//	Возврат ОбъектВыполнения.ОтправитьЗапросXML(ЗапросXML, док);
-	//КонецЕсли;	
-	////}
-	
-	Сообщить("Отправляем запрос" ,"i");
-	результат = Компонента.SendRequestSoap(метод, ЗапросXML);
-
-	//Сообщить(Компонента.ApplicationId);
-	appID = Получить_ApplicationID(Компонента.LogFilename);
-			
-	//УдалитьXML( ГМ.Компонента.LogFilename);
 	
 	Возврат appID;
 	
@@ -5612,6 +5826,7 @@
 		СпрОбъект.ВидПродукции = ВидПродукции; 
 		СпрОбъект.UUID = uuid;
 		СпрОбъект.GUID = guid;
+		СпрОбъект.ТермическиеУсловияПеревозки=1;
 		
 		СпрОбъект.Записать();
 
