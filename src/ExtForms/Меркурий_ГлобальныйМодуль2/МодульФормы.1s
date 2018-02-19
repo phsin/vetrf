@@ -1670,7 +1670,7 @@
 	|                <vd:laboratoryResearch>
 	|                  <vd:actualDateTime>"+ ГМ.ДатаXML(док.ДатаОтбораПроб, "T00:00:00") +"</vd:actualDateTime>
 	|                  <vd:operator>
-	|                    <dt:name>" + док.НаименованиеЛаборатории + "</dt:name>
+	|                    <dt:name>" + СокрЛП(док.НаименованиеЛаборатории) + "</dt:name>
 	|                  </vd:operator>
 	|                  <vd:referencedDocument>
 	|                    <vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
