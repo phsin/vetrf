@@ -360,95 +360,52 @@
 		subProduct 	= batch.selectSingleNode("vd:subProduct").selectSingleNode("bs:guid").text;
 
 		Попытка
-			productItemName = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
+			productItem = batch.selectSingleNode("*[local-name()='productItem'] ");
 		Исключение
-			//Сообщить("Не удалось получить элемент [productItem]","!");
-			productItemName = "";
-		КонецПопытки;
-		
-		Попытка
-			productItemUuid = batch.selectSingleNode("vd:productItem").selectSingleNode("bs:uuid").text;
-		Исключение			
-			productItemUuid="";
+			productItem = "";
 		КонецПопытки;
 		
 		//Trade Identification Number (GTIN) - идентификационный номер продукции производителя.
-		Попытка
-			GTIN = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:globalID").text;
-		Исключение
-			GTIN="";
-		КонецПопытки;
-        //Артикул (код) продукции в соответствии с внутренним кодификатором производителя.
-		Попытка
-			Артикул = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:code").text;
-		Исключение
-			Артикул="";
-		КонецПопытки;
-        //Наименование продукции. 
-		Попытка
-			НаимПрции = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:name").text;
-		Исключение
-			НаимПрции="";
-		КонецПопытки;
+		//Попытка
+		//	GTIN = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:globalID").text;
+		//Исключение
+		//	GTIN="";
+		//КонецПопытки;
+        ////Артикул (код) продукции в соответствии с внутренним кодификатором производителя.
+		//Попытка
+		//	Артикул = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:code").text;
+		//Исключение
+		//	Артикул="";
+		//КонецПопытки;
+        ////Наименование продукции. 
+		//Попытка
+		//	НаимПрции = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:name").text;
+		//Исключение
+		//	НаимПрции="";
+		//КонецПопытки;
 
-		//<dt:packaging> Фасовка. - В чем отличие от упаковки? packageList 
+		//<dt:packaging> Фасовка. 
 		ФасУИД =""; ФасГУИД ="";ФасУН ="";ФасИмя ="";КолФас ="";ОбъемФас ="";ЕдФас ="";
 		Попытка
 			packaging = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:packaging");
-			// 	Тип упаковки. 
-			Попытка
-				ТипФасовки = packaging.selectSingleNode("dt:packagingType").text; 
-			Исключение
-				ТипФасовки ="";
-			КонецПопытки;
-			// 	Идентификатор версии типа упаковки.
-			Попытка
-				ФасУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:uuid").text;
-			Исключение
-				ФасУИД ="";
-			КонецПопытки;
-			//  	Глобальный идентификатор типа упаковки.
-			Попытка
-				ФасГУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid").text;   // ВСД_ФормыУпаковки
-			Исключение
-				ФасГУИД ="";
-			КонецПопытки;
-			Попытка
-				//  	Уникальный идентификатор упаковки. 
-				ФасУН =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:globalID").text;
-			Исключение
-				ФасУН ="";
-			КонецПопытки;
+			//// 	Тип упаковки. 
+			//Попытка
+			//	ТипФасовки = packaging.selectSingleNode("dt:packagingType").text; 
+			//Исключение
+			//	ТипФасовки ="";
+			//КонецПопытки;
 			
-			// Наименование упаковки.
-			Попытка
-				ФасИмя =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name").text;
-			Исключение
-				ФасИмя ="";
-			КонецПопытки;
-				
-			//  	Количество единиц упаковки.
-			Попытка
-				КолФас = packaging.selectSingleNode("dt:quantity").text;
-			Исключение
-				КолФас ="";
-			КонецПопытки;
-			// Объём единицы упаковки товара.
-			Попытка
-				ОбъемФас = packaging.selectSingleNode("dt:volume").text; 
-			Исключение
-				ОбъемФас ="";
-			КонецПопытки;
-			// 	Глобальный идентификатор единицы измерения. , есть uuid и имя - <dt:name> 
-			Попытка
-				ЕдФас = packaging.selectSingleNode("dt:unit").selectSingleNode("bs:guid").text;
-			Исключение
-				ЕдФас ="";
-			КонецПопытки;			
+			Попытка ФасУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:uuid").text; Исключение КонецПопытки;				// 	Идентификатор версии типа упаковки.		
+			Попытка ФасГУИД =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid").text; Исключение КонецПопытки; 			//  	Глобальный идентификатор типа упаковки. ВСД_ФормыУпаковки			
+			Попытка ФасУН =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:globalID").text; Исключение КонецПопытки;			//  	Уникальный идентификатор упаковки. 			
+			Попытка ФасИмя =  packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name").text; Исключение КонецПопытки;				// Наименование упаковки.			
+			Попытка КолФас = packaging.selectSingleNode("dt:quantity").text; Исключение КонецПопытки;									//  	Количество единиц упаковки.		
+			Попытка ОбъемФас = packaging.selectSingleNode("dt:volume").text; Исключение КонецПопытки;									// Объём единицы упаковки товара.			
+			Попытка ЕдФас = packaging.selectSingleNode("dt:unit").selectSingleNode("bs:guid").text; Исключение КонецПопытки;			// 	Глобальный идентификатор единицы измерения. , есть uuid и имя - <dt:name> 
 		Исключение
 			packaging = "";
 		КонецПопытки;
-		// Объем продукции
+		//// Объем продукции
 
 		volume 		= batch.selectSingleNode("vd:volume").text;
 		unit		= batch.selectSingleNode("vd:unit").selectSingleNode("bs:guid").text;
@@ -465,50 +422,14 @@
 		КонецПопытки;
 		//еще есть Наименование единицы измерения. 	<dt:name>кг.</dt:name> 
 
-
-			
-		ДатаИзготовления1="";
-		ДатаИзготовления="";
-		попытка			
-			год = ""+batch.selectSingleNode("vd:dateOfProduction").selectSingleNode("vd:firstDate").selectSingleNode("dt:year").text;
-			мес = ""+batch.selectSingleNode("vd:dateOfProduction").selectSingleNode("vd:firstDate").selectSingleNode("dt:month").text;
-			день = ""+batch.selectSingleNode("vd:dateOfProduction").selectSingleNode("vd:firstDate").selectSingleNode("dt:day").text;
-			ДатаИзготовления1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ДатаИзготовления = ""+batch.selectSingleNode("vd:dateOfProduction").text;
-			Исключение				
-			КонецПопытки;
-		КонецПопытки;				
-		ДатаИзготовления2="";
-		попытка
-			год = ""+batch.selectSingleNode("vd:dateOfProduction").selectSingleNode("vd:secondDate").selectSingleNode("dt:year").text;
-			мес = ""+batch.selectSingleNode("vd:dateOfProduction").selectSingleNode("vd:secondDate").selectSingleNode("dt:month").text;
-			день = ""+batch.selectSingleNode("vd:dateOfProduction").selectSingleNode("vd:secondDate").selectSingleNode("dt:day").text;
-			ДатаИзготовления2 = Дата(год, мес, день);
-		Исключение			
-		КонецПопытки;
+		ДатаИзготовления1=""; ДатаИзготовления2="";	ДатаИзготовления="";
+		dateOfProduction = batch.selectSingleNode("vd:dateOfProduction");		
+		ГМ.Дата_из_XML(dateOfProduction, ДатаИзготовления1, ДатаИзготовления2, ДатаИзготовления);
 		
-		//ДатаСрокГодности
-		попытка			
-			год = ""+batch.selectSingleNode("vd:expiryDate").selectSingleNode("vd:firstDate").selectSingleNode("dt:year").text;
-			мес = ""+batch.selectSingleNode("vd:expiryDate").selectSingleNode("vd:firstDate").selectSingleNode("dt:month").text;
-			день = ""+batch.selectSingleNode("vd:expiryDate").selectSingleNode("vd:firstDate").selectSingleNode("dt:day").text;
-			ДатаСрокГодности1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ДатаСрокГодности = ""+batch.selectSingleNode("vd:expiryDate").text;
-			Исключение				
-			КонецПопытки;
-		КонецПопытки;
-		ДатаСрокГодности2="";
-		попытка
-			год = ""+batch.selectSingleNode("vd:expiryDate").selectSingleNode("vd:secondDate").selectSingleNode("dt:year").text;
-			мес = ""+batch.selectSingleNode("vd:expiryDate").selectSingleNode("vd:secondDate").selectSingleNode("dt:month").text;
-			день = ""+batch.selectSingleNode("vd:expiryDate").selectSingleNode("vd:secondDate").selectSingleNode("dt:day").text;
-			ДатаСрокГодности2 = Дата(год, мес, день);
-		Исключение			
-		КонецПопытки;
+		ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодности="";
+		expiryDate = batch.selectSingleNode("vd:expiryDate");
+		ГМ.Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);
+		
      // <vd:batchID> 	bs:String255 	[1..*] 	Уникальный идентификатор производственной партии продукции. 	<vd:batchID>ПП64219</vd:batchID> 
 
 	 	Попытка
@@ -536,11 +457,11 @@
 		Исключение
 			producer = "";
 		КонецПопытки;
-		Попытка			
-			producerName = batch.selectSingleNode("vd:origin").selectSingleNode("vd:producer").selectSingleNode("dt:enterprise").selectSingleNode("dt:name").text;
-		Исключение
-			producerName = "";
-		КонецПопытки;
+		//Попытка			
+		//	producerName = batch.selectSingleNode("vd:origin").selectSingleNode("vd:producer").selectSingleNode("dt:enterprise").selectSingleNode("dt:name").text;
+		//Исключение
+		//	producerName = "";
+		//КонецПопытки;
 		
 		
 		Попытка
@@ -643,39 +564,23 @@
 		
 		Сообщить(" ВСД_Партия от "+createDate+" # "+entryNumber);
 		
-		//Партия.ДатаДок = СтрокаВДату(createDate);
-		Партия.ДатаИзменения = СтрокаВДату( updateDate );
-						
+		Партия.ДатаИзменения = СтрокаВДату( updateDate );						
 		Партия.Получатель_ХозСубъект = ВладелецХС;
 		Партия.Получатель_Площадка = ГМ.СписокКонстант.Получить("Отправитель_Площадка"); 
 		Партия.Производитель_Площадка = ГМ.НайтиПлощадку(producer);
-		//Попытка
-		//	Партия.Производитель_ХозСубъект = Партия.Производитель_Площадка.Контрагент;
-		//Исключение
-		//	Сообщить(ОписаниеОшибки());
-		//КонецПопытки;
 		Партия.Продукция 	= ГМ.НайтиПродукцию(product);
-		Партия.ВидПродукции = ГМ.НайтиВидПродукции(subProduct);
-		
-		Партия.Продукция_Элемент = ГМ.Найти_Продукция_Элемент(productItemName, productItemUuid, Партия.Продукция, Партия.ВидПродукции);
-		
+		Партия.ВидПродукции = ГМ.НайтиВидПродукции(subProduct);		
+		Партия.Продукция_Элемент = ГМ.Найти_Продукция_Элемент2(productItem, Партия.Продукция, Партия.ВидПродукции);		
 		Партия.Количество 	= Число(volume);
 		// ЖД - Фасовка в партии - Нужно ли? 
 		// 23/01/18 - Фасовка в ВСД_ПродукцияЭлемент - в Партию не загружаем    Нужно определиться
 		
-		попытка
-			Партия.КоличествоМест = Число(КолФас);
-		Исключение	КонецПопытки;
-        попытка
-			ФормаУпаковкиФас 			= ГМ.НайтиФормуУпаковки( ФасГУИД, ФасИмя);
-			Партия.ФормаУпаковки = ФормаУпаковкиФас;	
-		Исключение	КонецПопытки;
-		попытка	
-			Партия.ОбъемФас = Число(ОбъемФас);                         //ЖД реквизит отсутствует
-		Исключение	КонецПопытки;
-		попытка	
-			Партия.ЕдиницаИзмеренияФас = ГМ.НайтиЕдИзмерения( ЕдФас );    //ЖД реквизит отсутствует
-		Исключение	КонецПопытки;
+		попытка Партия.КоличествоМест = Число(КолФас); Исключение КонецПопытки;
+        попытка ФормаУпаковкиФас 		= ГМ.НайтиФормуУпаковки( ФасГУИД, ФасИмя); Исключение КонецПопытки;
+		попытка Партия.ФормаУпаковки 	= ФормаУпаковкиФас;	Исключение КонецПопытки;
+		
+		попытка	Партия.ОбъемФас = Число(ОбъемФас);	Исключение	КонецПопытки;
+		попытка	Партия.ЕдиницаИзмеренияФас = ГМ.НайтиЕдИзмерения( ЕдФас ); Исключение	КонецПопытки;
 	
 		попытка	
 			Если ТЗУровни.КоличествоСтрок()>0 Тогда
@@ -697,12 +602,9 @@
 		Партия.GUID = guid;
 		Партия.UUID = uuid;
 		Партия.НомерЗаписи = entryNumber;
-		Партия.НаименованиеПродукции = productItemName;
-		Если ПустоеЗначение(productItemName)=0 Тогда 
-			Партия.Наименование = productItemName;
-		Иначе
-			Партия.Наименование = Партия.Продукция_Элемент.Наименование;
-		КонецЕсли;
+		Партия.Наименование = Партия.Продукция_Элемент.Наименование;
+		Партия.НаименованиеПродукции = Партия.Продукция_Элемент.Наименование;
+		
 		//Партия.Фирма = глПользователь.ОсновнаяФирма; // ЖД - продумать по фирмам
 		//докОбъект.Фирма = глПользователь.ОсновнаяФирма; 
 		//Вариант1  
@@ -722,10 +624,7 @@
 			Партия.Автор = глПользователь;
 		КонецЕсли;
 		
-		Попытка
-			Партия.Филиал = глПользователь.Филиал;
-		Исключение
-		КонецПопытки;
+		Попытка Партия.Филиал = глПользователь.Филиал; Исключение КонецПопытки;
 		
 		Партия.ВсдДата = СтрокаВДату(createDate);
 		
@@ -1675,7 +1574,7 @@
 	|                  <vd:referencedDocument>
 	|                    <vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
 	|                    <vd:issueDate>"+ ГМ.ДатаXML(док.ДатаОтбораПроб) +"</vd:issueDate>
-	//|                    <vd:type>9</vd:type> 
+	|                    <vd:type>9</vd:type> 
 	//|                    <vd:relationshipType>6</vd:relationshipType>
 	|                  </vd:referencedDocument>
 	|                  <vd:expertiseID>"+ СокрЛП(док.НомерЭкспертизы) +"</vd:expertiseID>
