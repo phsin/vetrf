@@ -1499,6 +1499,99 @@
 	
 КонецФункции
 
+Функция ЗагрузитьХСПоGUID(GUID) Экспорт
+//ЖД
+
+	Если ПустоеЗначение(GUID)=1 Тогда 
+		Сообщить("Пустой GUID для поиска ХС");
+		Возврат "REJECTED";
+	КонецЕсли;
+	ЗапросXML = "
+	|<soapenv:Envelope xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+	|		  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2' 
+	|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+	|<soapenv:Header/>
+	|<soapenv:Body>
+	|   <ws:getBusinessEntityByGuidRequest>
+	|      <bs:guid>"+GUID+"</bs:guid>
+	|   </ws:getBusinessEntityByGuidRequest>
+	|</soapenv:Body>
+	|</soapenv:Envelope>";
+	
+	
+	метод = Компонента.GetMethod();
+	метод.Service = "platform/services/2.0/EnterpriseService";
+	метод.Action = "GetBusinessEntityByGUID";	
+	
+	Сообщить(" Запрос getEnterpriseByGuid [ "+СокрЛП(GUID)+" ]");
+	
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+		
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom.load( Компонента.LogFilename);    
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+		|xmlns:default='http://www.w3.org/2001/XMLSchema'
+		|" );
+    
+	
+	//businessEntity = objDom.selectSingleNode("//*[local-name() = 'Body']");
+	businessEntity = objDom.selectSingleNode("//*[local-name() = 'businessEntity']");
+	//.selectSingleNode("getBusinessEntityByGuidResponse").selectSingleNode("businessEntity") ;
+//	businessEntity = objDom.selectSingleNode("//businessEntity") ;
+						
+	guid = businessEntity.selectSingleNode("bs:guid").text;
+	uuid = businessEntity.selectSingleNode("bs:uuid").text;
+		
+	name = businessEntity.selectSingleNode("dt:name").text;
+	active = businessEntity.selectSingleNode("bs:active").text;
+	ИНН =  businessEntity.selectSingleNode("dt:inn").text;
+	Попытка
+		КПП = businessEntity.selectSingleNode("dt:kpp").text;
+	Исключение
+	    КПП="";
+	КонецПопытки;
+	ОГРН = businessEntity.selectSingleNode("dt:ogrn").text;
+    address = businessEntity.selectSingleNode("dt:juridicalAddress").selectSingleNode("dt:addressView").text;
+
+	//businessEntity = xdto.Body.getBusinessEntityByGuidResponse.businessEntity;
+	
+	Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
+	Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
+	    
+	Иначе
+		Спр.Новый();	
+	КонецЕсли;
+	Спр.Наименование = name;
+	//Объект_ВСД_ХозСубъект.Адрес = address;
+	Спр.GUID = guid;
+	Спр.UUID = uuid;	
+//	Спр.Записать();
+//	Сообщить("Записан ВСД_Хозсубъект ["+Спр+"] GUID = "+ Guid+" Адрес: "+address);		
+
+	УдалитьXML( Компонента.LogFilename);
+
+	// Ищем контрагента
+	СпрКонтрагенты = СоздатьОбъект("Справочник.Контрагенты");
+	ТекстВопроса = "Выберите контрагента для
+	|"+ ИНН+" "+name+" "+address;
+	Если СпрКонтрагенты.Выбрать(ТекстВопроса,)=1 Тогда
+		Спр.Контрагент = СпрКонтрагенты.ТекущийЭлемент();
+		Спр.Записать();
+		Сообщить("Записан ВСД_Хозсубъект ["+Спр+"] GUID = "+ Guid+" Адрес: "+address);
+		Возврат Спр.ТекущийЭлемент();
+	Иначе
+		Сообщить("Не выбран контрагент для ХС "+ ИНН+" "+name+" "+address);
+		Сообщить("ХС не записан");
+		Возврат "";
+	КонецЕсли;
+	
+	
+КонецФункции
+
 
 Функция НайтиХСпоGUID(Guid) Экспорт
 
@@ -1517,8 +1610,8 @@
 		Если Спр.НайтиПоРеквизиту("Guid",Guid,1)=1 Тогда 
 			Результат = Спр.ТекущийЭлемент();
 		Иначе
-			Сообщить("Guid "+Guid+" не найден, создайте ХС и выполните синхронизацию");
-			
+			//Сообщить("Guid "+Guid+" не найден, создайте ХС и выполните синхронизацию");
+			Результат = ЗагрузитьХСПоGUID(Guid);
 		КонецЕсли;
 	Иначе
 		Сообщить("Пустой Guid ХозСубъекта");
@@ -6202,6 +6295,22 @@
 
 КонецФункции
 
+Функция ПечатьВСД_Тест(Док) Экспорт
+	Если Док.Вид() = "Реализация" Тогда 
+		Док_ВСД_транзакция = Выбрать_ВСД_транзакция(Док);
+		тз_ВСД = Выбрать_ВСД(Док_ВСД_транзакция);
+					
+	ИначеЕсли Док.Вид() = "ВСД_транзакция" Тогда
+		тз_ВСД = Выбрать_ВСД(Док_ВСД_транзакция);
+	КонецЕсли;
+
+	тз_ВСД.ВыбратьСтроки();
+	Пока тз_ВСД.ПолучитьСтроку() = 1 Цикл
+		ЗапуститьПриложение("https://t2-mercury.vetrf.ru/pub/operatorui?_action=printVetDocumentByUuid&uuid="+тз_ВСД.Док.UUID);	
+	КонецЦикла;
+
+КонецФункции
+
 Функция ОткрытьВсдВГис(Док) Экспорт
 	
 	Если Док.Вид() = "Реализация" Тогда 
@@ -6489,7 +6598,7 @@
 Функция ЗаполнитьПартииПоТЧДокумента(Докум,Отправитель_Площадка) Экспорт
     // подбирает партии 
 
-	ДобавлятьУпаковки = СписокКонстант.ПолучитьЗначение("ДобавлятьУпаковки");
+	ДобавлятьУпаковки = СписокКонстант.Получить("ДобавлятьУпаковки");
 	
 	ТЗПартий = СоздатьОбъект("ТаблицаЗначений");
 	ТЗПартий.НоваяКолонка("ВСД_Продукция_Элемент",,,,,50,);
