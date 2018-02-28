@@ -2735,6 +2735,7 @@
 		|xmlns:ns2='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
 		|xmlns:ns1='http://api.vetrf.ru/schema/cdm/mercury/applications' 
 		|xmlns:vetd='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
+		|xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'
 		|xmlns:default='http://www.w3.org/2001/XMLSchema'
 		|" );
 		
@@ -2746,6 +2747,12 @@
         vetDocument=vetDocumentList.item(i1);
 		uuid = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
 
+		// Документ.ВСД = ответ сервера на второй запрос к Ветису
+		//  applicationId  = id первого запроса к Ветису 
+		// UUID можем получить только в ответе второго запроса к Ветису
+		докОбъект = НайтиВСДпоUUID( uuid );
+		докОбъект.UUID = uuid;
+		
 		form 	 = vetDocument.selectSingleNode("vetd:form").text;
 		st 	 = vetDocument.selectSingleNode("vetd:status").text;
 		type = vetDocument.selectSingleNode("vetd:type").text;
@@ -2778,20 +2785,7 @@
 		
 		product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
 		subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
-
-		//Попытка
-		//	productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
-		//Исключение
-		//	Сообщить("Не удалось получить элемент [productItem]","!");
-		//	productItem = "";
-		//КонецПопытки;
-		//
-		//Попытка
-		//	productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
-		//Исключение
-		//	productItemUuid="";
-		//КонецПопытки;
-		
+	
 		productItem = batch.selectSingleNode("vetd:productItem");
 		
 		volume 		= batch.selectSingleNode("vetd:volume").text;
@@ -2818,49 +2812,7 @@
 		
 		ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодности="";
 		expiryDate = batch.selectSingleNode("vetd:expiryDate");
-		Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);
-		
-		//попытка			
-		//	год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-		//	мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-		//	день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-		//	ДатаИзготовления1 = Дата(год, мес, день);
-		//Исключение
-		//	Попытка
-		//		ДатаИзготовления = ""+batch.selectSingleNode("vetd:dateOfProduction").text;
-		//	Исключение				
-		//	КонецПопытки;
-		//КонецПопытки;				
-		//ДатаИзготовления2="";
-		//попытка
-		//	год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-		//	мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-		//	день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-		//	ДатаИзготовления2 = Дата(год, мес, день);
-		//Исключение			
-		//КонецПопытки;
-		
-		//ДатаСрокГодности
-		//попытка			
-		//	год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-		//	мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-		//	день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-		//	ДатаСрокГодности1 = Дата(год, мес, день);
-		//Исключение
-		//	Попытка
-		//		ДатаСрокГодности = ""+batch.selectSingleNode("vetd:expiryDate").text;
-		//	Исключение				
-		//	КонецПопытки;
-		//КонецПопытки;
-		//ДатаСрокГодности2="";
-		//попытка
-		//	год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-		//	мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-		//	день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-		//	ДатаСрокГодности2 = Дата(год, мес, день);
-		//Исключение			
-		//КонецПопытки;
-
+		Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);		
 		
 		Попытка			
 			producer = batch.selectSingleNode("vetd:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
@@ -2871,60 +2823,46 @@
 		owner = batch.selectSingleNode("vetd:owner").selectSingleNode("bs:guid").text; //ХозСубъект
 		ВладелецХС = НайтиХСпоGUID(owner);
 				
+		Попытка докОбъект.ТтнНомер = vetDocument.selectSingleNode("vetd:waybillNumber").text; 				Исключение КонецПопытки;
+		Попытка докОбъект.ТтнДата = СтрокаВДату( vetDocument.selectSingleNode("vetd:waybillDate").text); 	Исключение КонецПопытки;
+		Попытка докОбъект.Экспертиза = vetDocument.selectSingleNode("vetd:expertiseInfo").text; 			Исключение КонецПопытки;
+		Попытка докОбъект.Местность = vetDocument.selectSingleNode("vetd:locationProsperity").text; 		Исключение КонецПопытки;
+		Попытка докОбъект.ОсобыеОтметки = vetDocument.selectSingleNode("vetd:specialMarks").text; 			Исключение КонецПопытки;
+					
+		Попытка докОбъект.номерАвто = vetDocument.selectSingleNode("vetd:transportInfo").selectSingleNode("shp:transportNumber").text; 	Исключение КонецПопытки;
+			
+		cargoInspected = "";
+		Попытка cargoInspected =  vetDocument.selectSingleNode("vetd:cargoInspected").text; 	Исключение КонецПопытки;			
+		Если cargoInspected="true" Тогда 
+			докОбъект.cargoInspected = 1;
+		КонецЕсли;
 
-		//Если ВидДокумента = "ВСД_транзакция" Тогда 
-		//	//для ВСД_транзакция :
-		//	// applicationId - одинаковый(!) для всех ВСД в транзакции 
-		//	// uuid  - уникальный для каждого ВСД
-		//	// поэтому ищем в по UUID
-		//	докОбъект = НайтиВсд(applicationId, uuid, "ВСД_исходящий", 1);
-		//Иначе	
-		//	// для остальных документов - формируется только 1 ВСД в транзакции, поэтому:
-		//	// applicationId - уникальный 
-		//	// uuid ВСД - уникальный 
-		//	// поэтому ищем по applicationId (который получен в результате первого запроса )	
-		//	// UUID можем получить только в ответе второго запроса к Ветису
-		//	докОбъект = НайтиВсд(applicationId, uuid, ВидДокумента, 2);
-		//КонецЕсли;
+		cargoExpertized = "";
+		Попытка cargoExpertized =  vetDocument.selectSingleNode("vetd:cargoExpertized").text; 	Исключение КонецПопытки;			
+		Если cargoExpertized="true" Тогда 
+			докОбъект.cargoExpertized = 1;
+		КонецЕсли;
 		
-		// Документ.ВСД = ответ сервера на второй запрос к Ветису
-		//  applicationId  = id первого запроса к Ветису 
-		// UUID можем получить только в ответе второго запроса к Ветису
-		докОбъект = НайтиВСДпоUUID( uuid );
+		Попытка 
+			transportStorageType =  vetDocument.selectSingleNode("vetd:transportStorageType").text; 	
+			зн = ТермическиеУсловияПеревозки.НайтиЗначение(transportStorageType); 
+			докОбъект.ТермическоеСостояние = зн;			
+		Исключение 
+		КонецПопытки;					
 		
-		//докОбъект = СоздатьОбъект("Документ.ВСД");
-		
-		докОбъект.UUID = uuid;
 		докОбъект.applicationID = Компонента.ApplicationId;
 		Если ПустоеЗначение(докОбъект.ДокОснование )=1 Тогда
 			докОбъект.ДокОснование = докОснование;
 		КонецЕсли;
 		
-		Попытка 
-			докОбъект.Отправитель_ХозСубъект 	= НайтиХСпоGUID(consignorBusinessEntity);
-		Исключение			
-		КонецПопытки;
-		Попытка			
-			докОбъект.Отправитель_Площадка 		= НайтиПлощадку(consignorEnterprise);
-		Исключение			
-		КонецПопытки;
-
-		Попытка
-			докОбъект.Получатель_ХозСубъект 	= НайтиХСпоGUID(consigneeBusinessEntity);
-		Исключение			
-		КонецПопытки;
-
-		Попытка			
-			докОбъект.Получатель_Площадка 		= НайтиПлощадку(consigneeEnterprise);
-		Исключение			
-		КонецПопытки;
+		Попытка докОбъект.Отправитель_ХозСубъект 	= НайтиХСпоGUID(consignorBusinessEntity); Исключение КонецПопытки;
+		Попытка	докОбъект.Отправитель_Площадка 		= НайтиПлощадку(consignorEnterprise); Исключение КонецПопытки;
+		Попытка докОбъект.Получатель_ХозСубъект 	= НайтиХСпоGUID(consigneeBusinessEntity); Исключение КонецПопытки;
+		Попытка	докОбъект.Получатель_Площадка 		= НайтиПлощадку(consigneeEnterprise); Исключение КонецПопытки;
 			
-		//докОбъект.Производитель_Площадка 	= НайтиПлощадку(producer);
-
 		докОбъект.Продукция 	= НайтиПродукцию(product);
 		докОбъект.ВидПродукции 	= НайтиВидПродукции(subProduct);
 		
-		//докОбъект.Продукция_Элемент = Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
 		докОбъект.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, докОбъект.Продукция, докОбъект.ВидПродукции);
 		
 		докОбъект.Количество 	= Число(volume);
@@ -2941,7 +2879,7 @@
 		докОбъект.ДатаИзготовления1 = ДатаИзготовления1;
 		докОбъект.ДатаИзготовления2 = ДатаИзготовления2;
 		докОбъект.ДатаСрокГодности1 = ДатаСрокГодности1;
-		докОбъект.ДатаСрокГодности2 = ДатаСрокГодности2;
+		докОбъект.ДатаСрокГодности2 = ДатаСрокГодности2;		
 		
 		докОбъект.Фирма = глПользователь.ОсновнаяФирма;
 		докОбъект.Автор = глПользователь;
@@ -3388,47 +3326,47 @@
 	
 КонецФункции
 
-Процедура ПолучитьПоследнююВерсиюПартии(ВыбПартия, Отправитель_Площадка)
-	//Если ПустоеЗначение(ВыбПлощадка)=1 Тогда 
-	//	Предупреждение("Выберите Площадку");
-	//	Возврат;
-	//КонецЕсли;
+//Процедура ПолучитьПоследнююВерсиюПартии(ВыбПартия, Отправитель_Площадка)
+//	//Если ПустоеЗначение(ВыбПлощадка)=1 Тогда 
+//	//	Предупреждение("Выберите Площадку");
+//	//	Возврат;
+//	//КонецЕсли;
+//
+//	Если ПустоеЗначение(Отправитель_Площадка.GUID)=1 Тогда 
+//		Сообщить("У Площадки пустой GUID");
+//		Возврат;
+//	КонецЕсли;
+//	
+//	Если ПустоеЗначение(ВыбПартия.GUID)=1 Тогда 
+//		Сообщить("В выбранной партии пустой GUID");
+//		Возврат;
+//	КонецЕсли;	
+//
+//	Результат = Компонента.GetStockEntryVersionList(
+//		СокрЛП(ВыбПартия.GUID),
+//		СокрЛП(Отправитель_Площадка.GUID)
+//		);
+//
+//	//Отладка();
+//			
+//КонецПроцедуры
 
-	Если ПустоеЗначение(Отправитель_Площадка.GUID)=1 Тогда 
-		Сообщить("У Площадки пустой GUID");
-		Возврат;
-	КонецЕсли;
-	
-	Если ПустоеЗначение(ВыбПартия.GUID)=1 Тогда 
-		Сообщить("В выбранной партии пустой GUID");
-		Возврат;
-	КонецЕсли;	
-
-	Результат = Компонента.GetStockEntryVersionList(
-		СокрЛП(ВыбПартия.GUID),
-		СокрЛП(Отправитель_Площадка.GUID)
-		);
-
-	//Отладка();
-			
-КонецПроцедуры
-
-Процедура ПолучитьПоследнююВерсиюПартииОтвет(appID)
-
-	Результат = Компонента.GetStockEntryVersionListResult(СокрЛП(appID));
-
-	//Отладка();
-	
-	Если Результат="COMPLETED" Тогда
-						
-		//тз = ЗагрузитьТЗ(Компонента.ResultString);
-		//тз.ВыбратьСтроку();
-		//ЗаписатьПартии(тз);
-				
-	КонецЕсли;		
-		
-	
-КонецПроцедуры
+//Процедура ПолучитьПоследнююВерсиюПартииОтвет(appID)
+//
+//	Результат = Компонента.GetStockEntryVersionListResult(СокрЛП(appID));
+//
+//	//Отладка();
+//	
+//	Если Результат="COMPLETED" Тогда
+//						
+//		//тз = ЗагрузитьТЗ(Компонента.ResultString);
+//		//тз.ВыбратьСтроку();
+//		//ЗаписатьПартии(тз);
+//				
+//	КонецЕсли;		
+//		
+//	
+//КонецПроцедуры
 
 //========================== ВСД Входящий =================================
 
