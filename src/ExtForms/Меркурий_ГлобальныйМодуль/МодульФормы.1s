@@ -6621,7 +6621,7 @@
 	|                  </merc:initiator>
 	|                  <merc:vetDocumentId>"+ СокрЛП(док.UUID) +"</merc:vetDocumentId>
 	|                  <merc:withdrawReason>Неверно указан объём продукции</merc:withdrawReason>
-	|                  <merc:withdrawDate>"+ ДатаXML(док.ДатаДок, "T00:00:00") +"</merc:withdrawDate>
+	|                  <merc:withdrawDate>"+ ДатаXML(док.ДатаДок, "T23:59:59") +"</merc:withdrawDate>
 	|                  <merc:vetDoctor>
 	|                      <com:login>"+ СписокКонстант.Получить("param_vetdoctor_login")+"</com:login>
 	|                  </merc:vetDoctor>
