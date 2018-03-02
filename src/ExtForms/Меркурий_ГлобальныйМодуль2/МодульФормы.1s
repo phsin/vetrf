@@ -277,7 +277,7 @@
 	applicationId = item.selectSingleNode("applicationId").text;
 	st = item.selectSingleNode("status").text;
 
-	Сообщить("Ответ: ["+applicationId+"] ["+st+"]");
+	//Сообщить("Ответ: ["+applicationId+"] ["+st+"]");
 	
 	возврат applicationId;
 КонецФункции
@@ -724,16 +724,16 @@
 		
 		st 	 = vetDocument.selectSingleNode("vd:vetDStatus").text;
 		type = vetDocument.selectSingleNode("vd:vetDType").text;
-		Попытка
-			Завершен = vetDocument.selectSingleNode("vd:finalized").text; // Сертификат закрыт 
-		Исключение
-			Завершен="";
-		КонецПопытки;
-		Попытка
-			Lastupd = vetDocument.selectSingleNode("vd:lastUpdateDate").text; // дата время посл изменения
-		Исключение
-			Lastupd="";
-		КонецПопытки;
+		//Попытка
+		//	Завершен = vetDocument.selectSingleNode("vd:finalized").text; // Сертификат закрыт 
+		//Исключение
+		//	Завершен="";
+		//КонецПопытки;
+		//Попытка
+		//	Lastupd = vetDocument.selectSingleNode("vd:lastUpdateDate").text; // дата время посл изменения
+		//Исключение
+		//	Lastupd="";
+		//КонецПопытки;
 		Если ПустоеЗначение(докОснование)=0 Тогда
 			//Если явно указан документ, получаем его вид
 			ВидДокумента = докОснование.Вид();
@@ -816,35 +816,35 @@
 		subProduct 	= batch.selectSingleNode("vd:subProduct").selectSingleNode("bs:guid").text;
 
 		Попытка
-			productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
+			productItem = batch.selectSingleNode("*[local-name()='productItem'] ");
 		Исключение
 			Сообщить("Не удалось получить элемент [productItem]","!");
 			productItem = "";
 		КонецПопытки;
 		
-		Попытка
-			productItemUuid = batch.selectSingleNode("vd:productItem").selectSingleNode("bs:uuid").text;
-		Исключение
-			productItemUuid="";
-		КонецПопытки;
+		//Попытка
+		//	productItemUuid = batch.selectSingleNode("vd:productItem").selectSingleNode("bs:uuid").text;
+		//Исключение
+		//	productItemUuid="";
+		//КонецПопытки;
 		//Trade Identification Number (GTIN) - идентификационный номер продукции производителя.
-		Попытка
-			GTIN = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:globalID").text;
-		Исключение
-			GTIN="";
-		КонецПопытки;
-        //Артикул (код) продукции в соответствии с внутренним кодификатором производителя.
-		Попытка
-			Артикул = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:code").text;
-		Исключение
-			Артикул="";
-		КонецПопытки;
-        //Наименование продукции. 
-		Попытка
-			НаимПрции = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:name").text;
-		Исключение
-			НаимПрции="";
-		КонецПопытки;
+		//Попытка
+		//	GTIN = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:globalID").text;
+		//Исключение
+		//	GTIN="";
+		//КонецПопытки;
+        ////Артикул (код) продукции в соответствии с внутренним кодификатором производителя.
+		//Попытка
+		//	Артикул = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:code").text;
+		//Исключение
+		//	Артикул="";
+		//КонецПопытки;
+        ////Наименование продукции. 
+		//Попытка
+		//	НаимПрции = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:name").text;
+		//Исключение
+		//	НаимПрции="";
+		//КонецПопытки;
 		
 		
 		
@@ -1173,12 +1173,6 @@
 		//UNFULFILLED 	Не проводилось.
 		//VSERAW 	ВСЭ подвергнуто сырьё, из которого произведена продукция.
 		//VSEFULL 	Продукция подвергнута ВСЭ в полном объеме.
-		//СзВСЭ = СоздатьОбъект("СписокЗначений"); // ЖД - добавить в ГМ?
-		//СзВСЭ.ДобавитьЗначение(0,"UNFULFILLED");
-		//СзВСЭ.ДобавитьЗначение(1,"VSERAW");
-		//СзВСЭ.ДобавитьЗначение(2,"VSEFULL");
-		
-		//докОбъект.cargoExpertized = СзВСЭ.Получить(cargoExpertized);
 		докОбъект.РезультатыИсследований = Перечисление.ВСД2_РезультатИсследований.ЗначениеПоИдентификатору(cargoExpertized);
 		докОбъект.cargoInspected = ?(cargoInspected="true",1,0);
 		
@@ -1208,7 +1202,8 @@
 		докОбъект.Продукция 	= ГМ.НайтиПродукцию(product);
 		докОбъект.ВидПродукции 	= ГМ.НайтиВидПродукции(subProduct);
 		
-		докОбъект.Продукция_Элемент = ГМ.Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		//докОбъект.Продукция_Элемент = ГМ.Найти_Продукция_Элемент(productItem, productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		докОбъект.Продукция_Элемент = ГМ.Найти_Продукция_Элемент2(productItem, докОбъект.Продукция, докОбъект.ВидПродукции);
 		
 		докОбъект.Количество 	= Число(volume);
 		
@@ -1285,16 +1280,11 @@
 		КонецПопытки;
 		
 		докОбъект.Автор = глПользователь;
-		Попытка
-			докОбъект.Филиал = глПользователь.Филиал;
-		Исключение
-		КонецПопытки;
+		Попытка докОбъект.Филиал = глПользователь.Филиал; Исключение КонецПопытки;
 		
 		докОбъект.ДатаДок = СтрокаВДату(createDate);
 		Если ТЗУровни.КоличествоСтрок()>0 Тогда
-			Попытка
-		    докОбъект.УровниУпаковки = ЗначениеВСтроку(ТзУровни);
-			Исключение 	КонецПопытки;
+			Попытка докОбъект.УровниУпаковки = ЗначениеВСтроку(ТзУровни); Исключение 	КонецПопытки;
 		КонецЕсли;
 				
 		докОбъект.Записать();
@@ -1900,7 +1890,7 @@
 КонецФункции
 
 //=============================== ВСД_производство ==========================
-Функция ВСД_производство_2_ЗапросXML(док)    
+Функция ВСД2_производство_ЗапросXML(док)    
 	//док = СоздатьОбъект("Документ.ВСД_производство");
 	
 	Запрос ="<SOAP-ENV:Envelope 
@@ -2202,7 +2192,7 @@
 	Возврат Запрос;
 КонецФункции
 
-Функция Отправить_ВСД_производство_2(док) Экспорт
+Функция Отправить_ВСД2_Производство(док) Экспорт
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("Отправить_ВСД_производство");
 	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
@@ -2215,7 +2205,7 @@
 	//	Возврат 0;
 	//КонецЕсли;	
 			
-	ЗапросXML = ВСД_производство_2_ЗапросXML(док);
+	ЗапросXML = ВСД2_производство_ЗапросXML(док);
 	
 	метод = ГМ.Компонента.GetMethod();
     метод.Service = "platform/services/ApplicationManagementService";
