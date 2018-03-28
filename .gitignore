@@ -5,7 +5,8 @@
 /unpack/
 /ExtForms/MobiS/
 /logs/
-
+*.mdp
+*.frm
 *.CDX
 *.DBF
 *.exe
@@ -35,5 +36,5 @@ MobiS
 1cv7.ORD
 /Лог_запуска_отчетов.txt
 ОбъектыМетаданных.txt
-*.mdp
-*.frm
+Структура.mdp
+Форма.frm
