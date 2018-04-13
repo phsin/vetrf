@@ -2,8 +2,10 @@
 Перем ВыбРеквизит; //для выбора площадки
 
 Процедура ПриИзмененииФирмы()
-	ГМ.Инициализация(ВыбФирма);
-	ГМ.ЗагрузитьПараметрыВФорму(Контекст);
+	Если Метаданные.Справочник("Фирмы").Выбран() = 1 Тогда
+		ГМ.Инициализация(ВыбФирма);
+		ГМ.ЗагрузитьПараметрыВФорму(Контекст);
+	КонецЕсли;
 КонецПроцедуры
 
 //======= ФУНКЦИИ ИНТЕРФЕЙСА ==============
@@ -106,10 +108,10 @@
     objDom.load(ГМ.Компонента.LogFilename);    	        
 	
     businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;									
-	guid = businessEntity.selectSingleNode("base:guid").text;
-	uuid = businessEntity.selectSingleNode("base:uuid").text;			
-	active = businessEntity.selectSingleNode("base:active").text;		
-	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("base:guid").text;		
+	guid = businessEntity.selectSingleNode("bs:guid").text;
+	uuid = businessEntity.selectSingleNode("bs:uuid").text;			
+	active = businessEntity.selectSingleNode("bs:active").text;		
+	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;		
 	Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
 	
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
@@ -163,10 +165,10 @@
 	КонецЕсли;		
 		
     enterprise=objDom.selectSingleNode("//merc:enterprise") ;								
-	guid = enterprise.selectSingleNode("base:guid").text;
-	uuid = enterprise.selectSingleNode("base:uuid").text;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
 	name = enterprise.selectSingleNode("ent:name").text;
-	active = enterprise.selectSingleNode("base:active").text;
+	active = enterprise.selectSingleNode("bs:active").text;
 				
 	если ПустоеЗначение(GUID)=0 Тогда			
 		Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
@@ -182,6 +184,8 @@
 	КонецЕсли;
 		
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );	
+	
+	ГМ.Пауза();
 	
 	СоздатьСвязьХозсубъектПлощадка(Площадка);
 				
@@ -314,9 +318,9 @@
 	КонецЕсли;
     
     enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
-	guid = enterprise.selectSingleNode("base:guid").text;
-	uuid = enterprise.selectSingleNode("base:uuid").text;
-	active = enterprise.selectSingleNode("base:active").text;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
+	active = enterprise.selectSingleNode("bs:active").text;
 						
 	если ПустоеЗначение(GUID)=0 Тогда			
 		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
