@@ -1,17 +1,32 @@
 //Автор: Жуков Дмитрий
 //zhukov@kb99.pro 
 //Все права принадлежат ИП Синявский Ф.А. http://www.kb99.pro
-//Тест коммит в УТФ8
 //**********
 // Считывание работает в 2 прохода
 // 1 - считывает данные ответа в ТЗ 
 // 2 - обрабатывает загруженную ТЗ - Создает докумены ВСД_Входящий (или перезаписывает), находит/создает по ГУИДам справочники в 1С
-// Возможно нужно объединить в 1 проход
 
-// Ошибка при отправлении Речного транспорта ?? при загрузке тип 6, при оправке ругается на 6
 
 Перем ГМ;
 Перем цвКрасный, цвЖелтый, цвЗеленый, цвГолубой, цвФиолетовый;
+
+
+Процедура ПриИзмененииФирмы()
+	Если Метаданные.Справочник("Фирмы").Выбран() = 1 Тогда
+		ГМ.Инициализация(ВыбФирма);
+		ГМ.ЗагрузитьПараметрыВФорму(Контекст);
+		ТЗВСД.УдалитьСтроки();
+	КонецЕсли;
+КонецПроцедуры
+
+Функция ПриИзмененииПлощадки()
+	//В противном случае партии запишутся на первую попавшуюся площадку
+	// когда у ХС их несколько !!!!
+	//Необходимо учесть этот момент во всех обработках
+	ТЗВСД.УдалитьСтроки();
+	ГМ.СписокКонстант.Установить("Отправитель_Площадка",Отправитель_Площадка);	
+КонецФункции
+
 
 //******************************************************************************
 Процедура ОтменитьВсеДокументы()
@@ -117,10 +132,8 @@
 		зн="";
 		Сп.ВыбратьЗначение(зн,"Маркировка");
 	ИначеЕсли текКол = "ДокВСД" Тогда
-		//не открывает, зараза
 		Эл = ТЗВСД.ПолучитьЗначение(текСтр, текКол);	
 		ОткрытьФорму(Эл);
-		
 	//	Если ПустоеЗначение(ТЗВСД.ДокВСД)=0 Тогда
 		    //ОткрытьФорму(ТЗВСД.ДокВСД);
 	//	КонецЕсли;; 
@@ -194,10 +207,6 @@
 
 //***************************
 
-
-
-
-
 // Функция загружает ответ от Ветиса = ответ на второй запрос
 // Просто читаем XML в ТЗВСД - например мы ее получим из Гл Модо потом
 Процедура ЗагрузитьXML_ВСД(имяФайла)
@@ -227,56 +236,26 @@
         vetDocument=vetDocumentList.item(i1);
 		ТЗВСД.НоваяСтрока();
 		ТЗВСД.Пометка=1;
-		ТЗВСД.uuid = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
+		ТЗВСД.uuid 	= vetDocument.selectSingleNode("*[local-name()='uuid']").text;
 
-		ТЗВСД.forma 	 = vetDocument.selectSingleNode("vetd:form").text;
-		ТЗВСД.st 	 = vetDocument.selectSingleNode("vetd:status").text;
-		ТЗВСД.type = vetDocument.selectSingleNode("vetd:type").text;
-
-// Анастасия Барнаул
-		ТЗВСД.всдсерия ="";
-		ТЗВСД.всдномер ="";
-		Попытка
-			ТЗВСД.всдсерия = vetDocument.selectSingleNode("vetd:issueSeries").text;
-		Исключение
-			ТЗВСД.всдсерия ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.всдномер = vetDocument.selectSingleNode("vetd:issueNumber").text;
-		Исключение
-			ТЗВСД.всдномер ="";
-		КонецПопытки;
-//		если пустоезначение(всдномер)=0 тогда
-		    //это бумажный
-//			продолжить;
-//		конецесли;	
-
-		
-// конец  Анастасия Барнаул
-
-		
-		
-		ТЗВСД.createDate = vetDocument.selectSingleNode("vetd:issueDate").text;
-		
-		ТЗВСД.consignorBusinessEntity = vetDocument.selectSingleNode("vetd:consignor").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text;
-		ТЗВСД.consignorEnterprise 	= vetDocument.selectSingleNode("vetd:consignor").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
-		
-		Попытка
-			ТЗВСД.consigneeBusinessEntity = vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text;
-		Исключение
-			ТЗВСД.consigneeBusinessEntity ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.consigneeEnterprise 	= vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
-		Исключение
-			ТЗВСД.consigneeEnterprise = "";
-		КонецПопытки;
-
+		Попытка ТЗВСД.forma	 = vetDocument.selectSingleNode("vetd:form").text Исключение КонецПопытки;
+		Попытка ТЗВСД.st 	 = vetDocument.selectSingleNode("vetd:status").text Исключение КонецПопытки;
+		Попытка ТЗВСД.type 	 = vetDocument.selectSingleNode("vetd:type").text Исключение КонецПопытки;
+		Попытка ТЗВСД.всдсерия = vetDocument.selectSingleNode("vetd:issueSeries").text Исключение КонецПопытки;
+		Попытка ТЗВСД.всдномер = vetDocument.selectSingleNode("vetd:issueNumber").text Исключение КонецПопытки;	
+		Попытка ТЗВСД.createDate = vetDocument.selectSingleNode("vetd:issueDate").text Исключение КонецПопытки;		
+		Попытка ТЗВСД.consignorBusinessEntity 	= vetDocument.selectSingleNode("vetd:consignor").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text Исключение КонецПопытки;
+		Попытка ТЗВСД.consignorEnterprise 		= vetDocument.selectSingleNode("vetd:consignor").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text Исключение КонецПопытки;		
+		Попытка ТЗВСД.consigneeBusinessEntity 	= vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:businessEntity").selectSingleNode("bs:guid").text Исключение КонецПопытки;			
+		Попытка ТЗВСД.consigneeEnterprise 		= vetDocument.selectSingleNode("vetd:consignee").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text Исключение КонецПопытки;
+			
 		Попытка
 			transportInfo = vetDocument.selectSingleNode("vetd:transportInfo");
 			ТЗВСД.ТипТранспорта = transportInfo.selectSingleNode("*[local-name()='transportType'] ").text;
 			Если ТЗВСД.типТранспорта = "1" Тогда
-				ТЗВСД.Автономер = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='vehicleNumber']").text; 
+				ТЗВСД.Автономер = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='vehicleNumber']").text;
+				Попытка ТЗВСД.номерПолуприцепа = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='trailerNumber']").text; Исключение КонецПопытки;
+				Попытка ТЗВСД.номерКонтейнера =  transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='containerNumber']").text; Исключение КонецПопытки;
 			Иначеесли ТЗВСД.типТранспорта = "2" Тогда
 				ТЗВСД.Автономер = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='wagonNumber']").text;
 			Иначеесли ТЗВСД.типТранспорта = "3" Тогда
@@ -289,142 +268,61 @@
 			КонецЕсли;
 		исключение
 		КонецПопытки;
-		
-		Попытка
-			ТЗВСД.ТермУсловия = vetDocument.selectSingleNode("vetd:transportStorageType").text;
-		Исключение
-			ТЗВСД.ТермУсловия ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.местность = vetDocument.selectSingleNode("vetd:locationProsperity").text;
-		Исключение
-			ТЗВСД.местность ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.осотм = vetDocument.selectSingleNode("vetd:specialMarks").text;
-		Исключение
-			ТЗВСД.осотм ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.эксп = vetDocument.selectSingleNode("vetd:expertiseInfo").text;
-		Исключение
-			ТЗВСД.эксп ="";
-		КонецПопытки;
-		
-		Попытка
-			ТЗВСД.ттнномер = vetDocument.selectSingleNode("vetd:waybillNumber").text;
-		Исключение
-			ТЗВСД.ттнномер ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.ттндата = vetDocument.selectSingleNode("vetd:waybillDate").text;
-		Исключение
-			ТЗВСД.ттндата ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.cInspected = vetDocument.selectSingleNode("vetd:cargoInspected").text;
-		Исключение
-			ТЗВСД.cInspected ="";
-		КонецПопытки;
-		Попытка
-			ТЗВСД.cExpertized = vetDocument.selectSingleNode("vetd:cargoExpertized").text;
-		Исключение
-			ТЗВСД.cExpertized ="";
-		КонецПопытки;  
-		
-		всддата ="";
-	  	перевоз="";
-		Попытка
-			ТЗВСД.всддата = vetDocument.selectSingleNode("vetd:issueDate").text;
-		Исключение
-			ТЗВСД.всддата ="";
-		КонецПопытки;
- 		Попытка
-	  		ТЗВСД.перевозчик 	= vetDocument.selectSingleNode("vetd:broker").selectSingleNode("bs:guid").text; 
-	  	исключение
-	  		ТЗВСД.перевозчик="";
-  		конецпопытки;
 
-
-		
+		Попытка ТЗВСД.ТермУсловия 	=  vetDocument.selectSingleNode("vetd:transportStorageType").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.местность 	=  vetDocument.selectSingleNode("vetd:locationProsperity").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.осотм 		=  vetDocument.selectSingleNode("vetd:specialMarks").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.эксп 			=  vetDocument.selectSingleNode("vetd:expertiseInfo").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.ттнномер 		=  vetDocument.selectSingleNode("vetd:waybillNumber").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.ттндата 		=  vetDocument.selectSingleNode("vetd:waybillDate").text; Исключение КонецПопытки; 
+		Попытка ТЗВСД.ттнТип 		=  vetDocument.selectSingleNode("vetd:waybillType").text; Исключение КонецПопытки; 
+		Попытка ТЗВСД.cInspected 	=  vetDocument.selectSingleNode("vetd:cargoInspected").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.cExpertized 	=  vetDocument.selectSingleNode("vetd:cargoExpertized").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.всддата 		=  vetDocument.selectSingleNode("vetd:issueDate").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.перевозчик 	=  vetDocument.selectSingleNode("vetd:broker").selectSingleNode("bs:guid").text; Исключение КонецПопытки;
+	
 		batch = vetDocument.selectSingleNode("vetd:batch");
 		
-		ТЗВСД.product 	= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
-		ТЗВСД.subProduct 	= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
+		product 			= batch.selectSingleNode("vetd:product").selectSingleNode("bs:guid").text;
+		subProduct 			= batch.selectSingleNode("vetd:subProduct").selectSingleNode("bs:guid").text;
+		
+		ТЗВСД.product 		= ГМ.НайтиПродукцию(product);		
+		ТЗВСД.subProduct 	= ГМ.НайтиВидПродукции(subProduct);
 
 		Попытка
-			ТЗВСД.productItem = batch.selectSingleNode("*[local-name()='productItem'] ").selectSingleNode("*[local-name()='name']").text;
+			productItem = batch.selectSingleNode("*[local-name()='productItem'] ");
+			ТЗВСД.productItem = ГМ.Найти_Продукция_Элемент2(productItem, ТЗВСД.product , ТЗВСД.subProduct); 
 		Исключение
 			Сообщить("Не удалось получить элемент [productItem]","!");
 			ТЗВСД.productItem = "";
 		КонецПопытки;
 		
-		Попытка
-			ТЗВСД.productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text;
-		Исключение
-			ТЗВСД.productItemUuid="";
-		КонецПопытки;
-		ТЗВСД.volume 		= batch.selectSingleNode("vetd:volume").text;
+		Попытка	ТЗВСД.НаименованиеПродукции = productItem.selectSingleNode("*[local-name()='name']").text;	Исключение ТЗВСД.НаименованиеПродукции="";	КонецПопытки;
+
+		
+		
+		ТЗВСД.volume 	= batch.selectSingleNode("vetd:volume").text;
 		ТЗВСД.unitGuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
 		
-		Попытка
-			ТЗВСД.packingFormUuid	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("bs:uuid").text;			
-		Исключение
-			//Сообщить("Не удалось получить элемент [packingForm] [uuid]","!");
-			ТЗВСД.packingFormUuid = "";			
-		КонецПопытки;
-		Попытка
-			ТЗВСД.packingFormName	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("*[local-name()='name']").text;			
-		Исключение
-			ТЗВСД.packingFormName="";
-			//Сообщить("Не удалось получить элемент [packingForm] [name]","!");
-		КонецПопытки;
-
-		ТЗВСД.packingAmount = batch.selectSingleNode("vetd:packingAmount").text;
+		Попытка ТЗВСД.packingFormUuid	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("bs:uuid").text; Исключение КонецПопытки;
+		Попытка ТЗВСД.packingFormName	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("*[local-name()='name']").text; Исключение КонецПопытки;
+	
+		Попытка ТЗВСД.packingAmount = batch.selectSingleNode("vetd:packingAmount").text; Исключение КонецПопытки;
 		ТЗВСД.Скоропортящаяся = ?(batch.selectSingleNode("vetd:perishable").text="true",1,0);
 		ТЗВСД.Некачественная = ?(batch.selectSingleNode("vetd:lowGradeCargo").text="true",1,0);
-		ТЗВСД.ДатаИзготовления1="";
-		ТЗВСД.ДатаИзготовления="";
-		попытка			
-			год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-			ТЗВСД.ДатаИзготовления1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ТЗВСД.ДатаИзготовления = ""+batch.selectSingleNode("vetd:dateOfProduction").text;
-			Исключение				
-			КонецПопытки;
-		КонецПопытки;				
-		ТЗВСД.ДатаИзготовления2="";
-		попытка
-			год = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:dateOfProduction").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-			ТЗВСД.ДатаИзготовления2 = Дата(год, мес, день);
-		Исключение			
-		КонецПопытки;
+				
+		ДатаИзготовления1=""; ДатаИзготовления2=""; ДатаИзготовленияСтрока="";
+		ГМ.Дата_из_XML(batch.selectSingleNode("vetd:dateOfProduction"), ДатаИзготовления1, ДатаИзготовления2, ДатаИзготовленияСтрока );
+		ТЗВСД.ДатаИзготовления1 = ДатаИзготовления1;
+		ТЗВСД.ДатаИзготовления2 = ДатаИзготовления2; 
+		ТЗВСД.ДатаИзготовленияСтрока = ДатаИзготовленияСтрока;
 		
-		попытка			
-			год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-			ТЗВСД.ДатаСрокГодности1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ТЗВСД.ДатаСрокГодности = ""+batch.selectSingleNode("vetd:expiryDate").text;
-			Исключение				
-			КонецПопытки;
-		КонецПопытки;
-		ТЗВСД.ДатаСрокГодности2="";
-		попытка
-			год = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("vetd:expiryDate").selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-			ТЗВСД.ДатаСрокГодности2 = Дата(год, мес, день);
-		Исключение			
-		КонецПопытки;
-        
+		ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодностиСтрока="";
+		ГМ.Дата_из_XML(batch.selectSingleNode("vetd:expiryDate"), ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодностиСтрока );
+		ТЗВСД.ДатаСрокГодности1 = ДатаСрокГодности1;
+		ТЗВСД.ДатаСрокГодности2 = ДатаСрокГодности2;
+		ТЗВСД.ДатаСрокГодностиСтрока = ДатаСрокГодностиСтрока;
+				        
 		Попытка
 			// выборка списка производителей  - возможно неправильно???
 			//Pl = batch.selectSingleNode("vetd:producerList");
@@ -517,7 +415,14 @@
     //Переопределение функций, если они определены в модуле
     глМеркурийИнтеграция.Инициализация(ГМ);    
     //}		
-	
+	стр = "";
+	попытка
+		к = ГМ.ПараметрыФирм.ПолучитьЗначение(1,стр);
+		Если Пустоезначение(стр) = 0 Тогда
+			ВыбФирма = ЗначениеИзСтрокиВнутр(стр);
+		КонецЕсли;
+	Исключение
+	КонецПопытки;
 	
 КонецПроцедуры
 
@@ -535,7 +440,7 @@
 	ВремТЗ.ВыбратьСтроки();
 	Пока ВремТЗ.ПолучитьСтроку() = 1 Цикл
 	    
-        ВремТЗ.ВладелецХС = ГМ.НайтиХСпоGUID(ТЗВСД.owner);
+        ВремТЗ.ВладелецХС = ГМ.НайтиХСпоGUID(ВремТЗ.owner);
 		Если ПустоеЗначение(ВремТЗ.ВладелецХС)=1 Тогда
 			Сообщить("Нет ХС владельца в справочнике "+ТЗВСД.owner);
 			// Может добавить в справочник с наименованием = ГУИД??
@@ -593,10 +498,10 @@
 			КонецЦикла;
 			ДокОбъект.МаркировкаСписок = ЗначениеВСтроку(МаркировкаСписок);
 			
-			ДокОбъект.Продукция = ГМ.НайтиПродукцию(ВремТЗ.product);
-			ДокОбъект.ВидПродукции = ГМ.НайтиВидПродукции(ВремТЗ.subProduct);
-			ДокОбъект.НаименованиеПродукции = ВремТЗ.productItem;
-			ДокОбъект.Продукция_Элемент = ГМ.Найти_Продукция_Элемент(ВремТЗ.productItem, ВремТЗ.productItemUuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+			ДокОбъект.Продукция = (ВремТЗ.product);
+			ДокОбъект.ВидПродукции = (ВремТЗ.subProduct);			
+			ДокОбъект.Продукция_Элемент = ВремТЗ.productItem;
+			ДокОбъект.НаименованиеПродукции = ДокОбъект.Продукция_Элемент.Наименование;
 	
 			ДокОбъект.Количество = Число(ВремТЗ.volume);
 			ДокОбъект.ЕдиницаИзмерения = ГМ.НайтиЕдИзмерения( ВремТЗ.unitGuid );
@@ -606,9 +511,10 @@
 	
 			ДокОбъект.ДатаИзготовления1 = ВремТЗ.ДатаИзготовления1;
 			ДокОбъект.ДатаИзготовления2 = ВремТЗ.ДатаИзготовления2;
-	
+	        ДокОбъект.ДатаИзготовленияСтрока = ВремТЗ.ДатаИзготовленияСтрока;
 			ДокОбъект.ДатаСрокГодности1 = ВремТЗ.ДатаСрокГодности1;
 			ДокОбъект.ДатаСрокГодности2 = ВремТЗ.ДатаСрокГодности2;
+			ДокОбъект.ДатаСрокГодностиСтрока = ВремТЗ.ДатаСрокГодностиСтрока;
 			Попытка
 				докОбъект.Фирма = глПользователь.ОсновнаяФирма;
 			Исключение
@@ -622,13 +528,17 @@
 			докОбъект.всддата = СтрокаВДату(ВремТЗ.всддата);
 			докОбъект.термическоесостояние = ГМ.ТермическиеУсловияПеревозки.найтизначение(ВремТЗ.ТермУсловия);
 			докОбъект.номеравто = ВремТЗ.автономер;
+			Попытка докОбъект.номерПолуприцепа = ВремТЗ.номерПолуприцепа; Исключение КонецПопытки;
+			Попытка докОбъект.номерКонтейнера = ВремТЗ.номерКонтейнера; Исключение КонецПопытки;
+			
 			докОбъект.ТипТС = ВремТЗ.ТипТранспорта;
 			
 			докОбъект.ВСДместность = ВремТЗ.местность;
 			докОбъект.ВСДэкспертиза = ВремТЗ.эксп;
 			докОбъект.особыеотметки = ВремТЗ.осотм;
 			докОбъект.ттнномер = ВремТЗ.ттнномер;
-			докОбъект.ттндата = СтрокаВДату(ВремТЗ.ттндата);  
+			докОбъект.ттндата = СтрокаВДату(ВремТЗ.ттндата);
+			Попытка докОбъект.ттнТип = ВремТЗ.ттнТип; Исключение КонецПопытки; 
 			докОбъект.Скоропортящийся = ВремТЗ.Скоропортящаяся;
 			докОбъект.Некачественный = ВремТЗ.Некачественная;
 			докОбъект.cargoInspected=?(ВремТЗ.cInspected="true",1,0);
@@ -714,7 +624,7 @@
 
 
 // Запрос на гашение ВСД входящего
-Функция ВСД_входящий_ЗапросXML(док)
+Функция ВСД_входящий_ЗапросXML(док,НаименованиеПродукции="")
 	
 	//док = СоздатьОбъект("Документ.ВСД_входящий")
 	
@@ -770,12 +680,17 @@
 			|            <vd:productItem>
 			|";
 		Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
-			Запрос = Запрос + "
-			|              <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>
-			|";
+			Запрос = Запрос + " <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid> ";
+		Иначе
+			Если ПустоеЗначение(НаименованиеПродукции) = 0 Тогда
+				Запрос = Запрос + " <pr:name>"+ СокрЛП(НаименованиеПродукции) +"</pr:name> ";    
+			Иначе
+				Запрос = Запрос + " <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name> ";	
+			КонецЕсли;
+						
 		КонецЕсли;
 		Запрос = Запрос + "
-			|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
+			|              
 			|            </vd:productItem>
 			|            <vd:volume>"+ Док.Количество +"</vd:volume>
 			|            <vd:unit>
@@ -851,7 +766,7 @@
 			|              <bs:uuid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
 			|            </vd:countryOfOrigin>
 			|";
-		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда     //Дима
+		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда     
 			Запрос=Запрос+"
 			|      		 <vd:producerList>
 			|";
@@ -871,7 +786,7 @@
 			|      		 </vd:producerList>
 			|";
 		КонецЕсли;
-		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда     //Дима
+		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда    
 			Запрос=Запрос+"
 			|      		 <vd:productMarkingList>
 			|";
@@ -892,7 +807,7 @@
 		КонецЕсли;
 		Запрос=Запрос+"
 			|            <vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
-			|            <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
+//			|            <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
 			|      		 <vd:sourceStockEntry />
 			|      </vd:consignment>
 			|    <vd:accompanyingForms>
@@ -910,14 +825,14 @@
 			|          <ent:enterprise />
 			|        </sh:consignee>
 			|";
-		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда  //Дима
+		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда  
 			Запрос=Запрос+"			
 			|        <sh:broker>
 			|          <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
 			|        </sh:broker>
 			|";
 		КонецЕсли;
-		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда  //Дима
+		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда 
 			Запрос=Запрос+"			
 			|        <sh:transportInfo>
 			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
@@ -1068,7 +983,7 @@
 			|            </vd:countryOfOrigin>
 			|";
 		
-		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда     //Дима
+		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда 
 			Запрос=Запрос+"
 			|      		 <vd:producerList>
 			|";
@@ -1088,7 +1003,7 @@
 			|      		 </vd:producerList>
 			|";
 		КонецЕсли;
-		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда     //Дима
+		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда
 			Запрос=Запрос+"
 			|      		 <vd:productMarkingList>
 			|";
@@ -1111,17 +1026,17 @@
 			|			<vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
 			|              </vd:batch>
 			|              <vd:purpose>
-			|                <bs:guid>5b90da1b-e089-11e1-bcf3-b499babae7ea</bs:guid>
+			|                <bs:guid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Цель").Guid ) +"</bs:guid>
 			|              </vd:purpose>
 			|";
-		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда  //Дима
+		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда
 			Запрос=Запрос+"			
 			|        <vd:broker>
 			|          <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
 			|        </vd:broker>
 			|";
 		КонецЕсли;
-		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда  //Дима
+		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда
 			Запрос=Запрос+"			
 			|        <vd:transportInfo>
 			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
@@ -1261,9 +1176,17 @@
 			Запрос = Запрос + "
 			|              <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>
 			|";
+		Иначе
+			Если ПустоеЗначение(НаименованиеПродукции) = 0 Тогда
+				Запрос = Запрос + " <pr:name>"+ СокрЛП(НаименованиеПродукции) +"</pr:name> ";    
+			Иначе
+				Запрос = Запрос + " <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name> ";	
+			КонецЕсли;
+						
 		КонецЕсли;
+
 		Запрос = Запрос + "
-			|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
+//			|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
 			|            </vd:productItem>
 			|            <vd:volume>"+ Док.Количество +"</vd:volume>
 			|            <vd:unit>
@@ -1304,8 +1227,14 @@
 			|              </vd:secondDate>
 			|";
 		КонецЕсли;
+		Если (ПустоеЗначение(док.ДатаИзготовленияСтрока)=0) Тогда
+			Запрос = Запрос + "
+			|              <vd:informalDate>"+ СокрЛП(док.ДатаИзготовленияСтрока) +"</vd:informalDate>";
+		КонецЕсли;
+
+
 		Запрос = Запрос + "
-			|              <vd:informalDate />
+	//		|              <vd:informalDate />
 			|            </vd:dateOfProduction>
 			|            <vd:expiryDate>
 			|";
@@ -1331,9 +1260,12 @@
 			|              </vd:secondDate>
 			|";
 		КонецЕсли;  
-		
+		Если (ПустоеЗначение(док.ДатаСрокГодностиСтрока)=0) Тогда
+			Запрос = Запрос + "
+			|              <vd:informalDate>"+ СокрЛП(док.ДатаСрокГодностиСтрока) +"</vd:informalDate>";
+		КонецЕсли;
 		Запрос = Запрос + "
-			|              <vd:informalDate />
+//			|              <vd:informalDate />
 			|            </vd:expiryDate>
 			|			<vd:perishable>"+ГМ.булево(док.скоропортящийся)+"</vd:perishable>
 			|            <vd:countryOfOrigin>
@@ -1341,7 +1273,20 @@
 			|            </vd:countryOfOrigin>
 			|";
 		
-		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда     //Дима
+		
+//		Если Пустоезначение(Док.Продукция_Элемент.Площадка.guid)=0 Тогда
+//			Запрос=Запрос+"
+//			|      		 <vd:producerList>
+//			|        		<ent:producer>
+//			|          			<ent:enterprise>
+//			|            			<bs:guid>"+ СокрЛП(Док.Продукция_Элемент.Площадка.guid) +"</bs:guid>
+//			|          			</ent:enterprise>
+//			|					<ent:role>PRODUCER</ent:role>
+//			|        		</ent:producer>
+//			|      		 </vd:producerList>
+//			|";
+	
+		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда
 			Запрос=Запрос+"
 			|      		 <vd:producerList>
 			|";
@@ -1361,7 +1306,7 @@
 			|      		 </vd:producerList>
 			|";
 		КонецЕсли;
-		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда     //Дима
+		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда
 			Запрос=Запрос+"
 			|      		 <vd:productMarkingList>
 			|";
@@ -1380,9 +1325,11 @@
 			|      		 <vd:productMarkingList />
 			|"; 
 		КонецЕсли;
+// ЖД Обрезанный до 98 символов productName отрабатывает на тестовой площадке нормально
+// можно заменить на 200 симв, если не погасит
 		Запрос=Запрос+"
 			|			<vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
-			|           <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
+//			|           <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
 			|      		<vd:sourceStockEntry />
 			|      </vd:consignment>
 			|
@@ -1390,8 +1337,19 @@
 			|      <vd:waybill>
 			|        <sh:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</sh:issueSeries>
 			|        <sh:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</sh:issueNumber>
-			|        <sh:issueDate>"+ ГМ.ДатаXML(док.ТтнДата) +"</sh:issueDate>
-			|        <sh:type>1</sh:type>
+			|        <sh:issueDate>"+ ГМ.ДатаXML(док.ТтнДата) +"</sh:issueDate>";
+			
+			Попытка
+				Запрос=Запрос+"			
+				|                  <sh:type>"+ док.ТтнТип +"</sh:type>";
+			Исключение
+				//Добавить Реквизит ттнТип в документ ВСД2_входящий
+				Сообщить("Добавьте Реквизит ттнТип (число 1.0) в документ ВСД2_входящий");
+				Сообщить("Отправляю с типом 1 - Товарно транспортная накладная");
+				Запрос=Запрос+"			
+				|                  <sh:type>1</sh:type>";
+			КонецПопытки;
+			Запрос=Запрос+"			
 			|        <sh:consignor>
 			|          <ent:businessEntity />
 			|          <ent:enterprise />
@@ -1401,23 +1359,40 @@
 			|          <ent:enterprise />
 			|        </sh:consignee>
 			|";
-		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда  //Дима
+		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда
 			Запрос=Запрос+"			
 			|        <sh:broker>
 			|          <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
 			|        </sh:broker>
 			|";
 		КонецЕсли;
-		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда  //Дима
+		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда
 			Запрос=Запрос+"			
 			|        <sh:transportInfo>
 			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
 			|          <sh:transportNumber>
 			|"; 
 			Если СокрЛП(Док.ТипТС) = "1" Тогда
+				Попытка
+					// Странный важный момент - контейнер д.б. первым !
+				Если ПустоеЗначение(док.номерКонтейнера)=0 Тогда
+			    	Запрос = Запрос+"
+					|            <sh:containerNumber>"+ СокрЛП(док.номерКонтейнера) +"</sh:containerNumber>
+					|";
+				КонецЕсли;
+				Исключение КонецПопытки;
+				
 			    Запрос = Запрос+"
-			|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
-			|";
+				|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
+				|";
+				Попытка
+				Если ПустоеЗначение(док.номерПолуприцепа)=0 Тогда
+			    	Запрос = Запрос+"
+					|            <sh:trailerNumber>"+ СокрЛП(док.номерПолуприцепа) +"</sh:trailerNumber>
+					|";
+				КонецЕсли;
+				Исключение КонецПопытки;
+			
 			иначеЕсли СокрЛП(Док.ТипТС) = "2" Тогда
 		    Запрос = Запрос+"
 			|            <sh:wagonNumber>"+ СокрЛП(док.номерАвто) +"</sh:wagonNumber>
@@ -1488,14 +1463,14 @@
 	Возврат Запрос;
 КонецФункции
 
-Функция Отправить_ВСД_Входящий(док)
+Функция Отправить_ВСД_Входящий(док,НаименованиеПродукции="")
 
 	//стандартное поведение функции	
 	Если Проверка_ВСД_Входящий(док)=0 Тогда 
 		Возврат 0;
 	КонецЕсли;	
 			
-	ЗапросXML = ВСД_входящий_ЗапросXML(док);
+	ЗапросXML = ВСД_входящий_ЗапросXML(док,НаименованиеПродукции);
 	
 	appID = ГМ.ОтправитьЗапросXML(ЗапросXML, док);
 		
@@ -1518,7 +1493,7 @@
 		    Продолжить;
 		КонецЕсли;
 		
-		Отправить_ВСД_Входящий(ВремТЗ.ДокВСД);	
+		Отправить_ВСД_Входящий(ВремТЗ.ДокВСД,ВремТЗ.НаименованиеПродукции);	
 		Отправлено = Отправлено + 1;
 		ВремТЗ.Пометка = 1;
 	КонецЦикла;
@@ -1619,6 +1594,7 @@
 ТЗВСД.НоваяКолонка("ВладелецХС");  //1С Элемент справочника. owner
 ТЗВСД.НоваяКолонка("productItem",,,,"Продукция");
 ТЗВСД.НоваяКолонка("volume",,,,"Объем",10);
+ТЗВСД.НоваяКолонка("ВсдДата");
 ТЗВСД.НоваяКолонка("ДокВСД");
 ТЗВСД.НоваяКолонка("uuid");
 
@@ -1634,9 +1610,10 @@
 //ТЗВСД.НоваяКолонка("Продукция");
 //ТЗВСД.НоваяКолонка("ВидПродукции");
 
-ТЗВСД.НоваяКолонка("ВсдДата");
+
 ТЗВСД.НоваяКолонка("ВсдСерия");
 ТЗВСД.НоваяКолонка("ВсдНомер");
+ТЗВСД.НоваяКолонка("НаименованиеПродукции","Строка",200);
 
 
 ТЗВСД.НоваяКолонка("createDate");
@@ -1647,6 +1624,8 @@
 ТЗВСД.НоваяКолонка("product");
 ТЗВСД.НоваяКолонка("subProduct");
 
+ТЗВСД.НоваяКолонка("productItem");
+ТЗВСД.НоваяКолонка("productItemGuid");
 ТЗВСД.НоваяКолонка("productItemUuid");
 
 ТЗВСД.НоваяКолонка("unitGuid");
@@ -1654,21 +1633,25 @@
 ТЗВСД.НоваяКолонка("packingFormName");
 ТЗВСД.НоваяКолонка("packingAmount");
 ТЗВСД.НоваяКолонка("ДатаИзготовления1");
-ТЗВСД.НоваяКолонка("ДатаИзготовления");
+ТЗВСД.НоваяКолонка("ДатаИзготовленияСтрока");
 ТЗВСД.НоваяКолонка("ДатаИзготовления2");
 ТЗВСД.НоваяКолонка("ДатаСрокГодности1");
-ТЗВСД.НоваяКолонка("ДатаСрокГодности");
+ТЗВСД.НоваяКолонка("ДатаСрокГодностиСтрока");
 ТЗВСД.НоваяКолонка("ДатаСрокГодности2");
 ТЗВСД.НоваяКолонка("producer");
 ТЗВСД.НоваяКолонка("ProductMarking");
 ТЗВСД.НоваяКолонка("ТипТранспорта");
 ТЗВСД.НоваяКолонка("АвтоНомер");
+ТЗВСД.НоваяКолонка("номерПолуприцепа");
+ТЗВСД.НоваяКолонка("номерКонтейнера");
 ТЗВСД.НоваяКолонка("ТермУсловия");
 ТЗВСД.НоваяКолонка("Местность");
 ТЗВСД.НоваяКолонка("ОсОтм");
 ТЗВСД.НоваяКолонка("Эксп");
 ТЗВСД.НоваяКолонка("ТтнНомер");
 ТЗВСД.НоваяКолонка("ТтнДата");
+ТЗВСД.НоваяКолонка("ТтнТип","Число",1,0);
+
 ТЗВСД.НоваяКолонка("cExpertized");
 ТЗВСД.НоваяКолонка("cInspected");    //??
 

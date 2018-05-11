@@ -3,12 +3,31 @@
 Перем ГМ2; // Глобальный модуль для Ветис 2.0
 Перем ВыбРеквизит; //для выбора площадки
 
+Функция ПриИзмененииПлощадки()
+	ГМ.СписокКонстант.Установить("Отправитель_Площадка",Отправитель_Площадка);	
+КонецФункции
+
 Процедура ПриИзмененииФирмы()
-	ГМ.Инициализация(ВыбФирма);
-	ГМ.ЗагрузитьПараметрыВФорму(Контекст);
+	Если Метаданные.Справочник("Фирмы").Выбран() = 1 Тогда
+		ГМ.Инициализация(ВыбФирма);
+		ГМ.ЗагрузитьПараметрыВФорму(Контекст);
+	КонецЕсли;
 КонецПроцедуры
 
 //======= ФУНКЦИИ ИНТЕРФЕЙСА ==============
+
+
+
+Процедура ПриНачалеВыбораЗначения(Элемент, ФлагПродолжения)
+
+	Если Элемент = "ФайлОтвета" Тогда
+		иф=""; ик="";
+		ФС.ВыбратьФайл(0,иф,ик,"Выберите файл с ответом Меркурия:","(*.xml)|*.xml","xml",60);
+		ФайлОтвета = ик+иф;
+	КонецЕсли;
+
+КонецПроцедуры 
+
 
  Процедура ПриВыбореЗакладки(НомерЗакладки, ЗначениеЗакладки)
 	
@@ -65,7 +84,7 @@
 		ВыбПлощадка = Элемент;
 		КонтФормы.Форма.Закрыть();
 	КонецЕсли;
-	
+	ПриИзмененииПлощадки();
 КонецПроцедуры
 
 Процедура Клик_условия()
@@ -124,10 +143,10 @@
     objDom.load(ГМ.Компонента.LogFilename);    	        
 	
     businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;									
-	guid = businessEntity.selectSingleNode("base:guid").text;
-	uuid = businessEntity.selectSingleNode("base:uuid").text;			
-	active = businessEntity.selectSingleNode("base:active").text;		
-	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("base:guid").text;		
+	guid = businessEntity.selectSingleNode("bs:guid").text;
+	uuid = businessEntity.selectSingleNode("bs:uuid").text;			
+	active = businessEntity.selectSingleNode("bs:active").text;		
+	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;		
 	Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
 	
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
@@ -181,10 +200,10 @@
 	КонецЕсли;		
 		
     enterprise=objDom.selectSingleNode("//merc:enterprise") ;								
-	guid = enterprise.selectSingleNode("base:guid").text;
-	uuid = enterprise.selectSingleNode("base:uuid").text;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
 	name = enterprise.selectSingleNode("ent:name").text;
-	active = enterprise.selectSingleNode("base:active").text;
+	active = enterprise.selectSingleNode("bs:active").text;
 				
 	если ПустоеЗначение(GUID)=0 Тогда			
 		Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
@@ -200,6 +219,8 @@
 	КонецЕсли;
 		
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );	
+	
+	ГМ.Пауза();
 	
 	СоздатьСвязьХозсубъектПлощадка(Площадка);
 				
@@ -340,9 +361,9 @@
 	КонецЕсли;
     
     enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
-	guid = enterprise.selectSingleNode("base:guid").text;
-	uuid = enterprise.selectSingleNode("base:uuid").text;
-	active = enterprise.selectSingleNode("base:active").text;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
+	active = enterprise.selectSingleNode("bs:active").text;
 						
 	если ПустоеЗначение(GUID)=0 Тогда			
 		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
@@ -463,38 +484,6 @@
 
 //=========================================================================
 
-Функция Продукция_Инфо_ЗапросXML( продукция )
-	Запрос = "
-	|<soapenv:Envelope 
-	|xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' 
-	|xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2' 
-	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'>
-	|   <soapenv:Header/>
-	|   <soapenv:Body>
-	|      <ws:getProductItemByGuidRequest>
-	|         <bs:guid>"+ СокрЛП(продукция.GUID) +"</bs:guid>
-	|      </ws:getProductItemByGuidRequest>
-	|   </soapenv:Body>
-	|</soapenv:Envelope>
-	|";
-	
-	Возврат запрос;
-КонецФункции
-
-Процедура Получить_Инфо_Продукции( Продукция )
-	ЗапросXML = Продукция_Инфо_ЗапросXML( Продукция );
-
-	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/services/2.0/ProductService";
-    метод.Action = "GetProductItemByGuid";	
-	
-	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
-		
-	Результат = ГМ.ПолучитьРезультат_Список_Продукции(Продукция);
-	
-	ГМ.УдалитьXML( ГМ.Компонента.LogFilename);	
-	
-КонецПроцедуры
 
 Функция ЗагрузитьXML_ПеревозкаРазрешена_2(имяФайла) Экспорт 
 	//<dt:decision> 	dt:RegionalizationDecision
@@ -540,36 +529,48 @@
 		
 	УсловияПеревозки = СоздатьОбъект("ТаблицаЗначений");
 	УсловияПеревозки.НоваяКолонка("Пометка", , , , ,3,);
+	УсловияПеревозки.НоваяКолонка("ВидПродукции", , , , ,5,);
+	УсловияПеревозки.НоваяКолонка("Решение", , , , ,1,);
 	УсловияПеревозки.НоваяКолонка("Название", , , , ,5,);
 	УсловияПеревозки.НоваяКолонка("UUID", , , , ,3,);
 	УсловияПеревозки.НоваяКолонка("GUID", , , , ,3,);
 		
-	Сообщить("Получено "+RouteSectionList.length+" записей","i");
-    Для i1 = 0 По RouteSectionList.length - 1 Цикл     // по продукции - какая разрешена, какая нет
+	Сообщить("Получено "+RouteSectionList.length+" записей по отрезкам маршрута","i");
+    Для i1 = 0 По RouteSectionList.length - 1 Цикл     
         RouteSection = RouteSectionList.item(i1);
-		decision = RouteSection.selectSingleNode("vd:appliedR13nRule").selectSingleNode("dt:decision").text;
-		Решение = Число(decision);
-		Если Решение = 1 Тогда
-			Сообщить("Перемещение разрешено.");    
-		ИначеЕсли Решение = 2 Тогда
-			Сообщить("Перемещение разрешено при обязательном соблюдении условий.");    
-		Иначе
-			Сообщить("Перемещение запрещено.");    
-		КонецЕсли;
-				
-		requirements = RouteSection.selectSingleNode("vd:appliedR13nRule").selectNodes("dt:requirement");
-		Для i2 = 0 По requirements.length - 1 Цикл 
-			conditionGroup = requirements.item(i2).selectNodes("dt:conditionGroup");
-			Для i3=0 По conditionGroup.length - 1 Цикл 
-				condition = conditionGroup.item(i3).selectSingleNode("dt:condition");
-				УсловияПеревозки.НоваяСтрока();
-				УсловияПеревозки.Пометка = 2;
-				УсловияПеревозки.Название = condition.selectSingleNode("dt:text").text;
-				УсловияПеревозки.UUID = condition.selectSingleNode("bs:uuid").text;
-				УсловияПеревозки.GUID = condition.selectSingleNode("bs:guid").text;
+		RuleList = RouteSection.SelectNodes("vd:appliedR13nRule");
+		Сообщить("Получено "+RuleList.length+" записей правил перемещения","i");
+		Для k1 = 0 По RuleList.length - 1 Цикл
+			appliedR13nRule = RuleList.item(k1);
+			Решение = Число(appliedR13nRule.selectSingleNode("dt:decision").text);
+			ВидПродукции = ГМ.НайтиВидПродукции( appliedR13nRule.selectSingleNode("dt:cargoType").selectSingleNode("bs:guid").text);
+			
+			requirements = appliedR13nRule.selectNodes("dt:requirement");
+			Сообщить("Получено "+requirements.length+" записей по правилам для "+ВидПродукции,"i");
+			Для i2 = 0 По requirements.length - 1 Цикл 
+				conditionGroup = requirements.item(i2).selectNodes("dt:conditionGroup");
+				Для i3=0 По conditionGroup.length - 1 Цикл
+					conditionList = conditionGroup.item(i3).selectNodes("dt:condition");
+					Для i4=0 По conditionList.length - 1 Цикл
+						condition = conditionList.item(i4);
+						УсловияПеревозки.НоваяСтрока();
+						УсловияПеревозки.Пометка = 2;  
+						УсловияПеревозки.Решение = Решение;
+						УсловияПеревозки.ВидПродукции = ВидПродукции;
+						УсловияПеревозки.Название = condition.selectSingleNode("dt:text").text;
+						УсловияПеревозки.UUID = condition.selectSingleNode("bs:uuid").text;
+						УсловияПеревозки.GUID = condition.selectSingleNode("bs:guid").text;
+						Если Решение = 1 Тогда
+							Сообщить("Перемещение разрешено.");    
+						ИначеЕсли Решение = 2 Тогда
+							Сообщить("Перемещение разрешено при обязательном соблюдении условий." + УсловияПеревозки.Название);    
+						Иначе
+							Сообщить("Перемещение запрещено." +УсловияПеревозки.Название);    
+						КонецЕсли;					
+					КонецЦикла;
+				КонецЦикла;
 			КонецЦикла;
-		КонецЦикла;
-		
+		КонецЦикла;	
 	КонецЦикла;
 
 	Возврат УсловияПеревозки;
@@ -586,6 +587,21 @@
 	тзУсловияПеревозки.ТекущаяСтрока(1);
 КонецФункции
 
+Процедура Регионализация()
+	ТзУсловияПеревозки.УдалитьСтроки();
+	Рез = ГМ2.ПроверитьВозможностьПеремещения( ВСД_транзакция_2 );
+	Если ТипЗначенияСтр(Рез) = "ТаблицаЗначений" Тогда
+	    тзУсловияПеревозки.Загрузить(Рез);
+		тзУсловияПеревозки.ВыводитьПиктограммы("Пометка");
+		тзУсловияПеревозки.ТекущаяСтрока(1);		
+	КонецЕсли;
+//	ФайлОтвета = ГМ.Компонента.LogFilename;
+//	ПрочестьХМЛРегион();
+КонецПроцедуры 
+
+Процедура ПриВыбореВСДТранзакция()
+	тзУсловияПеревозки.УдалитьСтроки();	
+КонецПроцедуры
 
 //Регионализация Конец
 
@@ -699,10 +715,21 @@
 			Возврат;
 
 		КонецЕсли;
+	Иначе
+		//Открыта без параметров
+		попытка
+		стр = "";
+		к = ГМ.ПараметрыФирм.ПолучитьЗначение(1,стр);
+		Если Пустоезначение(стр) = 0 Тогда
+			ВыбФирма = ЗначениеИзСтрокиВнутр(стр);
+		КонецЕсли;
+		Исключение	КонецПопытки;		
 	КонецЕсли;   
 	//}
 	
 КонецПроцедуры
+
+
 
 НачДата = ТекущаяДата();
 КонДата = НачДата;
@@ -717,6 +744,8 @@ productType = 1; //мясо
 КонецПопытки;
 
 тзУсловияПеревозки.НоваяКолонка("Пометка");
+тзУсловияПеревозки.НоваяКолонка("ВидПродукции");
+тзУсловияПеревозки.НоваяКолонка("Решение");
 тзУсловияПеревозки.НоваяКолонка("Название");
 тзУсловияПеревозки.НоваяКолонка("UUID");
 тзУсловияПеревозки.НоваяКолонка("GUID");
