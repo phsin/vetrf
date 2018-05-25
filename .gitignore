@@ -1,4 +1,4 @@
-/NEW_STRU/
+﻿/NEW_STRU/
 /SYSLOG/
 /usrdef/
 /users/
@@ -35,3 +35,4 @@ history.prm
 *.mxl
 *.txt
 *.frm
+*.prm
