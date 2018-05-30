@@ -4985,7 +4985,9 @@
 				|            <vd:countryOfOrigin>
 				|              <bs:uuid>"+ СокрЛП( СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
 				|            </vd:countryOfOrigin>
-				|            <vd:productMarkingList />
+				|            <vd:productMarkingList >
+				|               <vd:productMarking class='BN'>"+ Сокрлп(док.OperationID) +"</vd:productMarking>
+				|            </vd:productMarkingList >
 				|            <vd:lowGradeCargo>false</vd:lowGradeCargo>
 				|          </vd:productiveBatch>			
 				|";
