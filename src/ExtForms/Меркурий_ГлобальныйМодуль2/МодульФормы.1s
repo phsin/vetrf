@@ -1247,7 +1247,11 @@
 			consignment = consignment+ "
     	    |        <vd:productItem>";
 //			consignment = consignment+									"|          <bs:uuid>"+СокрЛП(док.Продукция_Элемент.UUID)+"</bs:uuid>
-    	    consignment = consignment+?(ПустоеЗначение(док.Продукция_Элемент.GUID)= 0,	"          <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>","");
+    	    // При изменении Вида продукции у ProductItem ошибка при списании ранее полученной партии
+			// Указанное наименование продукции относится к другому виду продукции.
+			Если Док.Продукция_Элемент.ВидПродукции = Док.Партия.ВидПродукции Тогда
+				consignment = consignment+?(ПустоеЗначение(док.Продукция_Элемент.GUID)= 0,	"          <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>","");
+    	    КонецЕсли;
     	    consignment = consignment+?(ПустоеЗначение(док.GTIN)= 0,	"          <dt:globalID>"+ СокрЛП(док.GTIN) +"</dt:globalID>","");
         	consignment = consignment+									"          <dt:name>"+СокрЛП(док.НаименованиеПродукции)+"</dt:name>";
 	        consignment = consignment+?(ПустоеЗначение(док.КодПродукции)= 0,	"          <dt:code>"+ СокрЛП(док.КодПродукции) +"</dt:code>","");
