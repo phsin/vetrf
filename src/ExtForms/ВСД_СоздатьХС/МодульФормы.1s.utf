@@ -1,0 +1,272 @@
+Перем ГМ;
+// вспомогательные переменные, можно хранить в списке значений
+
+Процедура ПриНачалеВыбораЗначения(ЭлементДиалога, ФлагПродолжения)
+
+	Если ЭлементДиалога = "Регион" Тогда
+		ВремЭлем = Страна;
+		ОткрытьФорму("Справочник.ВСД_Регион",ВремЭлем);
+		ФлагПродолжения = 0;
+	ИначеЕсли ЭлементДиалога = "Район" Тогда
+		ВремЭлем = Регион;
+		ОткрытьФорму("Справочник.ВСД_Район",ВремЭлем);
+		ФлагПродолжения = 0;
+	ИначеЕсли ЭлементДиалога = "Город" Тогда
+		ВремЭлем = Регион;
+		ОткрытьФорму("Справочник.ВСД_Город",ВремЭлем);
+		ФлагПродолжения = 0;
+	ИначеЕсли ЭлементДиалога = "Улица" Тогда
+		ВремЭлем = Город;
+		ОткрытьФорму("Справочник.ВСД_Улица",ВремЭлем);
+		ФлагПродолжения = 0;
+	КонецЕсли;
+
+КонецПроцедуры 
+
+Процедура ПриВыбореХС( ХС )
+	ИНН = ГМ.ПолучитьИНН(ХС.Контрагент);	
+	КПП = ГМ.ПолучитьКПП(ХС.Контрагент);	
+	ОГРН = ГМ.ПолучитьОГРН(ХС);
+	Адрес = ГМ.ПолучитьЮрАдрес(ХС.Контрагент);
+	ПолноеНаименование = ГМ.ПолучитьНаименованиеКлиента(ХС.Контрагент); 
+	
+	Если ПустоеЗначение(ИНН)=1 Тогда 
+		Сообщить("Неправильно указан ИНН","!");
+	КонецЕсли;	
+	Если ПустоеЗначение(ОГРН)=1 Тогда 
+		Сообщить("Не указан ОГРН","!");
+	КонецЕсли;
+	
+КонецПроцедуры
+
+// при открытии формы обработки запоминаем переданные параметры,
+// после чего закрываем форму документа (ставится "в очередь")
+Процедура ПриОткрытии()
+	Причина = "Причина добавления субъекта в реестр.";
+	
+   	Если ТипЗначенияСтр(Форма.Параметр) = "СписокЗначений" Тогда
+      	ГМ = Форма.Параметр.Получить("ГМ");
+	  	ВыбХС = Форма.Параметр.Получить("ХС");
+	  	ПриВыбореХС( ВыбХС );
+	  	ГМ.ЗагрузитьПараметрыВФорму(Контекст);
+   Иначе
+      СтатусВозврата(0);
+   КонецЕсли;
+КонецПроцедуры // ПриОткрытии 
+
+
+Процедура ХС_Создать_Ответ( applicationID, ХС)
+	
+	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Не указано applicationID");
+		Возврат;
+	КонецЕсли;
+	
+	Сообщить(" Запрос CreateBusinessEntityResult [ "+СокрЛП(applicationID)+" ]","i");		
+	Результат = ГМ.Компонента.CreateBusinessEntityResult( СокрЛП(applicationID));
+	//Отладка();	
+	
+    Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);        
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ГМ.Компонента.LogFilename);    
+	
+	Если ГМ.НайтиОшибки()>0 Тогда 
+		Возврат;
+	КонецЕсли;
+    
+    enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
+	guid = enterprise.selectSingleNode("base:guid").text;
+	uuid = enterprise.selectSingleNode("base:uuid").text;
+	active = enterprise.selectSingleNode("base:active").text;
+						
+	если ПустоеЗначение(GUID)=0 Тогда			
+		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
+		Спр.НайтиЭлемент(ХС);
+		спр.GUID = GUID;
+		спр.Записать();
+		Сообщить("Успешно записан ВСД_ХозСубъект ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
+	Иначе
+		Сообщить("Пустой GUID ХозСубъекта");
+	КонецЕсли;
+
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+КонецПроцедуры
+
+Функция Создать_ХС_ЗапросXML()
+	ответ ="
+	//|<submitApplicationRequest xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+	//|  <apiKey xmlns='http://api.vetrf.ru/schema/cdm/application/ws-definitions'>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apiKey>
+	//|  <application xmlns='http://api.vetrf.ru/schema/cdm/application'>
+	//|    <serviceId>mercury-g2b.service</serviceId>
+	//|    <issuerId>"+ ГМ.СписокКонстант.Получить("param_issuer_id")+"</issuerId>
+	//|    <issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</issueDate>
+	//|    <data>
+	|      <modifyBusinessEntityRequest 
+	|      xmlns:sch='http://www.w3.org/2001/XMLSchema' 
+	|      xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
+	|      xmlns:sh='http://api.vetrf.ru/schema/cdm/argus/shipment' 
+	|      xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+	|      xmlns:app='http://api.vetrf.ru/schema/cdm/application' 
+	|      xmlns:co='http://api.vetrf.ru/schema/cdm/argus/common' 
+	|      xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
+	|      xmlns:pr='http://api.vetrf.ru/schema/cdm/argus/production' 
+	|      xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar' 
+	|      xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+	|      xmlns='http://api.vetrf.ru/schema/cdm/mercury/applications'>
+	|        <localTransactionId>[GUID]</localTransactionId>
+	|        <initiator>
+	|          <co:login>"+ ГМ.СписокКонстант.Получить("param_intiator_login")+"</co:login>
+	|        </initiator>
+	|        <modificationOperation>
+	|          <ent:type>FIND_OR_CREATE</ent:type>
+	|          <ent:affectedList count='0' total='0' offset='0' />
+	|          <ent:resultingList count='1' total='1' offset='0'>
+	|";
+	
+	Если СтрДлина( СокрЛП(ИНН) ) = 12 Тогда 
+		// ИП = физ лицо
+		ответ = ответ + "
+		|  <ent:businessEntity>
+        |  <ent:type>2</ent:type>
+		|    <ent:fio>"+ СокрЛП(ПолноеНаименование) +"</ent:fio>
+		|    <ent:inn>" + СокрЛП(ИНН) +"</ent:inn>
+		|    <ent:ogrn>" + СокрЛП(ОГРН) +"</ent:ogrn>
+		|";
+	
+	Иначе  //Юр лицо ООО
+		ответ = ответ + "
+		|            <ent:businessEntity>
+		|              <ent:type>1</ent:type>
+		|              <ent:name>"+ СокрЛП(ПолноеНаименование) +"</ent:name>
+		|              <ent:incorporationForm>
+		|                <ent:code>12300</ent:code>
+		|              </ent:incorporationForm>
+		|              <ent:fullName>"+ СокрЛП(ПолноеНаименование) +"</ent:fullName>
+		|              <ent:inn>" + СокрЛП(ИНН) +"</ent:inn>
+		|              <ent:kpp>" + СокрЛП(КПП) +"</ent:kpp>
+		|              <ent:ogrn>" + СокрЛП(ОГРН) +"</ent:ogrn>
+		|";
+	КонецЕсли;
+
+	ответ=ответ+"
+		|              <ent:juridicalAddress>
+		|                <ik:country>
+		|                  <bs:guid>"+ СокрЛП(Страна.GUID) +"</bs:guid>
+		|                </ik:country>
+		|                <ik:federalDistrict />
+		|                <ik:region>
+		|                  <bs:guid>"+ СокрЛП(Регион.GUID) +"</bs:guid>
+		|                </ik:region>
+		|                <ik:district />
+		|                <ik:locality>
+		|                  <bs:guid>"+ СокрЛП(Город.GUID) +"</bs:guid>
+		|                </ik:locality>
+		|                <ik:subLocality />
+		|";
+;	
+	Если ПустоеЗначение(Улица.GUID)=0 Тогда 
+		Ответ=Ответ+"
+		|                <ik:street>
+		|                   <bs:guid>"+ СокрЛП(Улица.GUID) +"</bs:guid>
+		|                </ik:street>
+		|";
+	Иначе
+			Ответ=Ответ+"  <ik:street /> ";		
+	КонецЕсли;
+	Ответ=Ответ+"
+	|                <ik:addressView>" + СокрЛП(Адрес) +"</ik:addressView>
+	|              </ent:juridicalAddress>
+	|            </ent:businessEntity>
+	|          </ent:resultingList>
+	|          <ent:reason>"+ СокрЛП(Причина) +"</ent:reason>
+	|        </modificationOperation>
+	|      </modifyBusinessEntityRequest>
+	//|    </data>
+	//|  </application>
+	//|</submitApplicationRequest>
+	|";
+	
+	Возврат ответ;
+КонецФункции
+//
+//Процедура _ХС_Создать_(ХС)
+//
+//	
+//	Сообщить(" Запрос CreateBusinessEntity [ "+ИНН+" ]","i");		
+//	Результат = ГМ.Компонента.CreateBusinessEntity(
+//			СокрЛП(хс.Наименование),  							// название
+//			СокрЛП(ПолноеНаименование), 	// полное название
+//			ИНН, 
+//			КПП, 
+//			ОГРН, 
+//	        СокрЛП(Страна.GUID), 
+//            СокрЛП(Регион.GUID), 
+//            СокрЛП(Город.GUID), 
+//			Адрес
+//	);
+//	
+//	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+//	
+//	Если Результат="ACCEPTED" Тогда
+//		ГМ.Пауза();
+//		
+//		ХС_Создать_Ответ( ГМ.Компонента.ApplicationId, ХС )
+//		
+//	КонецЕсли;
+//	
+//КонецПроцедуры
+
+Процедура Создать_ХС_Результат( applicationID, ХС)
+	
+	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Не указано applicationID");
+		Возврат;
+	КонецЕсли;
+	
+	//Сообщить(" Запрос CreateBusinessEntityResult [ "+СокрЛП(applicationID)+" ]","i");		
+	//Результат = ГМ.Компонента.CreateBusinessEntityResult( СокрЛП(applicationID));
+	//Отладка();	
+	
+    Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);        
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ГМ.Компонента.LogFilename);    
+	
+	Если ГМ.НайтиОшибки()>0 Тогда 
+		Возврат;
+	КонецЕсли;
+    
+    enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
+	active = enterprise.selectSingleNode("bs:active").text;
+						
+	если ПустоеЗначение(GUID)=0 Тогда			
+		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
+		Спр.НайтиЭлемент(ХС);
+		спр.GUID = GUID;
+		спр.Записать();
+		Сообщить("Успешно записан ВСД_ХозСубъект ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
+	Иначе
+		Сообщить("Пустой GUID ХозСубъекта");
+	КонецЕсли;
+
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+КонецПроцедуры
+
+Функция ХС_Создать(ХС) 	
+	ЗапросXML = Создать_ХС_ЗапросXML(  );
+
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";	
+	
+	appID = ГМ.ОтправитьЗапросXML(ЗапросXML);
+	
+	Создать_ХС_Результат(appID, ХС);
+		
+	Возврат appID;
+КонецФункции
+
+Процедура НайтиОГРН()
+	ЗапуститьПриложение("https://egrul.nalog.ru/");
+КонецПроцедуры
