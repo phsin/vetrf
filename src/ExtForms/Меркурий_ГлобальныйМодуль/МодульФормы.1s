@@ -2737,6 +2737,7 @@
 		Спр.Наименование = view;
 		Спр.GUID = guid;
 		Спр.UUID = UUID;
+		Спр.ParentGUID = Страна.GUID;
 		Спр.Записать();
 		Сообщить("Записан ВСД_Регион ["+name+"] ","");
     КонецЦикла;
@@ -2795,6 +2796,7 @@
 		Спр.Наименование = view;
 		Спр.GUID = guid;
 		Спр.UUID = UUID;
+		Спр.ParentGUID = Регион.GUID;
 		Спр.Записать();
 		Сообщить("Записан ВСД_Район ["+name+"] ","");
     КонецЦикла;
@@ -2845,8 +2847,87 @@
 		Спр.Наименование = view;
 		Спр.GUID = guid;
 		Спр.UUID = UUID;
+		Спр.ParentGUID = Регион.GUID;
 		Спр.Записать();
 		Сообщить("Записан ВСД_Город ["+name+"] ","");
+    КонецЦикла;
+
+	Сообщить("Загрузка завершена");
+КонецФункции
+
+Функция Список_Улиц_ЗапросXML( Город, Смещение )
+
+	Запрос = "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' 
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions' 
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base' 
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:getStreetListByLocalityRequest>
+	|         <base:listOptions>
+	|            <base:count>1000</base:count>
+	|            <base:offset>"+Смещение+"</base:offset>
+	|         </base:listOptions>
+	|         <ikar:localityGuid>" +СокрЛП(Город.GUID)+ "</ikar:localityGuid>
+	|      </ws:getStreetListByLocalityRequest>
+	|   </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	
+	возврат Запрос;
+КонецФункции
+
+Функция ИнициализацияХС_ЗагрузитьУлицы(Город, Смещение=0) Экспорт 
+
+	//стандартное поведение функции			
+	//Страна_GUID = ?(ПустоеЗначение(Страна)=1,"",Страна_GUID);
+		
+	Сообщить(" Запрос getStreetListByLocalityRequest "+Город+" ["+СокрЛП(Город.GUID) +"]","i");	
+	ЗапросXML = Список_Улиц_ЗапросXML( Город, Смещение );
+
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/ikar/services/IkarService";
+    метод.Action = "GetStreetListByLocality";	
+	
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+	
+	//Отладка();
+	
+	Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);    
+
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(Компонента.LogFilename);    
+    
+	Если НайтиОшибки()>0 Тогда 
+		Возврат "";
+	КонецЕсли;		
+	
+	Спр = СоздатьОбъект("Справочник.ВСД_Улица");
+    List = objDom.selectNodes("//ikar:street") ;
+    Для i1 = 0 По List.length - 1 Цикл
+        item=List.item(i1);
+		
+		uuid = item.selectSingleNode("bs:uuid").text;
+		guid = item.selectSingleNode("bs:guid").text;
+		st = item.selectSingleNode("bs:status").text;
+		//updateDate = product.selectSingleNode("updateDate").text;
+		//createDate = product.selectSingleNode("createDate").text;		
+		name = item.selectSingleNode("ikar:name").text;
+		view = item.selectSingleNode("ikar:view").text;
+					
+		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда 
+			//Рез = Спр.ТекущийЭлемент();
+		Иначе
+			Сообщить("Новый ВСД_Улица ["+name+"] ","i");
+			Спр.Новый();
+			//рез = Спр.ТекущийЭлемент();
+		КонецЕсли;		
+		Спр.Наименование = view;
+		Спр.GUID = guid;
+		Спр.UUID = UUID;
+		Спр.ParentGUID = Город.GUID;
+		Спр.Записать();
+		Сообщить("Записан ВСД_Улица ["+name+"] ","");
     КонецЦикла;
 
 	Сообщить("Загрузка завершена");
