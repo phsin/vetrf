@@ -2175,11 +2175,13 @@
     activityLocationList = objDom.selectNodes("//activityLocation") ;
     Для i1 = 0 По activityLocationList.length - 1 Цикл
         activityLocation=activityLocationList.item(i1);
-						
-		guid = activityLocation.selectSingleNode("enterprise").selectSingleNode("guid").text;
+		Попытка				
+			guid = activityLocation.selectSingleNode("enterprise").selectSingleNode("guid").text;
 		
-    	ЗагрузитьПлощадкуПоGUID(guid, ХС);
-					
+    		ЗагрузитьПлощадкуПоGUID(guid, ХС);
+		Исключение
+        	Сообщить("Не удалось получить GUID площадки из файла "+Компонента.LogFilename);
+		КонецПопытки;			
 	КонецЦикла;
 	
 	Сообщить("Загрузка площадок завершена","i");
