@@ -2840,7 +2840,7 @@
 
 // **************** Инвентаризация v2
 
-
+// http://help.vetrf.ru/wiki/ResolveDiscrepancyOperation_v2.0
 Функция ВСД2_инвентаризация_ЗапросXML(док)
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("ВСД2_инвентаризация_ЗапросXML");
@@ -2881,12 +2881,13 @@
 	|            <merc:responsible>
 	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
 	|            </merc:responsible>
-	|            <merc:stockDiscrepancy id='test1'>
-	|              <vd:resultingList>";
+	|";
 	Док.ВыбратьСтроки();
 	Пока Док.ПолучитьСтроку() = 1 Цикл
 
 		Запрос = Запрос + "	
+	|            <merc:stockDiscrepancy id='_"+ док.НомерСтроки +"'>
+	|              <vd:resultingList>
 		|                <vd:stockEntry>";
 	    Если ПустоеЗначение(Док.Партия)=0 Тогда // изменяем конкретную партию
 			Запрос = Запрос + "
@@ -3070,20 +3071,27 @@
 		|                      <bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
 		|                    </vd:owner>
 		|                  </vd:batch>
-		|                </vd:stockEntry>";
+		|                </vd:stockEntry>
+		|              </vd:resultingList>
+		|            </merc:stockDiscrepancy>
+		|";
+	КонецЦикла;
+	Док.ВыбратьСтроки();
+	Пока Док.ПолучитьСтроку() = 1 Цикл
+		Запрос = Запрос + "
+		
+		|            <merc:discrepancyReport for='_"+ док.НомерСтроки +"'>
+	//	|              <vd:issueSeries>777</vd:issueSeries>
+		|              <vd:issueNumber>"+ Док.НомерДок +"</vd:issueNumber>
+		|              <vd:issueDate>" + ГМ.ДатаXML(док.ДатаДок) + "</vd:issueDate>
+		|              <vd:reason>
+		|                <vd:name>"+СокрЛП(док.ПричинаРасхождения)+"</vd:name>
+		|              </vd:reason>
+		|              <vd:description>"+СокрЛП(док.ОписаниеНесоответствия)+"</vd:description>
+		|            </merc:discrepancyReport>
+		|";
 	КонецЦикла;
 	Запрос = Запрос + "
-	|              </vd:resultingList>
-	|            </merc:stockDiscrepancy>
-	|            <merc:discrepancyReport for='test1'>
-//	|              <vd:issueSeries>777</vd:issueSeries>
-	|              <vd:issueNumber>"+ Док.НомерДок +"</vd:issueNumber>
-	|              <vd:issueDate>" + ГМ.ДатаXML(док.ДатаДок) + "</vd:issueDate>
-	|              <vd:reason>
-	|                <vd:name>"+СокрЛП(док.ПричинаРасхождения)+"</vd:name>
-	|              </vd:reason>
-	|              <vd:description>"+СокрЛП(док.ОписаниеНесоответствия)+"</vd:description>
-	|            </merc:discrepancyReport>
 	|          </merc:resolveDiscrepancyRequest>
 	|        </apl:data>
 	|      </apl:application>
