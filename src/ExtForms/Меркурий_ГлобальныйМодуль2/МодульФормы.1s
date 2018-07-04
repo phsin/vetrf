@@ -445,7 +445,8 @@
 		//Попытка Некач = batch.selectSingleNode("vd:lowGradeCargo").text; Исключение	Некач = "";	КонецПопытки;
 	//Список физической упаковки. vd:packageList		
 	// С уровнями
-		УровниУпаковки = УровниУпаковки_из_XML(batch.selectSingleNode("vd:packageList").selectNodes("dt:package"));
+		Попытка package = batch.selectSingleNode("vd:packageList").selectNodes("dt:package"); Исключение package = ""; КонецПопытки;
+		УровниУпаковки = УровниУпаковки_из_XML( package );
 		Попытка Партия.УровниУпаковки = УровниУпаковки; Исключение 	КонецПопытки;
 			
 		ИмяФайла = ПолучитьИмяФайла_УровниУпаковки(Партия);
