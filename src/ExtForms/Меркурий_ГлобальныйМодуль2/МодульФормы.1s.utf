@@ -1508,7 +1508,7 @@
         |          <vd:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</vd:vehicleNumber>
         |        </vd:transportNumber>
         |      </vd:transportInfo>
-        |      <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</vd:transportStorageType>";
+        |      <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>";
 //	КонецЕсли;
 
 	ЗапросПодвал=ЗапросПодвал + Запрос_МаршрутДоставки( док );

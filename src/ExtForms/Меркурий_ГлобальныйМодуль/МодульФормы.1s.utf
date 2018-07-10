@@ -6045,7 +6045,7 @@
 	|                  <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
 	|                </sh:transportNumber>
 	|              </sh:transportInfo>
-	|              <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+	|              <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
 	|              <sh:cargoReloadingPointList />
 	|            </vd:waybill>
 	|";
