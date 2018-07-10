@@ -1500,16 +1500,21 @@
         |      </vd:broker>";
 	КонецЕсли;
 	
-//	Если ПустоеЗначение(док.номерАвто) = 0 Тогда // Смена владельца без перевозки
-		ЗапросПодвал = ЗапросПодвал+"		  
-        |      <vd:transportInfo>
-        |        <vd:transportType>1</vd:transportType>
-        |        <vd:transportNumber>
-        |          <vd:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</vd:vehicleNumber>
-        |        </vd:transportNumber>
-        |      </vd:transportInfo>
-        |      <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>";
-//	КонецЕсли;
+	//ТермическоеСостояние="";
+	//ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние, ТермическоеСостояние );
+	//Если ПустоеЗначение(ТермическоеСостояние)=1 Тогда
+	//	Предупреждение("Не указано ТермическоеСостояние");
+	//	Возврат "";
+	//КонецЕсли;
+	//
+	ЗапросПодвал = ЗапросПодвал+"		  
+    |      <vd:transportInfo>
+    |        <vd:transportType>1</vd:transportType>
+    |        <vd:transportNumber>
+    |          <vd:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</vd:vehicleNumber>
+    |        </vd:transportNumber>
+    |      </vd:transportInfo>
+    |      <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>";
 
 	ЗапросПодвал=ЗапросПодвал + Запрос_МаршрутДоставки( док );
 
