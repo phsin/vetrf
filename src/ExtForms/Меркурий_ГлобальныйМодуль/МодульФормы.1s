@@ -5553,6 +5553,8 @@
 			|            </vd:expiryDate>
 			|            <vd:perishable>false</vd:perishable>
 			|            <vd:countryOfOrigin>
+			|              <bs:uuid>"+ СокрЛП( СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
+			|            </vd:countryOfOrigin>
 			|";
 			Если ПустоеЗначение(док.Производитель_Площадка)=0 Тогда 
 				Запрос=Запрос+"
@@ -5567,8 +5569,6 @@
 				|";
 			КонецЕсли;
 			Запрос=Запрос+"			
-			|              <bs:uuid>"+ СокрЛП( СписокКонстант.Получить("Страна").UUID) +"</bs:uuid>
-			|            </vd:countryOfOrigin>
 			|            <vd:productMarkingList />
 			|            <vd:lowGradeCargo>false</vd:lowGradeCargo>
 			|          <vd:owner>
