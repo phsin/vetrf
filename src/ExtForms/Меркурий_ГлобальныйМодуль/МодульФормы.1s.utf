@@ -4495,7 +4495,7 @@
 			|                  <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
 			|                </sh:transportNumber>
 			|              </vd:transportInfo>
-			|              <vd:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</vd:transportStorageType>
+			|              <vd:transportStorageType>"+ ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>
 			|              <vd:cargoReloadingPointList />
 			|              <vd:waybillSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:waybillSeries>
 			|              <vd:waybillNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:waybillNumber>
@@ -4765,7 +4765,7 @@
 		КонецЕсли;
 		
 		Запрос=Запрос+"
-		|        <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+		|        <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
 		|        <sh:cargoReloadingPointList />
 		|      </vd:waybill>
 		|      <vd:vetCertificate>
@@ -5088,7 +5088,7 @@
 			|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
 			|          </sh:transportNumber>
 			|        </sh:transportInfo>
-			|        <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+			|        <sh:transportStorageType>"+ ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
 			|        <sh:cargoReloadingPointList />
 			|      </vd:waybill>
 			|      <vd:vetCertificate>
@@ -5227,7 +5227,7 @@
 			|                  <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
 			|                </sh:transportNumber>
 			|              </vd:transportInfo>
-			|              <vd:transportStorageType>"+ ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</vd:transportStorageType>
+			|              <vd:transportStorageType>"+ ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>
 			|              <vd:cargoReloadingPointList />
 			|              <vd:waybillSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:waybillSeries>
 			|              <vd:waybillNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:waybillNumber>

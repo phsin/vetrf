@@ -885,7 +885,7 @@
 		КонецЕсли;
 		
 			Запрос=Запрос+"
-			|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+			|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
 			|        <sh:cargoReloadingPointList />
 			|      </vd:waybill>
 			|      <vd:vetCertificate>
@@ -1089,7 +1089,7 @@
 		КонецЕсли;
 		
 			Запрос=Запрос+"
-			|              <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</vd:transportStorageType>
+			|              <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>
 			|              <vd:cargoReloadingPointList />
 			|              <vd:waybillSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:waybillSeries>
 			|              <vd:waybillNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:waybillNumber>
@@ -1436,7 +1436,7 @@
 		КонецЕсли;
 		
 			Запрос=Запрос+"
-			|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.Получить( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+			|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
 			|        <sh:cargoReloadingPointList />
 			|      </vd:waybill>
 			|      <vd:vetCertificate>
