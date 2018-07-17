@@ -247,10 +247,23 @@
 			Попытка ТЗточкиМаршрута.ПредприятиеНаименование	 =  	Узел.selectSingleNode("vd:enterprise").selectSingleNode("dt:name").text; Исключение КонецПопытки;
             Попытка ТЗточкиМаршрута.Перегрузка				 = 		Узел.selectSingleNode("vd:transshipment").text; Исключение КонецПопытки;
             Попытка ТЗточкиМаршрута.ТипТС					 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportType").text; Исключение КонецПопытки;
-            // В зависимости от типа ТС - смотри transportInfo в ЗагрузитьXML_ВСД2()
-			Попытка ТЗточкиМаршрута.номерКонтейнера			 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:containerNumber").text; Исключение КонецПопытки;
-            Попытка ТЗточкиМаршрута.номеравто				 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:vehicleNumber").text; Исключение КонецПопытки;
-            Попытка ТЗточкиМаршрута.номерПолуприцепа		 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:trailerNumber").text; Исключение КонецПопытки;
+			Если ТЗточкиМаршрута.ТипТС = "1" Тогда
+				Попытка ТЗточкиМаршрута.номеравто 			= Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:vehicleNumber").text; Исключение КонецПопытки;
+				Попытка ТЗточкиМаршрута.номерПолуприцепа 	= Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:trailerNumber").text; Исключение КонецПопытки;;
+				Попытка ТЗточкиМаршрута.номерКонтейнера 	= Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:containerNumber").text; Исключение КонецПопытки;
+			Иначеесли ТЗточкиМаршрута.ТипТС = "2" Тогда
+				Попытка ТЗточкиМаршрута.номеравто 			= Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:wagonNumber").text; Исключение КонецПопытки;
+			Иначеесли ТЗточкиМаршрута.ТипТС = "3" Тогда
+				Попытка ТЗточкиМаршрута.номеравто 			= Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:flightNumber").text; Исключение КонецПопытки;
+			Иначеесли (ТЗточкиМаршрута.ТипТС = "4") или (ТЗточкиМаршрута.ТипТС = "5") или (ТЗточкиМаршрута.ТипТС = "6") Тогда
+				Попытка ТЗточкиМаршрута.номеравто 			= Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:shipName").text; Исключение КонецПопытки;
+//			Иначеесли ТЗВСД.ТипТС = "7" Тогда
+//					ТЗВСД.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='shipName']").text;
+				
+			КонецЕсли;
+//			Попытка ТЗточкиМаршрута.номерКонтейнера			 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:containerNumber").text; Исключение КонецПопытки;
+//          Попытка ТЗточкиМаршрута.номеравто				 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:vehicleNumber").text; Исключение КонецПопытки;
+//          Попытка ТЗточкиМаршрута.номерПолуприцепа		 = 		Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportNumber").selectSingleNode("vd:trailerNumber").text; Исключение КонецПопытки;
 		КонецЦикла;
 	Исключение КонецПопытки;
 	
@@ -738,7 +751,20 @@
 			Попытка	докОбъект.термическоесостояние = ГМ.ТермическиеУсловияПеревозки.найтизначение(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportStorageType").text);Исключение	КонецПопытки;
 			// Маршрут Следования ЖД 17/07/18	 #1899 #1898
 			Попытка докОбъект.МаршрутСледования = МаршрутСледования_из_XML(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:shipmentRoute").selectNodes("vd:routePoint")); Исключение	КонецПопытки;
-				
+			Попытка
+				ТочкиМаршрута = ЗначениеИзСтроки(докОбъект.МаршрутСледования);
+				// ЖД При гашении Нужно указать Тип и № последнего ТС в Маршруте Следования - запишем данные в соотв реквизиты.
+				Если ТипЗначенияСтр(ТочкиМаршрута) = "ТаблицаЗначений" Тогда
+					ВсегоТочек = точкиМаршрута.КоличествоСтрок();
+					Если ВсегоТочек > 0 Тогда
+						ТочкиМаршрута.ПолучитьСтрокуПоНомеру(ВсегоТочек);
+						докОбъект.ТипТС				= ТочкиМаршрута.ТипТС;
+						докОбъект.номерКонтейнера 	= ТочкиМаршрута.номерКонтейнера;
+						докОбъект.номеравто			= ТочкиМаршрута.номеравто;
+						докОбъект.номерПолуприцепа	= ТочкиМаршрута.номерПолуприцепа;
+					КонецЕсли;
+				КонецЕсли;
+			Исключение	КонецПопытки;
 				
 		КонецЕсли;
 			
