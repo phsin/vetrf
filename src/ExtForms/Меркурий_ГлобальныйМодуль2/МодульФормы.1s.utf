@@ -3421,6 +3421,7 @@
 			|                      	<dt:enterprise>
 			|                      	  <bs:guid>"+ СокрЛП(док.Производитель_Площадка.GUID) +"</bs:guid>
 			|                      	</dt:enterprise>
+			|                       <dt:role>PRODUCER</dt:role>
 			|                      </vd:producer>";
 		КонецЕсли;
 			Запрос=Запрос+"
