@@ -2921,10 +2921,7 @@
         productItem = productItemList.item(i1);
 
 		active 	 = productItem.selectSingleNode("bs:active").text;
-
-		Если active="false" Тогда
-			Продолжить;
-		КонецЕсли;
+		last 	 = productItem.selectSingleNode("bs:last").text;
 
 		//st  	 = productItem.selectSingleNode("bs:status").text;
 		//prodType = productItem.selectSingleNode("dt:productType").text;
@@ -2940,6 +2937,16 @@
 				КонецЕсли;
 			КонецЕсли;
 		КонецЕсли;
+
+		Если ((last="true") и (active="false")) Тогда
+			//Если СпрОбъект.Выбран()=1 Тогда
+				СпрОбъект.Удалить(0);
+			//КонецЕсли;
+		КонецЕсли;
+		Если active="false" Тогда
+			Продолжить;
+		КонецЕсли;
+
 
 		СпрОбъект.Наименование = productItem.selectSingleNode("dt:name").text;
 		СпрОбъект.Продукция = ГМ.НайтиПродукцию(productItem.selectSingleNode("dt:product").selectSingleNode("bs:guid").text);
@@ -3076,93 +3083,116 @@
 		|        <apl:issueDate>" + ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
 		|        <apl:data>
 		|          <merc:modifyProducerStockListRequest>
-		|            <merc:localTransactionId>" + "Id1" + "</merc:localTransactionId>
+		|            <merc:localTransactionId>" + "[GUID]" + "</merc:localTransactionId>
 		|            <merc:initiator>
 		|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
 		|            </merc:initiator>
 		|            <merc:modificationOperation>
 	    |          <vd:type>"+RegisterModificationType+"</vd:type>
-	    |          <vd:resultingList>
-	    |            <dt:productItem>";
+		|";
 
-		//При Модификации
-//	    Если ПустоеЗначение(продукцияЭлемент.guid) = 0 Тогда
-//			Запрос = Запрос + "
-//    		|              <dt:guid>"+СокрЛП(продукцияЭлемент.guid)+"</dt:guid>";
-//		КонецЕсли;
-	    Если ПустоеЗначение(продукцияЭлемент.uuid) = 0 Тогда
+		Если RegisterModificationType = "DELETE" Тогда
 			Запрос = Запрос + "
-    		|              <bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
-		КонецЕсли;
-
-		Попытка //Нет пока такого реквизита в справочнике
-		    Если ПустоеЗначение(продукцияЭлемент.GTIN) = 0 Тогда
+		    |          <vd:affectedList>
+		    |            <dt:productItem>";
+		    Если ПустоеЗначение(продукцияЭлемент.uuid) = 0 Тогда
 				Запрос = Запрос + "
-    			|              <dt:globalID>"+ продукцияЭлемент.GTIN +"</dt:globalID>";
+	    		|              <bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
 			КонецЕсли;
-		Исключение КонецПопытки;
 
-		Название = УбратьСпецСимв( продукцияЭлемент.Наименование );
-		Запрос = Запрос + "
-	    |              <dt:name>"+СокрЛП( Название )+"</dt:name>";
-	    Если ПустоеЗначение(продукцияЭлемент.Артикул) = 0 Тогда
 			Запрос = Запрос + "
-    		|              <dt:code>"+СокрЛП(продукцияЭлемент.Артикул)+"</dt:code>";
-		КонецЕсли;
-		Запрос = Запрос + "
-	    |              <dt:productType>"+продукцияЭлемент.Продукция.Тип+"</dt:productType>
-    	|              <dt:product>
-	    |                <bs:guid>"+Сокрлп(продукцияЭлемент.Продукция.GUID)+"</bs:guid>
-    	|              </dt:product>
-	    |              <dt:subProduct>
-    	|                <bs:guid>"+Сокрлп(продукцияЭлемент.ВидПродукции.GUID)+"</bs:guid>
-	    |              </dt:subProduct>
-		|              <dt:correspondsToGost>"+ГМ.Булево(продукцияЭлемент.СоответствуетГОСТу)+"</dt:correspondsToGost>";
-	    Если продукцияЭлемент.СоответствуетГОСТу = 1 Тогда
+			|            </dt:productItem>
+		    |          </vd:affectedList>";
+
+		Иначе
 			Запрос = Запрос + "
-	    	|              <dt:gost>"+СокрЛП(продукцияЭлемент.Гост)+"</dt:gost>";
+		    |          <vd:resultingList>
+		    |            <dt:productItem>";
+
+			//При Модификации
+	//	    Если ПустоеЗначение(продукцияЭлемент.guid) = 0 Тогда
+	//			Запрос = Запрос + "
+	//    		|              <dt:guid>"+СокрЛП(продукцияЭлемент.guid)+"</dt:guid>";
+	//		КонецЕсли;
+
+		    Если ПустоеЗначение(продукцияЭлемент.uuid) = 0 Тогда
+				Запрос = Запрос + "
+	    		|              <bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
+			КонецЕсли;
+
+
+			Попытка //Нет пока такого реквизита в справочнике
+			    Если ПустоеЗначение(продукцияЭлемент.GTIN) = 0 Тогда
+					Запрос = Запрос + "
+	    			|              <dt:globalID>"+ продукцияЭлемент.GTIN +"</dt:globalID>";
+				КонецЕсли;
+			Исключение КонецПопытки;
+
+			Название = УбратьСпецСимв( продукцияЭлемент.Наименование );
+			Запрос = Запрос + "
+		    |              <dt:name>"+СокрЛП( Название )+"</dt:name>";
+		    Если ПустоеЗначение(продукцияЭлемент.Артикул) = 0 Тогда
+				Запрос = Запрос + "
+	    		|              <dt:code>"+СокрЛП(продукцияЭлемент.Артикул)+"</dt:code>";
+			КонецЕсли;
+			Запрос = Запрос + "
+		    |              <dt:productType>"+продукцияЭлемент.Продукция.Тип+"</dt:productType>
+	    	|              <dt:product>
+		    |                <bs:guid>"+Сокрлп(продукцияЭлемент.Продукция.GUID)+"</bs:guid>
+	    	|              </dt:product>
+		    |              <dt:subProduct>
+	    	|                <bs:guid>"+Сокрлп(продукцияЭлемент.ВидПродукции.GUID)+"</bs:guid>
+		    |              </dt:subProduct>
+			|              <dt:correspondsToGost>"+ГМ.Булево(продукцияЭлемент.СоответствуетГОСТу)+"</dt:correspondsToGost>";
+		    Если продукцияЭлемент.СоответствуетГОСТу = 1 Тогда
+				Запрос = Запрос + "
+		    	|              <dt:gost>"+СокрЛП(продукцияЭлемент.Гост)+"</dt:gost>";
+			КонецЕсли;
+			// ХС Производитель и владелец ТМ
+			Запрос = Запрос + "
+		    |              <dt:producer>
+	    	|                <bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
+		    |              </dt:producer>
+		    |              <dt:tmOwner>
+	    	|                <bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
+		    |              </dt:tmOwner>";
+
+
+	//45 	·········<dt:producing> 	dt:ProductItemProducing 	[0..*] 	Список площадок, на которых выпускается данная продукция.
+	//46 	············<dt:location> 	dt:Enterprise 	[1..1] 	Площадка, осуществляющая выпуск продукции.
+	//47 	···············<bs:uuid> 	bs:UUID 	[1..1] 	Идентификатор версии предприятия. 	<bs:uuid>9c706614-b995-4bdd-bda3-8fa9de70803a</bs:uuid>
+	//48 	···············<bs:guid> 	bs:UUID 	[1..1] 	Глобальный идентификатор предприятия. 	<bs:guid>12f04ea3-e236-4b71-b427-e04d41b26de4</bs:guid>
+	//49 	············</dt:location>
+	//50 	·········</dt:producing>
+			Запрос = Запрос + "
+		    |              <dt:producing>
+			|                <dt:location>
+	    	|                   <bs:guid>"+Сокрлп(продукцияЭлемент.Площадка.GUID)+"</bs:guid>
+		    |                </dt:location>
+		    |              </dt:producing>";
+
+	// ЖД ФАСОВКА
+			Если ПустоеЗначение(продукцияЭлемент.ТипФасовки)= 0 Тогда
+			Запрос = Запрос + "
+			|              <dt:packaging>
+		    |                <dt:packagingType>
+	    	|                  <bs:guid>"+Сокрлп(продукцияЭлемент.ТипФасовки.GUID)+"</bs:guid>
+		    |                </dt:packagingType>
+	    	|                <dt:quantity>"+продукцияЭлемент.КолвоЕдиницФасовки+"</dt:quantity>
+		    |                <dt:volume>"+продукцияЭлемент.ОбъемЕдиницыФасовки+"</dt:volume>
+	    	|                <dt:unit>
+		    |                  <bs:guid>"+ СокрЛП(продукцияЭлемент.ЕдИзмОбъемаФасовки.Guid) +"</bs:guid>
+	    	|                </dt:unit>
+		    |              </dt:packaging>";
+
+			КонецЕсли;
+			Запрос = Запрос + "
+			|            </dt:productItem>
+		    |          </vd:resultingList>";
+
 		КонецЕсли;
-		// ХС Производитель и владелец ТМ
-		Запрос = Запрос + "
-	    |              <dt:producer>
-    	|                <bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
-	    |              </dt:producer>
-	    |              <dt:tmOwner>
-    	|                <bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
-	    |              </dt:tmOwner>";
 
-
-//45 	·········<dt:producing> 	dt:ProductItemProducing 	[0..*] 	Список площадок, на которых выпускается данная продукция.
-//46 	············<dt:location> 	dt:Enterprise 	[1..1] 	Площадка, осуществляющая выпуск продукции.
-//47 	···············<bs:uuid> 	bs:UUID 	[1..1] 	Идентификатор версии предприятия. 	<bs:uuid>9c706614-b995-4bdd-bda3-8fa9de70803a</bs:uuid>
-//48 	···············<bs:guid> 	bs:UUID 	[1..1] 	Глобальный идентификатор предприятия. 	<bs:guid>12f04ea3-e236-4b71-b427-e04d41b26de4</bs:guid>
-//49 	············</dt:location>
-//50 	·········</dt:producing>
 		Запрос = Запрос + "
-	    |              <dt:producing>
-		|                <dt:location>
-    	|                   <bs:guid>"+Сокрлп(продукцияЭлемент.Площадка.GUID)+"</bs:guid>
-	    |                </dt:location>
-	    |              </dt:producing>";
-
-// ЖД ФАСОВКА
-		Если ПустоеЗначение(продукцияЭлемент.ТипФасовки)= 0 Тогда
-		Запрос = Запрос + "
-		|              <dt:packaging>
-	    |                <dt:packagingType>
-    	|                  <bs:guid>"+Сокрлп(продукцияЭлемент.ТипФасовки.GUID)+"</bs:guid>
-	    |                </dt:packagingType>
-    	|                <dt:quantity>"+продукцияЭлемент.КолвоЕдиницФасовки+"</dt:quantity>
-	    |                <dt:volume>"+продукцияЭлемент.ОбъемЕдиницыФасовки+"</dt:volume>
-    	|                <dt:unit>
-	    |                  <bs:guid>"+ СокрЛП(продукцияЭлемент.ЕдИзмОбъемаФасовки.Guid) +"</bs:guid>
-    	|                </dt:unit>
-	    |              </dt:packaging>";
-
-		КонецЕсли;
-		Запрос = Запрос + "
-		|            </dt:productItem>
-	    |          </vd:resultingList>
 	    |        </merc:modificationOperation>
 	    |      </merc:modifyProducerStockListRequest>
 	    |    </apl:data>
