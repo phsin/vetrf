@@ -4067,7 +4067,7 @@
 	|   <soapenv:Header/>
 	|   <soapenv:Body>
 	|      <ws:receiveApplicationResultRequest>
-	|         <ws:apiKey>"+ + ПолучитьКонстанту("param_api_key") + +"</ws:apiKey>
+	|         <ws:apiKey>"+ ПолучитьКонстанту("param_api_key") +"</ws:apiKey>
 	|         <ws:issuerId>"+ ПолучитьКонстанту("param_issuer_id") +"</ws:issuerId>
 	|         <ws:applicationId>"+ СокрЛП(appID) +"</ws:applicationId>
 	|      </ws:receiveApplicationResultRequest>
