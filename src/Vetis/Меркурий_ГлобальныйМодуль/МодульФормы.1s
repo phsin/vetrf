@@ -685,13 +685,14 @@
 //Найти ошибки в XML ответе сервера и показать в строке сообщений
 Функция НайтиОшибки(док="") Экспорт
 	Результат=0;
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load(Компонента.LogFilename);
 
 	ДокОбъект = СоздатьОбъект("Документ");
 
-	//Попытка
-	    errors=objDom.selectNodes("//error") ;
+	Попытка
+	    errors=objDom.selectNodes("//*[local-name() = 'errors']");
+		//errors = objDom.selectSingleNode("//*[local-name() = 'errors']");
 
 		Если errors.length>0 Тогда
 
@@ -719,8 +720,9 @@
 
 
 		КонецЕсли;
-	//Исключение
-	//КонецПопытки;
+	Исключение
+		Сообщить("ОШИБКА: "+Компонента.ErrorMessage,"!!");
+	КонецПопытки;
 
 	Возврат Результат;
 КонецФункции
@@ -758,7 +760,7 @@
 		Попытка
 			ФС.УдалитьФайл(ИмяФайла);
 		Исключение
-			СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(761)");
+			СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(763)");
 		КонецПопытки;
 	КонецЕсли;
 
@@ -1139,10 +1141,12 @@
 	КонецЕсли;
 
 	Если ПолучитьКонстанту("ОтладкаЗапросовXML")=1 Тогда
-		Опции.DEBUG 				= Компонента.TRUE();
+		Опции.DEBUG = Компонента.TRUE();
 	Иначе
-		Опции.DEBUG 				= Компонента.FALSE();
+		Опции.DEBUG = Компонента.FALSE();
 	КонецЕсли;
+	//Опции.SEND_STAT = Компонента.TRUE();
+	//Опции.SEND_STAT = Компонента.FALSE();
 
 	Компонента.Init(Опции);
 
@@ -1286,8 +1290,9 @@
 	КонецЕсли;
 	//}
 
-	Сообщить("Отправляем запрос" ,"i");
-	результат = Компонента.SendRequestSoap(метод, ЗапросXML);
+	appID = Компонента.GUID();
+	Сообщить("Отправляем запрос "+appID ,"i");
+	результат = Компонента.SendRequestSoap(метод, ЗапросXML, appID);
 
 	//Сообщить(Компонента.ApplicationId);
 	appID = Получить_ApplicationID(Компонента.LogFilename);
@@ -1945,6 +1950,51 @@
 
 //****************** Площадки **********************************
 
+Функция Загрузить_ХС_по_ИНН(ИНН) Экспорт
+
+	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+	ОбъектВыполнения = ПроверитьПереопределениеФункции("Загрузить_ХС_по_ИНН");
+	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+		Возврат ОбъектВыполнения.Загрузить_ХС_по_ИНН(инн);
+	КонецЕсли;
+	//}
+
+	Если ПустоеЗначение(ИНН)=1 Тогда
+		Сообщить("Пустой ИНН для поиска ХС");
+		Возврат "REJECTED";
+	КонецЕсли;
+	ЗапросXML = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/business-entity/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base' xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getBusinessEntityListRequest>
+	|        <ent:businessEntity>
+	|            <ent:inn>"+ СокрЛП(инн) +"</ent:inn>
+	|        </ent:businessEntity>
+	//|      <base:listOptions>
+	//|        <base:count>3</base:count>
+	//|        <base:offset>0</base:offset>
+	//|      </base:listOptions>
+	|    </ws:getBusinessEntityListRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+
+
+	метод = Компонента.GetMethod();
+	метод.Service = "platform/cerberus/services/EnterpriseService";
+	метод.Action = "GetBusinessEntityList";
+
+	Сообщить(" Запрос GetBusinessEntityList [ "+СокрЛП(ИНН)+" ]");
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	Возврат appID;
+КонецФункции
+
 Функция ХС_ПолучитьGuid(ХС) Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
@@ -1962,41 +2012,75 @@
 	КонецЕсли;
 
 	Сообщить(" Запрос GetBusinessEntityByINN [ "+ИНН+" ]","i");
-	Результат = Компонента.GetBusinessEntityByINN( ИНН );
+	//Результат = Компонента.GetBusinessEntityByINN( ИНН );
+	Результат = Загрузить_ХС_по_ИНН( ИНН );
 	//Отладка();
 
-	Если Результат="SUCCESS" Тогда
+  	Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
 
-	  	Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom.load(Компонента.LogFilename);
 
-	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-	    objDom.load(Компонента.LogFilename);
-
-		Если НайтиОшибки()>0 Тогда
-			Возврат Результат;
-		КонецЕсли;
-
-		Попытка
-		    enterprise=objDom.selectSingleNode("//businessEntity") ;
-			guid = enterprise.selectSingleNode("guid").text;
-			uuid = enterprise.selectSingleNode("uuid").text;
-			active = enterprise.selectSingleNode("active").text;
-
-			Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
-			Спр.НайтиЭлемент(ХС);
-			спр.GUID = GUID;
-			спр.UUID = uuid;
-			спр.Записать();
-			Сообщить("Записан ХозСубъект ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID);
-		Исключение
-			Сообщить("Получен пустой ответ GetBusinessEntityByINN","!");
-			Сообщить(ОписаниеОшибки(),"!");
-		КонецПопытки;
-
+	Если НайтиОшибки()>0 Тогда
+		Возврат Результат;
 	КонецЕсли;
+
+	Попытка
+	    enterprise=objDom.selectSingleNode("//*[local-name() = 'businessEntity']") ;
+		guid = enterprise.selectSingleNode("//*[local-name() = 'guid']").text;
+		uuid = enterprise.selectSingleNode("//*[local-name() = 'uuid']").text;
+		active = enterprise.selectSingleNode("//*[local-name() = 'active']").text;
+
+		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
+		Спр.НайтиЭлемент(ХС);
+		спр.GUID = GUID;
+		спр.UUID = uuid;
+		спр.Записать();
+		Сообщить("Записан ХозСубъект ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID);
+	Исключение
+		Сообщить("businessEntity не найден в ответе сервера","!");
+		Сообщить(ОписаниеОшибки(),"!");
+	КонецПопытки;
 
 	Возврат Результат;
 
+КонецФункции
+
+Функция ЗагрузитьХС(GUID) Экспорт
+
+	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+	ОбъектВыполнения = ПроверитьПереопределениеФункции("ЗагрузитьХС");
+	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+		Возврат ОбъектВыполнения.ЗагрузитьХС(guid);
+	КонецЕсли;
+	//}
+
+	Если ПустоеЗначение(GUID)=1 Тогда
+		Сообщить("Пустой GUID для поиска ХС");
+		Возврат "REJECTED";
+	КонецЕсли;
+	ЗапросXML = "
+	|<soapenv:Envelope xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+	|		  xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/business-entity/ws-definitions'
+	|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+	|<soapenv:Header/>
+	|<soapenv:Body>
+	|   <ws:getBusinessEntityByGuidRequest>
+	|      <bs:guid>"+GUID+"</bs:guid>
+	|   </ws:getBusinessEntityByGuidRequest>
+	|</soapenv:Body>
+	|</soapenv:Envelope>";
+
+
+	метод = Компонента.GetMethod();
+	метод.Service = "platform/cerberus/services/EnterpriseService";
+	метод.Action = "GetBusinessEntityByGUID";
+
+	Сообщить(" Запрос GetBusinessEntityByGUID [ "+СокрЛП(GUID)+" ]");
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	Возврат appID;
 КонецФункции
 
 
@@ -2014,7 +2098,7 @@
 		Возврат "REJECTED";
 	КонецЕсли;
 
-	ГМ2.ЗагрузитьХС( GUID );
+	ЗагрузитьХС( GUID );
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load( Компонента.LogFilename);
@@ -2078,6 +2162,43 @@
 
 КонецФункции
 
+Функция ЗагрузитьПлощадку(GUID) Экспорт
+
+	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+	ОбъектВыполнения = ПроверитьПереопределениеФункции("ЗагрузитьПлощадку");
+	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+		Возврат ОбъектВыполнения.ЗагрузитьПлощадку(guid);
+	КонецЕсли;
+	//}
+
+	Если ПустоеЗначение(GUID)=1 Тогда
+		Сообщить("Пустой GUID для поиска Площадки");
+		Возврат "REJECTED";
+	КонецЕсли;
+	ЗапросXML = "
+	|<soapenv:Envelope xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+	|		  xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/enterprise/ws-definitions'
+	|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+	|<soapenv:Header/>
+	|<soapenv:Body>
+	|   <ws:getEnterpriseByGuidRequest>
+	|      <bs:guid>"+GUID+"</bs:guid>
+	|   </ws:getEnterpriseByGuidRequest>
+	|</soapenv:Body>
+	|</soapenv:Envelope>";
+
+
+	метод = Компонента.GetMethod();
+	//метод.BaseUrl = "https://api.vetrf.ru:8002/";
+	метод.Service = "platform/cerberus/services/EnterpriseService";
+	метод.Action = "GetEnterpriseByGUID";
+
+	Сообщить(" Запрос GetEnterpriseByGUID [ "+СокрЛП(GUID)+" ]");
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	Возврат appID;
+КонецФункции
 
 Функция НайтиХСпоGUID(Guid) Экспорт
 
@@ -2117,9 +2238,9 @@
 
 	//стандартное поведение функции
 
-	Сообщить(" Запрос getEnterpriseByGuid [ "+СокрЛП(GUID)+" ]","i");
-	Результат = Компонента.getEnterpriseByGuid( СокрЛП(GUID) );
-
+	//Сообщить(" Запрос getEnterpriseByGuid [ "+СокрЛП(GUID)+" ]","i");
+	//Результат = Компонента.getEnterpriseByGuid( СокрЛП(GUID) );
+	Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(Компонента.LogFilename);
@@ -2275,7 +2396,7 @@
 		Возврат "";
 	КонецЕсли;
 
-	результат = ГМ2.ЗагрузитьХС( СокрЛП(ХС.GUID) );
+	результат = ЗагрузитьХС( СокрЛП(ХС.GUID) );
 
     Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
 
@@ -2314,32 +2435,33 @@
 
 	//стандартное поведение функции
 
-	Сообщить("Запрос getEnterpriseByGuid [ "+СокрЛП(GUID)+" ]","i");
-	Результат = Компонента.getEnterpriseByGuid( СокрЛП(GUID) );
+	//Сообщить("Запрос getEnterpriseByGuid [ "+СокрЛП(GUID)+" ]","i");
+	//Результат = Компонента.getEnterpriseByGuid( СокрЛП(GUID) );
+	Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
 
 
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
 		Возврат Результат;
 	КонецЕсли;
 
-    enterprise = objDom.selectSingleNode("//enterprise") ;
+    enterprise = objDom.selectSingleNode("//*[local-name() = 'enterprise']") ;
 
-	guid = enterprise.selectSingleNode("guid").text;
-	uuid = enterprise.selectSingleNode("uuid").text;
+	guid = enterprise.selectSingleNode("//*[local-name() = 'guid']").text;
+	uuid = enterprise.selectSingleNode("//*[local-name() = 'uuid']").text;
 
-	updateDate = enterprise.selectSingleNode("updateDate").text;
-	createDate = enterprise.selectSingleNode("createDate").text;
-	name = enterprise.selectSingleNode("name").text;
-	active = enterprise.selectSingleNode("active").text;
+	updateDate = enterprise.selectSingleNode("//*[local-name() = 'updateDate']").text;
+	createDate = enterprise.selectSingleNode("//*[local-name() = 'createDate']").text;
+	name = enterprise.selectSingleNode("//*[local-name() = 'name']").text;
+	active = enterprise.selectSingleNode("//*[local-name() = 'active']").text;
 
-	address = enterprise.selectSingleNode("address").selectSingleNode("addressView").text;
+	address = enterprise.selectSingleNode("//*[local-name() = 'address']").selectSingleNode("//*[local-name() = 'addressView']").text;
 
 	Попытка
-		owner = enterprise.selectSingleNode("owner").selectSingleNode("guid").text;
-		ownerName = enterprise.selectSingleNode("owner").selectSingleNode("name").text;
+		owner = enterprise.selectSingleNode("//*[local-name() = 'owner']").selectSingleNode("//*[local-name() = 'guid']").text;
+		ownerName = enterprise.selectSingleNode("//*[local-name() = 'owner']").selectSingleNode("//*[local-name() = 'name']").text;
 	Исключение
 		owner="";
 	КонецПопытки;
@@ -2383,11 +2505,11 @@
 	//стандартное поведение функции
 
 
-	Результат = ГМ2.ЗагрузитьХС( СокрЛП(ХС.GUID) );
+	Результат = ЗагрузитьХС( СокрЛП(ХС.GUID) );
 
     Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
 
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
@@ -2405,11 +2527,11 @@
 	тзПлощадки.НоваяКолонка("ДатаСоздания");
 	тзПлощадки.НоваяКолонка("ДатаИзменения");
 
-    activityLocationList = objDom.selectNodes("//activityLocation") ;
+    activityLocationList = objDom.selectNodes("//*[local-name() = 'activityLocation']") ;
     Для i1 = 0 По activityLocationList.length - 1 Цикл
         activityLocation=activityLocationList.item(i1);
 
-		guid = activityLocation.selectSingleNode("enterprise").selectSingleNode("guid").text;
+		guid = activityLocation.selectSingleNode("*[local-name() = 'enterprise']").selectSingleNode("*[local-name() = 'guid']").text;
 
     	ЗагрузитьПлощадкуПоGuidТЗ(guid, ХС, тзПлощадки);
 
@@ -3310,7 +3432,7 @@
 		// проведем только успешно выполненный запрос
 			ДокОб.Провести();
 		Исключение
-			СообщитьОбОшибке("Не удалось провести документ "+док+" "+ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(3313)");
+			СообщитьОбОшибке("Не удалось провести документ "+док+" "+ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(3435)");
 		КонецПопытки;
 	КонецЕсли;
 КонецФункции
@@ -3924,6 +4046,42 @@
 
 //=================== ВСД ==========================================
 
+Функция ПолучитьРезультатСервер(appID) Экспорт
+	Запрос ="<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'><SOAP-ENV:Header/><SOAP-ENV:Body>
+	|<receiveApplicationResultRequest xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+  	|<apiKey xmlns='http://api.vetrf.ru/schema/cdm/application/ws-definitions'>"+ ПолучитьКонстанту("param_api_key") +"</apiKey>
+  	|<issuerId xmlns='http://api.vetrf.ru/schema/cdm/application/ws-definitions'>"+ ПолучитьКонстанту("param_issuer_id") +"</issuerId>
+  	|<applicationId xmlns='http://api.vetrf.ru/schema/cdm/application/ws-definitions'>"+ СокрЛП(appID) +"</applicationId>
+	|</receiveApplicationResultRequest>
+	|</SOAP-ENV:Body></SOAP-ENV:Envelope>
+	|";
+
+	запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:receiveApplicationResultRequest>
+	|         <ws:apiKey>NTdhNWNkYjktMjg1YS00YzcyLWJhOTItMTk5NDYxNjNlZjgwV2VkIEp1bCAxMyAwODozNDoxMiBNU0sgMjAxNg==</ws:apiKey>
+	|         <ws:issuerId>57a5cdb9-285a-4c72-ba92-19946163ef80</ws:issuerId>
+	|         <ws:applicationId>"+ СокрЛП(appID) +"</ws:applicationId>
+	|      </ws:receiveApplicationResultRequest>
+	|   </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "receiveApplicationResult";
+
+	Результат = Компонента.SendRequestSoap( метод, запрос, appID );
+
+	//appID = Получить_ApplicationID(Компонента.LogFilename);
+	//Возврат appID;
+
+	//Возврат Результат;
+	возврат Компонента.Статус;
+КонецФункции
+
 Функция ПолучитьРезультат_ВСД(applicationID, докСсылка) Экспорт
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("ПолучитьРезультат_ВСД");
@@ -3938,8 +4096,9 @@
 		Возврат "Пустая ссылка applicationID";
 	КонецЕсли;
 
-	Сообщить("Отправляем запрос ["+applicationID+"] "+докСсылка );
-	Результат = Компонента.SendRequestResult( applicationID );
+	Сообщить("Отправляем запрос результата ["+applicationID+"] "+докСсылка );
+	//Результат = Компонента.SendRequestResult( applicationID );
+	Результат = ПолучитьРезультатСервер( applicationID );
 
 	Если ПустоеЗначение(докСсылка)=0 Тогда
 		СохранитьСтатусЗапроса(докСсылка);
@@ -4011,6 +4170,7 @@
 			Если (Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1) Тогда
 				Пауза();
 				Результат = ПолучитьРезультат_ВСД( appID, док);
+				Сообщить("Результат = "+Результат);
 			КонецЕсли;
 		КонецЦикла;
 	Иначе
@@ -4057,7 +4217,7 @@
 
 	ЗапросXML = ПолучитьПартии_ТекстЗапросаSoap(Отправитель_Площадка, Смещение);
 
-	метод = ГМ.Компонента.GetMethod();
+	метод = Компонента.GetMethod();
     метод.Service = "platform/services/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
@@ -4069,7 +4229,7 @@
 	Если ПустоеЗначение(appID)=0 Тогда
 
 		Результат = "";
-		Сообщить("Результат = "+Результат);
+		//Сообщить("Результат = "+Результат);
 		Для А=1 По 10 Цикл
 			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
 				//Результат = ПолучитьРезультат_ВСД(appID, "", Смещение, УдалятьПартии ); //ДокОб.ТекущийДокумент()
@@ -4077,7 +4237,9 @@
 				Пауза( );
 
 				Сообщить("Отправляем запрос на получение ответа [Актуальные партии]" );
-				Результат = Компонента.SendRequestResult( appID );
+				//Результат = Компонента.SendRequestResult( appID );
+				Результат = ПолучитьРезультатСервер( appID );
+				Сообщить("Результат = "+Результат);
 
 				ЗагрузитьXML_Партии( Компонента.LogFilename, Смещение, УдалятьПартии );
 
@@ -4402,7 +4564,7 @@
                 |";
             КонецЦикла;
         Исключение
-            СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(4405)");
+            СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(4567)");
         КонецПопытки;
         Запрос = Запрос + "
             |               </ent:producer>
@@ -4569,7 +4731,7 @@
                 |";
             КонецЦикла;
         Исключение
-            СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(4572)");
+            СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(4734)");
         КонецПопытки;
         Запрос = Запрос + "
             |                  </ent:producer>
@@ -6995,7 +7157,8 @@
 	КонецЕсли;
 
 	Сообщить("Отправляем запрос ["+appID+"]" );
-	Результат = Компонента.SendRequestResult( appID );
+	//Результат = Компонента.SendRequestResult( appID );
+	Результат = ПолучитьРезультатСервер( appID );
 
 	Если ПустоеЗначение(Результат)=0 Тогда
 		ЗагрузитьXML_ВСД( Компонента.LogFilename);
@@ -7100,6 +7263,7 @@
 			Если (Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1) Тогда
 				Пауза();
 				Результат = ПолучитьСписокВСДОтветXML( appID );
+				Сообщить("Результат = "+Результат);
 			КонецЕсли;
 		КонецЦикла;
 	Иначе
@@ -7385,7 +7549,7 @@
 		Исключение
 			Ошибка = "Неверно указан один из параметров: НазваниеРеквизитаНоменклатура или НазваниеРеквизитаКоличество ";
 			Сообщить(Ошибка,"!");
-			СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(7388)");
+			СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(7552)");
 			Возврат тзРез;
 		КонецПопытки;
 
@@ -7767,7 +7931,7 @@
 		КонецЕсли;
 	Исключение
 		СообщитьОбОшибке("Не удалось выполнить запрос по документам. Проверьте параметры
-		|"+ ОписаниеОшибки(),,"НомерСтрокиМодуля(7770)");
+		|"+ ОписаниеОшибки(),,"НомерСтрокиМодуля(7934)");
 	КонецПопытки;
 
 	Состояние("");
@@ -7850,7 +8014,7 @@
 	Исключение
 		Ошибка = "Передан неверный параметр ";
 		Сообщить(Ошибка, "!");
-		СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(7853)");
+		СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8017)");
 		Возврат "";
 	КонецПопытки;
 
@@ -8329,7 +8493,7 @@
 		докОбъект.Записать();
 		докОбъект.Удалить(0);
 	Исключение
-		СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8332)");
+		СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8496)");
 	КонецПопытки;
 
 
@@ -8372,7 +8536,7 @@
 	Исключение
 		Ошибка = "Не удалось открыть запрос "+Док.ИмяФайлаЗапрос+" ";
 		Сообщить(Ошибка);
-		СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8375)");
+		СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8539)");
 	КонецПопытки;
 КонецФункции
 
@@ -8383,7 +8547,7 @@
 	Исключение
 		Ошибка = "Не удалось открыть ответ "+Док.ИмяФайлаОтвет+" ";
 		Сообщить(Ошибка);
-		СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8386)");
+		СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8550)");
 	КонецПопытки;
 КонецФункции
 
@@ -8764,6 +8928,6 @@
 	Попытка
 		А = 1/0;
 	Исключение
-		СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8767)");
+		СообщитьОбОшибке(ОписаниеОшибки(), Сам(), "НомерСтрокиМодуля(8931)");
 	КонецПопытки;
 КонецПроцедуры
