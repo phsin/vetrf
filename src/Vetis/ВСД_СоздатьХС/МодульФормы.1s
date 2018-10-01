@@ -54,43 +54,43 @@
    КонецЕсли;
 КонецПроцедуры // ПриОткрытии
 
-
-Процедура ХС_Создать_Ответ( applicationID, ХС)
-
-	Если ПустоеЗначение(applicationID)=1 Тогда
-		Сообщить("Не указано applicationID");
-		Возврат;
-	КонецЕсли;
-
-	Сообщить(" Запрос CreateBusinessEntityResult [ "+СокрЛП(applicationID)+" ]","i");
-	Результат = ГМ.Компонента.CreateBusinessEntityResult( СокрЛП(applicationID));
-	//Отладка();
-
-    Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(ГМ.Компонента.LogFilename);
-
-	Если ГМ.НайтиОшибки()>0 Тогда
-		Возврат;
-	КонецЕсли;
-
-    enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
-	guid = enterprise.selectSingleNode("base:guid").text;
-	uuid = enterprise.selectSingleNode("base:uuid").text;
-	active = enterprise.selectSingleNode("base:active").text;
-
-	если ПустоеЗначение(GUID)=0 Тогда
-		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
-		Спр.НайтиЭлемент(ХС);
-		спр.GUID = GUID;
-		спр.Записать();
-		Сообщить("Успешно записан ВСД_ХозСубъект ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
-	Иначе
-		Сообщить("Пустой GUID ХозСубъекта");
-	КонецЕсли;
-
-	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
-КонецПроцедуры
+// не используется
+//Процедура ХС_Создать_Ответ( applicationID, ХС)
+//
+//	Если ПустоеЗначение(applicationID)=1 Тогда
+//		Сообщить("Не указано applicationID");
+//		Возврат;
+//	КонецЕсли;
+//
+//	Сообщить(" Запрос CreateBusinessEntityResult [ "+СокрЛП(applicationID)+" ]","i");
+//	Результат = ГМ.Компонента.CreateBusinessEntityResult( СокрЛП(applicationID));
+//	//Отладка();
+//
+//    Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);
+//    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+//    objDom.load(ГМ.Компонента.LogFilename);
+//
+//	Если ГМ.НайтиОшибки()>0 Тогда
+//		Возврат;
+//	КонецЕсли;
+//
+//    enterprise=objDom.selectSingleNode("//merc:businessEntity") ;
+//	guid = enterprise.selectSingleNode("base:guid").text;
+//	uuid = enterprise.selectSingleNode("base:uuid").text;
+//	active = enterprise.selectSingleNode("base:active").text;
+//
+//	если ПустоеЗначение(GUID)=0 Тогда
+//		Спр = СоздатьОбъект("Справочник.ВСД_ХозСубъект");
+//		Спр.НайтиЭлемент(ХС);
+//		спр.GUID = GUID;
+//		спр.Записать();
+//		Сообщить("Успешно записан ВСД_ХозСубъект ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
+//	Иначе
+//		Сообщить("Пустой GUID ХозСубъекта");
+//	КонецЕсли;
+//
+//	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+//КонецПроцедуры
 
 Функция Создать_ХС_ЗапросXML()
 	ответ ="

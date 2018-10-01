@@ -2873,6 +2873,27 @@
 	Состояние("");
 КонецФункции
 
+Функция ЗагрузитьВидыПродукции_ЗапросXML( guid )
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getSubProductByProductListRequest>
+	|      <base:listOptions>
+	|        <base:count>1000</base:count>
+	|        <base:offset>0</base:offset>
+	|      </base:listOptions>
+	|      <prod:productGuid>"+ guid +"</prod:productGuid>
+	|    </ws:getSubProductByProductListRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
+КонецФункции
+
 Функция ИнициализацияХС_ЗагрузитьВидыПродукции(guid, Владелец) Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
@@ -2888,8 +2909,14 @@
 		Возврат 0;
 	КонецЕсли;
 
-	Сообщить(" Запрос GetProductList ","i");
-	Результат = Компонента.GetSubProductByProductList( guid );
+	//Сообщить("Загрузка видов продукции "+Владелец,"i");
+	//Результат = Компонента.GetSubProductByProductList( guid );
+
+	ЗапросXML = ЗагрузитьВидыПродукции_ЗапросXML( guid );
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/services/ProductService";
+    метод.Action = "GetSubProductByProductList";
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
 
 	Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
 
@@ -2897,24 +2924,24 @@
 	objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
+		Возврат appID;
 	КонецЕсли;
 
 
 	Спр = СоздатьОбъект("Справочник.ВСД_ВидПродукции");
 
-	List = objDom.selectNodes("//subProduct") ;
+	List = objDom.selectNodes("//pro:subProduct") ;
 	Для i1 = 0 По List.length - 1 Цикл
 	    item = List.item(i1);
 
-		uuid = item.selectSingleNode("uuid").text;
-		guid = item.selectSingleNode("guid").text;
-		st = item.selectSingleNode("status").text;
-		updateDate = item.selectSingleNode("updateDate").text;
-		createDate = item.selectSingleNode("createDate").text;
-		name = item.selectSingleNode("name").text;
+		uuid = item.selectSingleNode("bs:uuid").text;
+		guid = item.selectSingleNode("bs:guid").text;
+		st = item.selectSingleNode("bs:status").text;
+		updateDate = item.selectSingleNode("bs:updateDate").text;
+		createDate = item.selectSingleNode("bs:createDate").text;
+		name = item.selectSingleNode("pro:name").text;
 		Попытка
-			code = item.selectSingleNode("code").text;
+			code = item.selectSingleNode("pro:code").text;
 		Исключение
 			code ="";
 		КонецПопытки;
@@ -2932,7 +2959,7 @@
 		Спр.КодТНВЭД = code;
 		Спр.Владелец = Владелец.ТекущийЭлемент();
 		Спр.Записать();
-
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
 	КонецЦикла;
 
 	Возврат 1;
@@ -2959,14 +2986,14 @@
 
 	Спр = СоздатьОбъект("Справочник.ВСД_ЕдиницыИзмерения");
 
-    unitList = objDom.selectNodes("//unit") ;
+    unitList = objDom.selectNodes("//com:unit") ;
     Для i1 = 0 По unitList.length - 1 Цикл
         unit=unitList.item(i1);
 
-		uuid = unit.selectSingleNode("uuid").text;
-		guid = unit.selectSingleNode("guid").text;
-		name = unit.selectSingleNode("name").text;
-		factor = unit.selectSingleNode("factor").text;
+		uuid = unit.selectSingleNode("bs:uuid").text;
+		guid = unit.selectSingleNode("bs:guid").text;
+		name = unit.selectSingleNode("com:name").text;
+		factor = unit.selectSingleNode("com:factor").text;
 		//commonUnitGuid = unit.selectSingleNode("commonUnitGuid").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
@@ -2975,12 +3002,33 @@
 			Сообщить("ВСД_ЕдиницыИзмерения GUID ["+name+"] не найдена");
 			Спр.Новый();
 		КонецЕсли;
-			Спр.Наименование = name;
-			Спр.GUID = guid;
-			Спр.UUID = UUID;
-			Спр.Коэффициент = factor;
-			Спр.Записать();
-    КонецЦикла;
+		Спр.Наименование = name;
+		Спр.GUID = guid;
+		Спр.UUID = UUID;
+		Спр.Коэффициент = factor;
+		Спр.Записать();
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
+	КонецЦикла;
+
+КонецФункции
+
+Функция ЗагрузитьСтраны_ЗапросXML( )
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getAllCountryListRequest>
+	|      <base:listOptions>
+	|        <base:count>1000</base:count>
+	|        <base:offset>0</base:offset>
+	|      </base:listOptions>
+	|    </ws:getAllCountryListRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
 КонецФункции
 
 Функция ИнициализацияХС_ЗагрузитьСтраны() Экспорт
@@ -2993,8 +3041,15 @@
 	//}
 
 	//стандартное поведение функции
-	Сообщить(" Запрос GetCountryList ","i");
-	Результат = Компонента.GetCountryList( );
+	Сообщить(" Запрос GetAllCountryList ","i");
+	//Результат = Компонента.GetCountryList( );
+
+	ЗапросXML = ЗагрузитьСтраны_ЗапросXML();
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/ikar/services/IkarService";
+    метод.Action = "GetAllCountryList";
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
 
 	//Отладка();
 
@@ -3004,22 +3059,23 @@
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
+		Возврат appID;
 	КонецЕсли;
 
 	ПометитьНаУдалениеСправочник("ВСД_Страна");
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Страна");
-    countryList = objDom.selectNodes("//country") ;
+    countryList = objDom.selectNodes("//ikar:country") ;
     Для i1 = 0 По countryList.length - 1 Цикл
         country=countryList.item(i1);
 
-		uuid = country.selectSingleNode("uuid").text;
-		guid = country.selectSingleNode("guid").text;
-		st = country.selectSingleNode("status").text;
+		uuid = country.selectSingleNode("bs:uuid").text;
+		guid = country.selectSingleNode("bs:guid").text;
+		st = country.selectSingleNode("bs:status").text;
 		//updateDate = product.selectSingleNode("updateDate").text;
 		//createDate = product.selectSingleNode("createDate").text;
-		name = country.selectSingleNode("name").text;
+		name = country.selectSingleNode("ikar:name").text;
+		//fullname = country.selectSingleNode("ikar:fullName").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
@@ -3032,10 +3088,32 @@
 		Спр.GUID = guid;
 		Спр.UUID = UUID;
 		Спр.Записать();
-		Сообщить("Записан ВСД_Страна ["+name+"] ","");
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
 
 	Сообщить("Загрузка стран завершена");
+КонецФункции
+
+
+Функция ЗагрузитьРегионы_ЗапросXML( guid )
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getRegionListByCountryRequest>
+	|      <base:listOptions>
+	|        <base:count>1000</base:count>
+	|        <base:offset>0</base:offset>
+	|      </base:listOptions>
+	|      <ikar:countryGuid>"+ guid +"</ikar:countryGuid>
+	|    </ws:getRegionListByCountryRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
 КонецФункции
 
 Функция ИнициализацияХС_ЗагрузитьРегионы(Страна) Экспорт //проверить реквизит страна ... как о
@@ -3051,9 +3129,15 @@
 	//Страна_GUID = ?(ПустоеЗначение(Страна)=1,"",Страна.GUID);
 
 	Сообщить(" Запрос GetRegionList ["+СокрЛП(Страна.GUID) +"]","i");
-	Результат = Компонента.GetRegionList( СокрЛП(Страна.GUID) );
+	//Результат = Компонента.GetRegionList( СокрЛП(Страна.GUID) );
 
-	//Отладка();
+	ЗапросXML = ЗагрузитьРегионы_ЗапросXML( Страна.GUID );
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/ikar/services/IkarService";
+    метод.Action = "RegionListByCountry";
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
 
 	 Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
 
@@ -3061,21 +3145,21 @@
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
+		Возврат appID;
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Регион");
-    regionList = objDom.selectNodes("//region") ;
+    regionList = objDom.selectNodes("//ikar:region") ;
     Для i1 = 0 По regionList.length - 1 Цикл
         region=regionList.item(i1);
 
-		uuid = region.selectSingleNode("uuid").text;
-		guid = region.selectSingleNode("guid").text;
-		st = region.selectSingleNode("status").text;
+		uuid = region.selectSingleNode("bs:uuid").text;
+		guid = region.selectSingleNode("bs:guid").text;
+		st = region.selectSingleNode("bs:status").text;
 		//updateDate = product.selectSingleNode("updateDate").text;
 		//createDate = product.selectSingleNode("createDate").text;
-		name = region.selectSingleNode("name").text;
-		view = region.selectSingleNode("view").text;
+		name = region.selectSingleNode("ikar:name").text;
+		view = region.selectSingleNode("ikar:view").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
@@ -3089,10 +3173,31 @@
 		Спр.UUID = UUID;
 		Спр.ParentGUID = Страна.GUID;
 		Спр.Записать();
-		Сообщить("Записан ВСД_Регион ["+name+"] ","");
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
 
 	Сообщить("Загрузка завершена");
+КонецФункции
+
+Функция ЗагрузитьРайоны_ЗапросXML( guid )
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getDistrictListByRegionRequest>
+	|      <base:listOptions>
+	|        <base:count>1000</base:count>
+	|        <base:offset>0</base:offset>
+	|      </base:listOptions>
+	|      <ikar:regionGuid>"+ guid +"</ikar:regionGuid>
+	|    </ws:getDistrictListByRegionRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
 КонецФункции
 
 Функция ИнициализацияХС_ЗагрузитьРайоны(Регион) Экспорт
@@ -3109,32 +3214,37 @@
 		Сообщить("Пустое значение Регион.GUID");
 	КонецЕсли;
 
-	Сообщить(" Запрос GetDistrictList ["+СокрЛП(Регион.GUID) +"]","i");
-	Результат = Компонента.GetDistrictList( СокрЛП(Регион.GUID) );
+	Сообщить(" Запрос GetDistrictListByRegion ["+СокрЛП(Регион.GUID) +"]","i");
+	//Результат = Компонента.GetDistrictList( СокрЛП(Регион.GUID) );
 
-	//Отладка();
+	ЗапросXML = ЗагрузитьРайоны_ЗапросXML( Регион.GUID );
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/ikar/services/IkarService";
+    метод.Action = "GetDistrictListByRegion";
 
-	 Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
+		Возврат appID;
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Район");
-    districtList = objDom.selectNodes("//district") ;
+    districtList = objDom.selectNodes("//ikar:district") ;
     Для i1 = 0 По districtList.length - 1 Цикл
         district=districtList.item(i1);
 
-		uuid = district.selectSingleNode("uuid").text;
-		guid = district.selectSingleNode("guid").text;
-		st = district.selectSingleNode("status").text;
+		uuid = district.selectSingleNode("bs:uuid").text;
+		guid = district.selectSingleNode("bs:guid").text;
+		st = district.selectSingleNode("bs:status").text;
 		//updateDate = product.selectSingleNode("updateDate").text;
 		//createDate = product.selectSingleNode("createDate").text;
-		name = district.selectSingleNode("name").text;
-		view = district.selectSingleNode("view").text;
+		name = district.selectSingleNode("ikar:name").text;
+		view = district.selectSingleNode("ikar:view").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
@@ -3148,44 +3258,67 @@
 		Спр.UUID = UUID;
 		Спр.ParentGUID = Регион.GUID;
 		Спр.Записать();
-		Сообщить("Записан ВСД_Район ["+name+"] ","");
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
 
 	Сообщить("Загрузка завершена");
 КонецФункции
 
+Функция ЗагрузитьГорода_ЗапросXML( guid )
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getLocalityListByRegionRequest>
+	|      <base:listOptions>
+	|        <base:count>1000</base:count>
+	|        <base:offset>0</base:offset>
+	|      </base:listOptions>
+	|      <ikar:regionGuid>"+ guid +"</ikar:regionGuid>
+	|    </ws:getLocalityListByRegionRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
+КонецФункции
 
 Функция ИнициализацияХС_ЗагрузитьГорода(Регион) Экспорт
 
 	//стандартное поведение функции
 	//Страна_GUID = ?(ПустоеЗначение(Страна)=1,"",Страна_GUID);
 
-	Сообщить(" Запрос GetLocalityListByRegion "+Регион+" ["+СокрЛП(Регион.GUID) +"]","i");
-	Результат = Компонента.GetLocalityListByRegion( СокрЛП(Регион.GUID) );
+	Сообщить(" Запрос getLocalityListByRegion "+Регион+" ["+СокрЛП(Регион.GUID) +"]","i");
+	//Результат = Компонента.GetLocalityListByRegion( СокрЛП(Регион.GUID) );
 
-	//Отладка();
+	ЗапросXML = ЗагрузитьГорода_ЗапросXML( Регион.GUID );
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/ikar/services/IkarService";
+    метод.Action = "GetLocalityListByRegion";
 
-	 Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
+		Возврат appID;
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Город");
-    List = objDom.selectNodes("//locality") ;
+    List = objDom.selectNodes("//ikar:locality") ;
     Для i1 = 0 По List.length - 1 Цикл
         item=List.item(i1);
 
-		uuid = item.selectSingleNode("uuid").text;
-		guid = item.selectSingleNode("guid").text;
-		st = item.selectSingleNode("status").text;
-		//updateDate = product.selectSingleNode("updateDate").text;
-		//createDate = product.selectSingleNode("createDate").text;
-		name = item.selectSingleNode("name").text;
-		view = item.selectSingleNode("view").text;
+		uuid = item.selectSingleNode("bs:uuid").text;
+		guid = item.selectSingleNode("bs:guid").text;
+		st = item.selectSingleNode("bs:status").text;
+		name = item.selectSingleNode("ikar:name").text;
+		view = item.selectSingleNode("ikar:view").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
@@ -3199,7 +3332,7 @@
 		Спр.UUID = UUID;
 		Спр.ParentGUID = Регион.GUID;
 		Спр.Записать();
-		Сообщить("Записан ВСД_Город ["+name+"] ","");
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
 
 	Сообщить("Загрузка завершена");
@@ -3283,6 +3416,26 @@
 	Сообщить("Загрузка завершена");
 КонецФункции
 
+
+Функция ЗагрузитьЕдиницыИзмерения_ЗапросXML()
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:getUnitListRequest>
+	|        <base:listOptions>
+	|           <base:count>1000</base:count>
+	|           <base:offset>0</base:offset>
+	|         </base:listOptions>
+	|      </ws:getUnitListRequest>
+	|   </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
+КонецФункции
+
 Функция ИнициализацияХС_ЗагрузитьЕдиницыИзмерения() Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
@@ -3293,16 +3446,45 @@
 	//}
 
 	//стандартное поведение функции
-	Сообщить(" Запрос GetUnitList ","i");
-	Результат = Компонента.GetUnitList();
+	Сообщить("Запрос UnitList","i");
+	//Результат = Компонента.GetUnitList();
 
-	Если Результат="SUCCESS" Тогда
+	ЗапросXML = ЗагрузитьЕдиницыИзмерения_ЗапросXML();
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/services/DictionaryService";
+    метод.Action = "GetUnitList";
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	//Если Результат="SUCCESS" Тогда
 
 		ПометитьНаУдалениеСправочник("ВСД_ЕдиницыИзмерения");
 		ЗагрузитьXML_ЕдиницыИзмерения( Компонента.LogFilename );
 
-	КонецЕсли;
+	//КонецЕсли;
 	Сообщить("Загрузка завершена");
+КонецФункции
+
+
+Функция ЗагрузитьПродукцию_ЗапросXML(тип)
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getProductByTypeListRequest>
+	|      <base:listOptions>
+	|        <base:count>1000</base:count>
+	|        <base:offset>0</base:offset>
+	|      </base:listOptions>
+	|      <prod:productType>"+ тип +"</prod:productType>
+	|    </ws:getProductByTypeListRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+	Возврат Запрос;
 КонецФункции
 
 Функция ИнициализацияХС_ЗагрузитьПродукцию(Тип) Экспорт
@@ -3316,38 +3498,46 @@
 	//}
 
 	//стандартное поведение функции
-	Сообщить(" Запрос GetProductList ","i");
+	//Сообщить(" Запрос GetProductList ","i");
 	Состояние("Загрузить Продукцию "+Тип);
-	Результат = Компонента.GetProductList( Тип );
-
+	//Результат = Компонента.GetProductList( Тип );
 	//ЗагрузитьXML_Номенклатура( Компонента.LogFilename );
+
+	ЗапросXML = ЗагрузитьПродукцию_ЗапросXML(Тип);
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/services/ProductService";
+    метод.Action = "GetProductByTypeList";
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+
 	Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
 
 	objDom=СоздатьОбъект("MSXML2.DOMDocument");
 	objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
+		Возврат appID;
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Продукция");
 
-	productList = objDom.selectNodes("//product") ;
+	productList = objDom.selectNodes("//pro:product") ;
 	Для i1 = 0 По productList.length - 1 Цикл
 	    product=productList.item(i1);
 
-		uuid = product.selectSingleNode("uuid").text;
-		guid = product.selectSingleNode("guid").text;
-		st = product.selectSingleNode("status").text;
-		updateDate = product.selectSingleNode("updateDate").text;
-		createDate = product.selectSingleNode("createDate").text;
-		name = product.selectSingleNode("name").text;
+		uuid = product.selectSingleNode("bs:uuid").text;
+		guid = product.selectSingleNode("bs:guid").text;
+		st = product.selectSingleNode("bs:status").text;
+		updateDate = product.selectSingleNode("bs:updateDate").text;
+		createDate = product.selectSingleNode("bs:createDate").text;
+		name = product.selectSingleNode("pro:name").text;
 		Попытка
-			code = product.selectSingleNode("code").text;
+			code = product.selectSingleNode("pro:code").text;
 		Исключение
 			code ="";
 		КонецПопытки;
-		productType = product.selectSingleNode("productType").text;
+		productType = product.selectSingleNode("pro:productType").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
@@ -3361,8 +3551,8 @@
 			Спр.КодТНВЭД = code;
 			Спр.Тип = ProductType;
 			Спр.Записать();
-
 		КонецЕсли;
+		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
 
 		Сообщить("Загрузка [Видов продукции] "+name);
 		ИнициализацияХС_ЗагрузитьВидыПродукции(guid, Спр.ТекущийЭлемент());
