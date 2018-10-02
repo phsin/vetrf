@@ -2413,12 +2413,12 @@
 		Возврат Результат;
 	КонецЕсли;
 
-    activityLocationList = objDom.selectNodes("//activityLocation") ;
+    activityLocationList = objDom.selectNodes("//ent:activityLocation") ;
     Для i1 = 0 По activityLocationList.length - 1 Цикл
         activityLocation=activityLocationList.item(i1);
 
 		Попытка
-			guid = activityLocation.selectSingleNode("enterprise").selectSingleNode("guid").text;
+			guid = activityLocation.selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
 
     		ЗагрузитьПлощадкуПоGUID(guid, ХС);
 		Исключение
