@@ -102,7 +102,7 @@
    |            xmlns:base='http://api.vetrf.ru/schema/cdm/base'
    |            xmlns:com='http://api.vetrf.ru/schema/cdm/argus/common'
    |            xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
-   |            xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+   |            xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar'>
    |   <SOAP-ENV:Header/>
    |   <SOAP-ENV:Body>
    |      <ws:submitApplicationRequest>
@@ -112,15 +112,8 @@
    |            <app:issuerId>"+ ГМ.СписокКонстант.Получить("param_issuer_id")+"</app:issuerId>
    |            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
    |            <app:data>
-   //|<submitApplicationRequest xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
-	//|  <apiKey xmlns='http://api.vetrf.ru/schema/cdm/application/ws-definitions'>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apiKey>
-	//|  <application xmlns='http://api.vetrf.ru/schema/cdm/application'>
-	//|    <serviceId>mercury-g2b.service</serviceId>
-	//|    <issuerId>"+ ГМ.СписокКонстант.Получить("param_issuer_id")+"</issuerId>
-	//|    <issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</issueDate>
-	//|    <data>
 	|      <merc:modifyBusinessEntityRequest>
-	|        <merc:localTransactionId>[GUID]</localTransactionId>
+	|        <merc:localTransactionId>[GUID]</merc:localTransactionId>
 	|        <merc:initiator>
 	|          <com:login>"+ ГМ.СписокКонстант.Получить("param_intiator_login")+"</com:login>
 	|        </merc:initiator>
@@ -277,6 +270,7 @@
 	//appID = ГМ.ОтправитьЗапросXML(ЗапросXML);
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
 
+	ГМ.Пауза();
 	Создать_ХС_Результат(appID, ХС);
 
 	Возврат appID;
