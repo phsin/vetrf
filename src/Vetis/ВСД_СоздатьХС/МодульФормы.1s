@@ -236,6 +236,11 @@
 	//Результат = ГМ.Компонента.CreateBusinessEntityResult( СокрЛП(applicationID));
 	//Отладка();
 
+	Сообщить("Отправляем запрос результата ["+applicationID+"] " );
+	//Результат = Компонента.SendRequestResult( applicationID );
+	Результат = ГМ.ПолучитьРезультатСервер( applicationID );
+
+
     Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(ГМ.Компонента.LogFilename);

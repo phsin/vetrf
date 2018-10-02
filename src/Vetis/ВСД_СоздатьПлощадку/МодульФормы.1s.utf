@@ -25,13 +25,13 @@
 		ФлагПродолжения = 0;
 	КонецЕсли;
 
-КонецПроцедуры 
+КонецПроцедуры
 
 Процедура ПриВыбореПлощадки( Площадка )
-	
+
 	Адрес = Площадка.Адрес;
-	ПолноеНаименование = Площадка.Наименование; 
-		
+	ПолноеНаименование = Площадка.Наименование;
+
 КонецПроцедуры
 
 // при открытии формы обработки запоминаем переданные параметры,
@@ -39,38 +39,38 @@
 Процедура ПриОткрытии()
 	Причина = "Причина добавления субъекта в реестр.";
 	Деятельность = "Продажа продуктов питания";
-	
+
    	Если ТипЗначенияСтр(Форма.Параметр) = "СписокЗначений" Тогда
   //    ГМ = Форма.Параметр.Получить("ГМ");
 	  	ВыбХС = Форма.Параметр.Получить("ХС");
 	  	ПриВыбореПлощадки( ВыбПлощадка );
    	Иначе
       //СтатусВозврата(0);
-	  
+
 	//  //{ Глобальный модуль плюс несколько базовых функций
 	//
 	//    ГМ = СоздатьОбъект("Меркурий_ГлобальныйМодуль");
-		ГМ.Инициализация(Контекст);        
+		ГМ.Инициализация(Контекст);
 	    //ГМ.ЗагрузитьПараметрыВФорму(Контекст);
-		////}		
+		////}
    	КонецЕсли;
  	ГМ.ЗагрузитьПараметрыВФорму(Контекст);
-КонецПроцедуры // ПриОткрытии 
+КонецПроцедуры // ПриОткрытии
 
 
 
 Процедура СоздатьНовуюПлощадку(ВыбХС)
-	
+
 	Если ПустоеЗначение(ВыбХС)=1 Тогда
 		Предупреждение("Выберите Хоз субъект");
 	КонецЕсли;
-	
+
 	ВидСтравочникаХС = Метаданные.Справочник("ВСД_ХозСубъект").Реквизит("Контрагент").Вид;
 	ВидСтравочникаПЛ = Метаданные.Справочник("ВСД_Площадка").Реквизит("Контрагент").Вид;
-	
+
 	Если ВидСтравочникаХС = ВидСтравочникаПЛ Тогда
 		СпрПл = СоздатьОбъект("Справочник.ВСД_Площадка");
-		
+
 		СпрПл.Новый();
 		СпрПл.Наименование = ВыбХС.Контрагент.Наименование;
 		СпрПл.Контрагент = ВыбХС.Контрагент;
@@ -78,7 +78,7 @@
 		СпрПл.GuidХозСубъекта = ВыбХС.GUID;
 		СпрПл.Записать();
 		Сообщить("Создан ВСД_Площадка "+СпрПл.ТекущийЭлемент());
-		
+
 		ВыбПлощадка = СпрПл.ТекущийЭлемент();
 	Иначе
 		Если Метаданные.Справочник(ВидСтравочникаПЛ).Владелец.Выбран() = 1 Тогда
@@ -94,208 +94,283 @@
 				СпрПл.GuidХозСубъекта = ВыбХС.GUID;
 				СпрПл.Записать();
 				Сообщить("Создан ВСД_Площадка "+СпрПл.ТекущийЭлемент());
-				
+
 				ВыбПлощадка = СпрПл.ТекущийЭлемент();
 			КонецЕсли;
 		КонецЕсли;
 	КонецЕсли;
-	
+
 КонецПроцедуры
 
 Процедура ПолучитьОтветСоздатьСвязьХозсубъектПлощадка( applicationID )
-	
+
 	Если ПустоеЗначение(applicationID)=1 Тогда
 		Сообщить("Не указано applicationID");
 		Возврат;
 	КонецЕсли;
-	
-	ГМ.Пауза();
-	Сообщить(" Запрос CreateActivityLocationsOperationResult [ "+СокрЛП(applicationID)+" ]","i");		
-	Результат = ГМ.Компонента.CreateActivityLocationsOperationResult( СокрЛП(applicationID));
+
+	//ГМ.Пауза();
+	//Сообщить(" Запрос CreateActivityLocationsOperationResult [ "+СокрЛП(applicationID)+" ]","i");
+	//Результат = ГМ.Компонента.CreateActivityLocationsOperationResult( СокрЛП(applicationID));
 	//Отладка();
-		
-	Если ГМ.НайтиОшибки()>0 Тогда 
+	Сообщить("Отправляем запрос результата ["+applicationID+"] " );
+	//Результат = Компонента.SendRequestResult( applicationID );
+	Результат = ГМ.ПолучитьРезультатСервер( applicationID );
+
+	Если ГМ.НайтиОшибки()>0 Тогда
 		Возврат;
-	КонецЕсли;		
+	КонецЕсли;
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(ГМ.Компонента.LogFilename);    	        
-	
-    businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;									
+    objDom.load(ГМ.Компонента.LogFilename);
+
+    businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;
 	guid = businessEntity.selectSingleNode("bs:guid").text;
-	uuid = businessEntity.selectSingleNode("bs:uuid").text;			
-	active = businessEntity.selectSingleNode("bs:active").text;		
-	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;		
+	uuid = businessEntity.selectSingleNode("bs:uuid").text;
+	active = businessEntity.selectSingleNode("bs:active").text;
+	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
 	Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
-	
+
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
 КонецПроцедуры
 
+Функция СоздатьСвязь_ЗапросXML(Площадка)
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+	|                  xmlns:app='http://api.vetrf.ru/schema/cdm/application'
+	|                  xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/applications'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:com='http://api.vetrf.ru/schema/cdm/argus/common'
+	|                  xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:submitApplicationRequest>
+	|         <ws:apiKey>" + ГМ.ПолучитьКонстанту("param_api_key") + "</ws:apiKey>
+	|         <app:application>
+	|            <app:serviceId>mercury-g2b.service</app:serviceId>
+	|            <app:issuerId>" + ГМ.ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
+	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:data>
+	|               <merc:modifyActivityLocationsRequest>
+	|                   <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|                   <merc:initiator>
+	|                      <com:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</com:login>
+	|                   </merc:initiator>
+	|                  <merc:modificationOperation>
+	|                      <ent:type>CREATE</ent:type>
+	|                      <ent:businessEntity>
+	|                          <base:guid>"+ Площадка.GuidХозСубъекта +"</base:guid>
+	|                      </ent:businessEntity>
+	|                      <ent:enterpriseList count='1' total='1' offset='0'>
+	|                          <ent:enterprise>
+	|                              <base:guid>"+Площадка.GUID +"</base:guid>
+	|                          </ent:enterprise>
+	|                     </ent:enterpriseList>
+	|                 </merc:modificationOperation>
+	|             </merc:modifyActivityLocationsRequest>
+	|          </app:data>
+	|        </app:application>
+	|     </ws:submitApplicationRequest>
+	|</soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+
+	возврат Запрос;
+КонецФункции
+
 Процедура СоздатьСвязьХозсубъектПлощадка(Площадка)
-	Если ПустоеЗначение(Площадка.GuidХозСубъекта)=1 Тогда 
+	Если ПустоеЗначение(Площадка.GuidХозСубъекта)=1 Тогда
 		Сообщить("не указан GUID хоз субъекта");
 		Возврат;
 	КонецЕсли;
-		
-	Если ПустоеЗначение(Площадка.GUID)=1 Тогда 
+
+	Если ПустоеЗначение(Площадка.GUID)=1 Тогда
 		Сообщить("Выб площадке не указан GUID");
 		Возврат;
 	КонецЕсли;
-	
+
 	ГМ.Пауза();
-	Сообщить(" Запрос CreateActivityLocationsOperation [ "+СокрЛП(Площадка)+" ]","i");		
-	Результат = ГМ.Компонента.CreateActivityLocationsOperation(
-			СокрЛП(Площадка.GuidХозСубъекта),
-			СокрЛП(Площадка.GUID) 
-	);
-	
-	//Отладка();	
+	Сообщить(" Запрос CreateActivityLocationsOperation [ "+СокрЛП(Площадка)+" ]","i");
+	//Результат = ГМ.Компонента.CreateActivityLocationsOperation(
+	//		СокрЛП(Площадка.GuidХозСубъекта),
+	//		СокрЛП(Площадка.GUID)
+	//);
+
+
+	Сообщить(" Запрос CreateEnterprise [ "+СокрЛП(Площадка)+" ]","i");
+	ЗапросXML = СоздатьСвязь_ЗапросXML(Площадка);
+
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";
+
+	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	//Отладка();
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
-	
-	Если Результат="ACCEPTED" Тогда		
-		ГМ.Пауза(); 		
-		ПолучитьОтветСоздатьСвязьХозсубъектПлощадка( ГМ.Компонента.ApplicationId)
-	КонецЕсли;
-	
+
+	ГМ.Пауза();
+	ПолучитьОтветСоздатьСвязьХозсубъектПлощадка( appID )
+
 КонецПроцедуры
 
 Процедура ПолучитьОтветПлощадка( applicationID , Площадка)
-	
+
 	Если ПустоеЗначение(applicationID)=1 Тогда
 		Сообщить("Не указано applicationID");
 		Возврат;
 	КонецЕсли;
-	
-	ГМ.Пауза();
-	
-	Сообщить(" Запрос CreateEnterpriseResult [ "+СокрЛП(applicationID)+" ]","i");		
-	Результат = ГМ.Компонента.SendRequestResult(СокрЛП(applicationID));
 
-   	Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);        
+	ГМ.Пауза();
+//
+//	Сообщить(" Запрос CreateEnterpriseResult [ "+СокрЛП(applicationID)+" ]","i");
+//	Результат = ГМ.Компонента.SendRequestResult(СокрЛП(applicationID));
+
+	Сообщить("Отправляем запрос результата ["+applicationID+"] " );
+	//Результат = Компонента.SendRequestResult( applicationID );
+	Результат = ГМ.ПолучитьРезультатСервер( applicationID );
+
+   	Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(ГМ.Компонента.LogFilename);        
-    
-	Если ГМ.НайтиОшибки()>0 Тогда 
+    objDom.load(ГМ.Компонента.LogFilename);
+
+	Если ГМ.НайтиОшибки()>0 Тогда
 		Возврат;
-	КонецЕсли;		
-		
-    enterprise=objDom.selectSingleNode("//merc:enterprise") ;								
+	КонецЕсли;
+
+    enterprise=objDom.selectSingleNode("//merc:enterprise") ;
 	guid = enterprise.selectSingleNode("bs:guid").text;
 	uuid = enterprise.selectSingleNode("bs:uuid").text;
 	name = enterprise.selectSingleNode("ent:name").text;
 	active = enterprise.selectSingleNode("bs:active").text;
-				
-	если ПустоеЗначение(GUID)=0 Тогда			
+
+	если ПустоеЗначение(GUID)=0 Тогда
 		Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
 		Спр.НайтиЭлемент(Площадка);
 		спр.GUID = GUID;
 		спр.uuid = uuid;
 		спр.Записать();
 		Сообщить("Успешно записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
-		
+
 		Площадка = Спр.ТекущийЭлемент();
 	Иначе
 		Сообщить("Пустой GUID Площадки");
 	КонецЕсли;
-		
-	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );	
-	
+
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+
 	СоздатьСвязьХозсубъектПлощадка(Площадка);
-				
+
 КонецПроцедуры
 
 Функция  СоздатьПлощадку_ЗапросXML(Площадка)
-	ЗапросXML = "<modifyEnterpriseRequest xmlns:sch='http://www.w3.org/2001/XMLSchema' 
-	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
-	|xmlns:sh='http://api.vetrf.ru/schema/cdm/argus/shipment' 
-	|xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
-	|xmlns:app='http://api.vetrf.ru/schema/cdm/application' 
-	|xmlns:co='http://api.vetrf.ru/schema/cdm/argus/common' 
-	|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
-	|xmlns:pr='http://api.vetrf.ru/schema/cdm/argus/production' 
-	|xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar' 
-	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
-	|xmlns='http://api.vetrf.ru/schema/cdm/mercury/applications'>
-	|        <localTransactionId>[GUID]</localTransactionId>
-	|        <initiator>
-	|          <co:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</co:login>
-	|        </initiator>
-	|        <modificationOperation>
-	|          <ent:type>CREATE</ent:type>
-	|          <ent:affectedList count='0' total='0' offset='0' />
-	|          <ent:resultingList count='1' total='1' offset='0'>
-	|            <ent:enterprise>
-	|              <ent:name>"+СокрЛП(ПолноеНаименование)+"</ent:name>
-	|              <ent:type>1</ent:type>
+
+	ЗапросXML = "
+	|<soapenv:Envelope
+	|     xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+	|xmlns:app='http://api.vetrf.ru/schema/cdm/application'
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/applications'
+	|xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|xmlns:com='http://api.vetrf.ru/schema/cdm/argus/common'
+	|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
+	|xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:submitApplicationRequest>
+	|         <ws:apiKey>" + ГМ.ПолучитьКонстанту("param_api_key") + "</ws:apiKey>
+	|         <app:application>
+	|            <app:serviceId>mercury-g2b.service</app:serviceId>
+	|            <app:issuerId>" + ГМ.ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
+	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:data>
+	|                <merc:modifyEnterpriseRequest>
+	|                   <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|                   <merc:initiator>
+	|                      <com:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</com:login>
+	|                   </merc:initiator>
+	|                   <merc:modificationOperation>
+	|                       <ent:type>CREATE</ent:type>
+	|                       <ent:resultingList count='1' total='1' offset='0'>
+	|                       <ent:enterprise>
+	|                           <ent:name>"+СокрЛП(ПолноеНаименование)+"</ent:name>
+	|                           <ent:type>1</ent:type>
 	|              <ent:address>
-	|                <ik:country>
-	|                  <bs:guid>"+СокрЛП(Страна.GUID)+"</bs:guid>
-	|                </ik:country>
-	|                <ik:federalDistrict /> ";
-	Если ПустоеЗначение(Регион.GUID)=0 Тогда	
+	|                <ikar:country>
+	|                  <base:guid>"+СокрЛП(Страна.GUID)+"</base:guid>
+	|                </ikar:country>
+	|                <ikar:federalDistrict /> ";
+	Если ПустоеЗначение(Регион.GUID)=0 Тогда
 		ЗапросXML=ЗапросXML+"
-		|                <ik:region>
-		|                  <bs:guid>"+СокрЛП(Регион.GUID)+"</bs:guid>
-		|                </ik:region>
+		|                <ikar:region>
+		|                  <base:guid>"+СокрЛП(Регион.GUID)+"</base:guid>
+		|                </ikar:region>
 		|";
 	Иначе
 		ЗапросXML=ЗапросXML+"
-		|                <ik:region> ";
+		|                <ikar:region> ";
 	КонецЕсли;
-	Если ПустоеЗначение(Район.GUID)=0 Тогда	
+	Если ПустоеЗначение(Район.GUID)=0 Тогда
 		ЗапросXML=ЗапросXML+"
-		|                <ik:district>
-		|                  <bs:guid>"+СокрЛП(Район.GUID)+"</bs:guid>
-		|                </ik:district>
+		|                <ikar:district>
+		|                  <base:guid>"+СокрЛП(Район.GUID)+"</base:guid>
+		|                </ikar:district>
 		|";
 	Иначе
 		ЗапросXML=ЗапросXML+"
-		|<ik:district />
+		|<ikar:district />
 		|";
 	КонецЕсли;
-	Если ПустоеЗначение(Город.GUID)=0 Тогда	
+	Если ПустоеЗначение(Город.GUID)=0 Тогда
 		ЗапросXML=ЗапросXML+"
-		|                <ik:locality>
-		|                  <bs:guid>"+СокрЛП(Город.GUID)+"</bs:guid>
-		|                </ik:locality> ";
+		|                <ikar:locality>
+		|                  <base:guid>"+СокрЛП(Город.GUID)+"</base:guid>
+		|                </ikar:locality> ";
 	Иначе
 		ЗапросXML=ЗапросXML+"
-		|                <ik:locality /> ";		
+		|                <ikar:locality /> ";
 	КонецЕсли;
 	ЗапросXML=ЗапросXML+"
-	|                <ik:subLocality /> ";
-	Если ПустоеЗначение(Улица.GUID)=0 Тогда	
+	|                <ikar:subLocality /> ";
+	Если ПустоеЗначение(Улица.GUID)=0 Тогда
 		ЗапросXML=ЗапросXML+"
-		|                <ik:street> 
-		|                  <bs:guid>"+СокрЛП(Улица.GUID)+"</bs:guid>
-		|                </ik:street > ";
+		|                <ikar:street>
+		|                  <base:guid>"+СокрЛП(Улица.GUID)+"</base:guid>
+		|                </ikar:street > ";
 	Иначе
 		ЗапросXML=ЗапросXML+"
-		|                <ik:street /> ";
+		|                <ikar:street /> ";
 	КонецЕсли;
 	ЗапросXML=ЗапросXML+"
-	|                <ik:addressView>"+СокрЛП(Адрес)+"</ik:addressView>
+	|                <ikar:addressView>"+СокрЛП(Адрес)+"</ikar:addressView>
 	|              </ent:address>
-	|              <ent:activityList count='1' total='1' offset='0'>
-	|                <ent:activity>
-	|                  <ent:name>" + СокрЛП(Деятельность) + "</ent:name>
-	|                </ent:activity>
-	|              </ent:activityList>
-	|              <ent:owner>
-	|                <bs:guid>"+СокрЛП(Площадка.GuidХозСубъекта)+"</bs:guid>
-	|              </ent:owner>
-	|            </ent:enterprise>
-	|          </ent:resultingList>
-	|          <ent:reason>"+ Причина +"</ent:reason>
-	|        </modificationOperation>
-	|      </modifyEnterpriseRequest>
+	|                          <ent:activityList count='1' total='1' offset='0'>
+	|                             <ent:activity>
+	|                                 <ent:name>" + СокрЛП(Деятельность) + "</ent:name>
+	|                             </ent:activity>
+	|                         </ent:activityList>
+	|                         <ent:owner>
+	|                            <base:guid>"+СокрЛП(Площадка.GuidХозСубъекта)+"</base:guid>
+	|                         </ent:owner>
+	|                    </ent:enterprise>
+	|              </ent:resultingList>
+	|              <ent:reason>"+ Причина +"</ent:reason>
+	|           </merc:modificationOperation>
+	|        </merc:modifyEnterpriseRequest>
+	|      </app:data>
+	|    </app:application>
+	|   </ws:submitApplicationRequest>
+	| </soapenv:Body>
+	|</soapenv:Envelope>
 	|";
 
 	Возврат ЗапросXML;
 КонецФункции
 
 Процедура СоздатьПлощадку(Площадка)
-	
+
 	Если ПустоеЗначение(Площадка.GuidХозСубъекта)=1 Тогда
 		Сообщить("Не указан Guid ХозСубъекта");
 		Возврат;
@@ -315,18 +390,23 @@
 //		Сообщить("Не указан Город.GUID");
 //		Возврат;
 //	КонецЕсли;
-	
-	Сообщить(" Запрос CreateEnterprise [ "+СокрЛП(Площадка)+" ]","i");				
+
+	Сообщить(" Запрос CreateEnterprise [ "+СокрЛП(Площадка)+" ]","i");
 	ЗапросXML = СоздатьПлощадку_ЗапросXML(Площадка);
-	
-	appID = ГМ.ОтправитьЗапросXML(ЗапросXML);
-	
+
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";
+
+	//appID = ГМ.ОтправитьЗапросXML(ЗапросXML);
+	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+
 	Если ПустоеЗначение(appID)=0 Тогда
-		
+
 		ПолучитьОтветПлощадка( appID, Площадка )
-		
+
 	КонецЕсли;
-	
+
 КонецПроцедуры
 
 //======================================================================
