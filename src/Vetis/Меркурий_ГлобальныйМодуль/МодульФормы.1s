@@ -2065,24 +2065,37 @@
 		Сообщить("Пустой GUID для поиска ХС");
 		Возврат "REJECTED";
 	КонецЕсли;
+	//ЗапросXML = "
+	//|<soapenv:Envelope xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+	//|		  xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/business-entity/ws-definitions'
+	//|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+	//|<soapenv:Header/>
+	//|<soapenv:Body>
+	//|   <ws:getBusinessEntityByGuidRequest>
+	//|      <bs:guid>"+GUID+"</bs:guid>
+	//|   </ws:getBusinessEntityByGuidRequest>
+	//|</soapenv:Body>
+	//|</soapenv:Envelope>";
+
 	ЗапросXML = "
-	|<soapenv:Envelope xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
-	|		  xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/business-entity/ws-definitions'
-	|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
-	|<soapenv:Header/>
-	|<soapenv:Body>
-	|   <ws:getBusinessEntityByGuidRequest>
-	|      <bs:guid>"+GUID+"</bs:guid>
-	|   </ws:getBusinessEntityByGuidRequest>
-	|</soapenv:Body>
-	|</soapenv:Envelope>";
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/business-entity/ws-definitions'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'>
+	|  <soapenv:Header/>
+	|  <soapenv:Body>
+	|    <ws:getBusinessEntityByGuidRequest>
+	|      <base:guid>"+GUID+"</base:guid>
+	|    </ws:getBusinessEntityByGuidRequest>
+	|  </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
 
 
 	метод = Компонента.GetMethod();
 	метод.Service = "platform/cerberus/services/EnterpriseService";
-	метод.Action = "GetBusinessEntityByGUID";
+	метод.Action = "GetBusinessEntityByGuid";
 
-	Сообщить(" Запрос GetBusinessEntityByGUID [ "+СокрЛП(GUID)+" ]");
+	Сообщить(" Запрос GetBusinessEntityByGuid [ "+СокрЛП(GUID)+" ]");
 
 	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
 
@@ -2104,10 +2117,15 @@
 		Возврат "REJECTED";
 	КонецЕсли;
 
-	ЗагрузитьХС( GUID );
+	appID = ЗагрузитьХС( GUID );
+
+	Если ПустоеЗначение( appID )=1 Тогда
+		Сообщить( "Ответ сервера = "+appID , "!");
+		Возврат appID;
+	КонецЕсли;
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
-    objDom.load( Компонента.LogFilename);
+    objDom.load( Компонента.LogFilenameResponse);
     objDom.setProperty("SelectionNamespaces", "
 		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
 		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
@@ -2420,6 +2438,7 @@
 		Попытка
 			guid = activityLocation.selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
 
+			//ГМ.Пауза();
     		ЗагрузитьПлощадкуПоGUID(guid, ХС);
 		Исключение
         	Сообщить("Не удалось получить GUID площадки из файла "+Компонента.LogFilename);
@@ -2446,30 +2465,38 @@
 	Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
 
 
-    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
 		Возврат Результат;
 	КонецЕсли;
 
-    enterprise = objDom.selectSingleNode("//*[local-name() = 'enterprise']") ;
+    enterprise = objDom.selectSingleNode("//ent:enterprise") ;
 
-	guid = enterprise.selectSingleNode("//*[local-name() = 'guid']").text;
-	uuid = enterprise.selectSingleNode("//*[local-name() = 'uuid']").text;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
 
-	updateDate = enterprise.selectSingleNode("//*[local-name() = 'updateDate']").text;
-	createDate = enterprise.selectSingleNode("//*[local-name() = 'createDate']").text;
-	name = enterprise.selectSingleNode("//*[local-name() = 'name']").text;
-	active = enterprise.selectSingleNode("//*[local-name() = 'active']").text;
+	updateDate = enterprise.selectSingleNode("bs:updateDate").text;
+	createDate = enterprise.selectSingleNode("bs:createDate").text;
+	name = enterprise.selectSingleNode("ent:name").text;
+	active = enterprise.selectSingleNode("bs:active").text;
 
-	address = enterprise.selectSingleNode("//*[local-name() = 'address']").selectSingleNode("//*[local-name() = 'addressView']").text;
+	address = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:addressView").text;
 
 	Попытка
-		owner = enterprise.selectSingleNode("//*[local-name() = 'owner']").selectSingleNode("//*[local-name() = 'guid']").text;
-		ownerName = enterprise.selectSingleNode("//*[local-name() = 'owner']").selectSingleNode("//*[local-name() = 'name']").text;
+		owner = enterprise.selectSingleNode("ent:owner").selectSingleNode("bs:guid").text;
 	Исключение
 		owner="";
+	КонецПопытки;
+	Попытка
+		ownerName = enterprise.selectSingleNode("ent:owner").selectSingleNode("ent:name").text;
+	Исключение
+		Попытка
+			ownerName = enterprise.selectSingleNode("ent:owner").selectSingleNode("ent:fio").text;
+		Исключение
+			ownerName ="";
+		КонецПопытки;
 	КонецПопытки;
 
 	Если owner<>СокрЛП(ХС.GUID) Тогда
@@ -2515,7 +2542,7 @@
 
     Сообщить("Загрузка XML-файла: "+Компонента.LogFilename);
 
-    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(Компонента.LogFilename);
 
 	Если НайтиОшибки()>0 Тогда
@@ -2533,11 +2560,11 @@
 	тзПлощадки.НоваяКолонка("ДатаСоздания");
 	тзПлощадки.НоваяКолонка("ДатаИзменения");
 
-    activityLocationList = objDom.selectNodes("//*[local-name() = 'activityLocation']") ;
+    activityLocationList = objDom.selectNodes("//ent:activityLocation") ;
     Для i1 = 0 По activityLocationList.length - 1 Цикл
         activityLocation=activityLocationList.item(i1);
 
-		guid = activityLocation.selectSingleNode("*[local-name() = 'enterprise']").selectSingleNode("*[local-name() = 'guid']").text;
+		guid = activityLocation.selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
 
     	ЗагрузитьПлощадкуПоGuidТЗ(guid, ХС, тзПлощадки);
 
