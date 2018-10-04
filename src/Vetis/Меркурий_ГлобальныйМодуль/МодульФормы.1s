@@ -725,31 +725,11 @@
 	    error=objDom.selectSingleNode("//*[local-name() = 'Fault']");
 
 		Если ПустоеЗначение(error)=0 Тогда
-<<<<<<< HEAD
-=======
-		//Если errors.length>0 Тогда
-
->>>>>>> ef240474c541dcd7356f9f8fbb226838908cb7b1
-			//СтрОшибки ="";
 			Сообщить("Ошибка : код = "+ error.selectSingleNode("faultcode").text +" ","!");
 			Сообщить("Ошибка : строка = "+ error.selectSingleNode("faultstring").text +" ","!");
 			Сообщить("Ошибка : сервис = "+ error.selectSingleNode("faultactor").text +" ","!");
 			Сообщить("Ошибка : detail описание = "+ error.selectSingleNode("detail").text +" ","!");
-<<<<<<< HEAD
 			Результат=Результат+1;
-=======
-//		    Для i1 = 0 По errors.length - 1 Цикл
-//		        error=errors.item(i1);
-//				СтрОшибки = СтрОшибки + "ОШИБКА: "+ СокрЛП(error.text) +" ";
-//				id = error.getAttribute("qualifier");
-//				Если ПустоеЗначение(id)=0 Тогда
-//					СтрОшибки = СтрОшибки + " в строке "+id;
-//				КонецЕсли;
-//
-//				Сообщить("ОШИБКА: "+СтрОшибки,"!!");
-				Результат=Результат+1;
-			//КонецЦикла;
->>>>>>> ef240474c541dcd7356f9f8fbb226838908cb7b1
 
 		КонецЕсли;
 
