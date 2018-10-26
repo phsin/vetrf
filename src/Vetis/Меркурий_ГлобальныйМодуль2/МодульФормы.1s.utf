@@ -248,8 +248,8 @@
 	ТзТочкиМаршрута.НоваяКолонка("номерПрицепа");
 	ТзТочкиМаршрута.НоваяКолонка("НазваниеСудна");
 	ТзТочкиМаршрута.НоваяКолонка("НомерАвиарейса");
-	ТзТочкиМаршрута.НоваяКолонка("UUID","Строка",36, ,"UUID",10);
-	ТзТочкиМаршрута.НоваяКолонка("НомерТочки","Число",3,0,"Номер точки",5);
+	ТзТочкиМаршрута.НоваяКолонка("UUID",); //ТзТочкиМаршрута.НоваяКолонка("UUID","Строка",36, ,"UUID",10);
+	ТзТочкиМаршрута.НоваяКолонка("НомерТочки");//ТзТочкиМаршрута.НоваяКолонка("НомерТочки","Число",3,0,"Номер точки",5);
 
 	Возврат ТзТочкиМаршрута;
 КонецФункции
@@ -4237,8 +4237,37 @@
 		|                <vd:sqnId>"+ СокрЛП(док.SequenceNumber) +"</vd:sqnId>
 		|                <vd:nextTransport>
 		|                  <vd:transportType>"+ док.transportType +"</vd:transportType>
-		|                  <vd:transportNumber>
-		|                    <vd:vehicleNumber>"+ СокрЛП(док.vehicleNumber) +"</vd:vehicleNumber>
+		|                  <vd:transportNumber>";
+		Попытка
+			Если док.transportType = 1 Тогда
+				 // Контейнер при наличии всегда первый
+				Если ПустоеЗначение(док.containerNumber) = 0 Тогда
+					Запрос=Запрос+"
+       				|          <vd:containerNumber>"+СокрЛП(док.containerNumber)+"</vd:containerNumber>";
+				КонецЕсли;
+				Запрос=Запрос+"
+				|                    <vd:vehicleNumber>"+ СокрЛП(док.vehicleNumber) +"</vd:vehicleNumber>";
+
+				Если ПустоеЗначение(док.trailerNumber) = 0 Тогда
+					Запрос=Запрос+"
+       				|          <vd:trailerNumber>"+СокрЛП(док.trailerNumber)+"</vd:trailerNumber>";
+				КонецЕсли;
+			ИначеЕсли док.transportType = 2 Тогда
+				Запрос=Запрос+"
+				|                    <vd:wagonNumber>"+ СокрЛП(док.wagonNumber) +"</vd:wagonNumber>";
+			ИначеЕсли док.transportType = 3 Тогда
+				Запрос=Запрос+"
+				|                    <vd:flightNumber>"+ СокрЛП(док.flightNumber) +"</vd:flightNumber>";
+			ИначеЕсли (док.transportType = 4) или (док.transportType = 5) или (док.transportType = 6) Тогда
+				Запрос=Запрос+"
+				|                    <vd:shipName>"+ СокрЛП(док.shipName) +"</vd:shipName>";
+			КонецЕсли;
+		Исключение
+			Сообщить("Обновите конфигурацию - отсутствуют ревизиты тч в документе ВСД2_ОбновитьТранспорт");
+			Сообщить(ОписаниеОшибки());
+		КонецПопытки;
+
+		Запрос=Запрос+"
 		|                  </vd:transportNumber>
 		|                </vd:nextTransport>
 		|              </vd:routePoint>

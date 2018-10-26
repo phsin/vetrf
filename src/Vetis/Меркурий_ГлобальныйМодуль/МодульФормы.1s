@@ -717,10 +717,12 @@
 
 				ИзменитьСтатусДокументОснования(док, "REJECTED");
 			КонецЕсли;
-
-
 		КонецЕсли;
+	Исключение
+		Сообщить("ОШИБКА: "+Компонента.ErrorMessage,"!!");
+	КонецПопытки;
 
+	Попытка
 		// Внутренние ошибки
 	    error=objDom.selectSingleNode("//*[local-name() = 'Fault']");
 
@@ -732,9 +734,7 @@
 			Результат=Результат+1;
 
 		КонецЕсли;
-
 	Исключение
-		Сообщить("ОШИБКА: "+Компонента.ErrorMessage,"!!");
 	КонецПопытки;
 
 	Возврат Результат;
@@ -2290,17 +2290,17 @@
 		Возврат Результат;
 	КонецЕсли;
 
-	enterprise = objDom.selectSingleNode("//enterprise") ;
+	enterprise = objDom.selectSingleNode("//ent:enterprise") ;
 
-	guid = enterprise.selectSingleNode("guid").text;
-	uuid = enterprise.selectSingleNode("uuid").text;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
 
 	//updateDate = unit.selectSingleNode("updateDate").text;
 	//createDate = unit.selectSingleNode("createDate").text;
-	name = enterprise.selectSingleNode("name").text;
-	active = enterprise.selectSingleNode("active").text;
+	name = enterprise.selectSingleNode("ent:name").text;
+	active = enterprise.selectSingleNode("bs:active").text;
 
-	address = enterprise.selectSingleNode("address").selectSingleNode("addressView").text;
+	address = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:addressView").text;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
 	УровнейВСправочнике = Метаданные.Справочник("ВСД_Площадка").КоличествоУровней;
@@ -3364,6 +3364,7 @@
 		name = item.selectSingleNode("ikar:name").text;
 		view = item.selectSingleNode("ikar:view").text;
 
+		НачатьТранзакцию(); // Ускоримся
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
 		Иначе
@@ -3371,11 +3372,12 @@
 			Спр.Новый();
 			//рез = Спр.ТекущийЭлемент();
 		КонецЕсли;
-		Спр.Наименование = view;
+		Спр.Наименование = name;
 		Спр.GUID = guid;
 		Спр.UUID = UUID;
 		Спр.ParentGUID = Регион.GUID;
 		Спр.Записать();
+		ЗафиксироватьТранзакцию();
 		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
 
@@ -3429,6 +3431,7 @@
 		Возврат "";
 	КонецЕсли;
 
+	НачатьТранзакцию(); // Ускоримся
 	Спр = СоздатьОбъект("Справочник.ВСД_Улица");
     List = objDom.selectNodes("//ikar:street") ;
     Для i1 = 0 По List.length - 1 Цикл
@@ -3442,6 +3445,7 @@
 		name = item.selectSingleNode("ikar:name").text;
 		view = item.selectSingleNode("ikar:view").text;
 
+
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
 			Спр.СнятьПометкуУдаления();
 		Иначе
@@ -3454,8 +3458,11 @@
 		Спр.UUID = UUID;
 		Спр.ParentGUID = Город.GUID;
 		Спр.Записать();
+
 		Сообщить("Записан ВСД_Улица ["+name+"] ","");
+
     КонецЦикла;
+	ЗафиксироватьТранзакцию();
 
 	Сообщить("Загрузка завершена");
 КонецФункции
