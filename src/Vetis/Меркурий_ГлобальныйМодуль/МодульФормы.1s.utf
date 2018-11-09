@@ -1,5 +1,6 @@
-//Автор: Синявский Филипп
-//phsin@kb99.pro
+//Авторы:
+// Синявский Филипп phsin@kb99.pro
+// Жуков Дмитрий zhukov@kb99.pro
 
 Перем Компонента Экспорт;
 Перем СписокКонстант Экспорт;
@@ -12,6 +13,7 @@
 Перем ИмяDLL Экспорт;
 Перем ТермическиеУсловияПеревозки Экспорт;
 Перем КлассыМаркировки Экспорт;
+Перем КолонкаСортировкиПартииСписания Экспорт;
 Перем RS Экспорт;
 Перем Сервис Экспорт;
 Перем _ФабрикаОбъектов Экспорт;
@@ -174,6 +176,12 @@
 	ТермическиеУсловияПеревозки.ДобавитьЗначение("CHILLED",		"Охлажденный");
 	ТермическиеУсловияПеревозки.ДобавитьЗначение("COOLED", 		"Охлаждаемый");
 	ТермическиеУсловияПеревозки.ДобавитьЗначение("VENTILATED",	"Вентилируемый");
+
+	КолонкаСортировкиПартииСписания = СоздатьОбъект("СписокЗначений");
+	КолонкаСортировкиПартииСписания.ДобавитьЗначение("ДатаИзменения",		"Дата изменения");
+	КолонкаСортировкиПартииСписания.ДобавитьЗначение("ДатаСрокГодности1",	"Срок годности");
+	КолонкаСортировкиПартииСписания.ДобавитьЗначение("ДатаИзготовления1",	"Изготовлено");
+
 
 	КлассыМаркировки = СоздатьОбъект("СписокЗначений");
 	КлассыМаркировки.ДобавитьЗначение("UNDEFINED", "Неопределенный класс");
@@ -631,7 +639,8 @@
 
 //======= ВСПОМОГАЛЬНЫЕ ФУНКЦИИ ==============
 
-Функция ДатаXML(ВыбДата, Время="") Экспорт
+//ДатаXML
+Функция Преобразовать_Дата_в_Строка(ВыбДата, Время="") Экспорт
 	стрДата = ""+ДатаГод(ВыбДата)+"-";
 	Если ДатаМесяц(ВыбДата)<10 ТОгда
 		стрДата=стрДата+"0"+ДатаМесяц(ВыбДата)+"-";
@@ -702,9 +711,9 @@
 		        error=errors.item(i1);
 				id = error.getAttribute("qualifier");
 				code = error.getAttribute("code");
-				СтрОшибка = "Ошибка" + " "+code ;
+				СтрОшибка = "Ошибка" + " "+ code ;
 				Если ПустоеЗначение(id)=0 Тогда
-					СтрОшибка = СтрОшибка + " в строке "+id " : ";
+					СтрОшибка = СтрОшибка + " в строке "+id + " : ";
 				КонецЕсли;
 				СтрОшибка = СтрОшибка + СокрЛП(error.text);
 
@@ -1024,7 +1033,9 @@
 		Попытка КонтекстФормы.Поставщик_Фирма = ПолучитьКонстанту("Поставщик_Фирма"); Исключение КонецПопытки;
 		Попытка КонтекстФормы.ВСД_РезультатыИсследований = ПолучитьКонстанту("ВСД_РезультатыИсследований"); Исключение КонецПопытки;
 
-		Попытка КонтекстФормы.ПарамКолонкаСортировкиПартииСписания = ПолучитьКонстанту("ПарамКолонкаСортировкиПартииСписания"); Исключение КонецПопытки;
+		ПарамКолонкаСортировкиПартииСписания = СокрЛП(ПолучитьКонстанту("ПарамКолонкаСортировкиПартииСписания"));
+		Попытка КонтекстФормы.спКолонкаСортировкиПартииСписания.ТекущаяСтрока( ПарамКолонкаСортировкиПартииСписания ); Исключение КонецПопытки;
+
 		Попытка КонтекстФормы.ПарамЗнакСортировкиУбывание = ПолучитьКонстанту("ПарамЗнакСортировкиУбывание"); Исключение КонецПопытки;
 		Попытка КонтекстФормы.ПарамЗаполнятьВСДБезПартий = ПолучитьКонстанту("ПарамЗаполнятьВСДБезПартий"); Исключение КонецПопытки;
 
@@ -3635,27 +3646,162 @@
 	возврат Дата(год, мес,день);
 КонецФункции
 
-Функция Дата_из_XML(dateXML, Дата1, Дата2, ДатаСтрока ) Экспорт
+Функция Преобразовать_СтрокаДата_в_XML(ДатаСтр) Экспорт
+	//например 2018.11.01-03:00
+	//
+	//год1 = Сред(ДатаСтр,7,4);
+	//мес1 = Сред(ДатаСтр,4,2);
+	//час1 = Сред(ДатаСтр,12,2);
+	//день1 = Лев(ДатаСтр,2);
+	день1= Сред(ДатаСтр,9,2);
+	мес1 = Сред(ДатаСтр,6,2);
+	час1 = Сред(ДатаСтр,12,2);
+	год1 = Лев(ДатаСтр,4);
+
+	ТекстЗапроса="";
+	Если ПустоеЗначение(год1)=0 Тогда
+		ТекстЗапроса = " <dt:year>"+ год1 +"</dt:year>";
+	КонецЕсли;
+	Если ПустоеЗначение(мес1)=0 Тогда
+		ТекстЗапроса = ТекстЗапроса + " <dt:month>"+ Число(мес1) +"</dt:month> ";
+	КонецЕсли;
+	Если ПустоеЗначение( день1 )=0 Тогда
+		ТекстЗапроса = ТекстЗапроса + " <dt:day>"+ Число(день1) +"</dt:day>";
+	КонецЕсли;
+	Если ПустоеЗначение(час1)=0 Тогда
+		ТекстЗапроса = ТекстЗапроса + " <dt:hour>"+ Число(час1) +"</dt:hour> ";
+	КонецЕсли;
+
+	Возврат ТекстЗапроса;
+КонецФункции
+
+Функция Преобразовать_ДатаXML_в_Строку(dateXML)
 	попытка
-		год = ""+dateXML.selectSingleNode("vetd:firstDate").selectSingleNode("bs:year").text;
-		мес = ""+dateXML.selectSingleNode("vetd:firstDate").selectSingleNode("bs:month").text;
-		день = ""+dateXML.selectSingleNode("vetd:firstDate").selectSingleNode("bs:day").text;
-		Дата1 = Дата(год, мес, день);
+		год = ""+dateXML.selectSingleNode("//*[local-name() = 'year']").text;
+		год = Формат(год,"Ч(0)4.0");
 	Исключение
-		Попытка
-			ДатаСтрока = ""+dateXML.text;
-		Исключение
-		КонецПопытки;
+		год ="    ";
 	КонецПопытки;
 	попытка
-		год = ""+dateXML.selectSingleNode("vetd:secondDate").selectSingleNode("bs:year").text;
-		мес = ""+dateXML.selectSingleNode("vetd:secondDate").selectSingleNode("bs:month").text;
-		день = ""+dateXML.selectSingleNode("vetd:secondDate").selectSingleNode("bs:day").text;
-		Дата2 = Дата(год, мес, день);
+		мес = ""+dateXML.selectSingleNode("//*[local-name() = 'month']").text;
+		мес = Формат(мес,"Ч(0)2.0");
+	Исключение
+		мес = "  ";
+	КонецПопытки;
+
+	попытка
+		день = ""+dateXML.selectSingleNode("//*[local-name() = 'day']").text;
+		день = Формат(день,"Ч(0)2.0");
+	Исключение
+		день = "  ";
+	КонецПопытки;
+
+	Время="";
+	попытка
+		час = ""+dateXML.selectSingleNode("//*[local-name() = 'hour']").text;
+		Если час>0 Тогда
+			час = Формат(час,"Ч(0)2.0");
+			минуты="00";
+			Время = "T"+час+":"+минуты;
+		КонецЕсли;
 	Исключение
 	КонецПопытки;
 
+	//формат "2018-10-01T14:00" = стандартное время
+	Дата1 = ""+ год +"-"+ мес +"-"+ день +Время;
+	Возврат Дата1;
 КонецФункции
+
+Функция Дата_из_XML( dateXML, Дата1, Дата2, ДатаСтрока ) Экспорт
+
+	Попытка
+		Дата1 = Преобразовать_ДатаXML_в_Строку( dateXML.selectSingleNode( "//*[local-name() = 'firstDate']" ) );
+	Исключение
+		Дата1="";
+	КонецПопытки;
+	Попытка
+		Дата2 = Преобразовать_ДатаXML_в_Строку( dateXML.selectSingleNode( "//*[local-name() = 'secondDate']" ) );
+	Исключение
+		Дата2="";
+	КонецПопытки;
+	Попытка
+		ДатаСтрока = ""+dateXML.selectSingleNode( "//*[local-name() = 'informalDate']" ).text;
+	Исключение
+		ДатаСтрока = "";
+	КонецПопытки;
+
+КонецФункции
+
+Функция ПустаяДата( ВыбСтрокаДата )
+	год1 = Лев(ВыбСтрокаДата,4);
+	Возврат ПустоеЗначение(год1);
+КонецФункции
+
+Функция Изготовление_СрокГодности_в_XML(док, префикс) Экспорт
+    ТекстЗапроса = "";
+
+	Попытка
+		ДатаИзготовленияСтр	= док.ДатаИзготовления;
+	Исключение
+		ДатаИзготовленияСтр ="";
+	КонецПопытки;
+
+	Если (ПустаяДата(док.ДатаИзготовления1) = 0) или (ПустоеЗначение(ДатаИзготовленияСтр) = 0) Тогда
+		ТекстЗапроса = ТекстЗапроса + "
+    	|                <"+ префикс +":dateOfProduction>";
+		Если (ПустаяДата(док.ДатаИзготовления1) = 0) Тогда
+			ТекстЗапроса = ТекстЗапроса + "<"+ префикс +":firstDate> ";
+			ТекстЗапроса = ТекстЗапроса + Преобразовать_СтрокаДата_в_XML(док.ДатаИзготовления1);
+			ТекстЗапроса = ТекстЗапроса + " </"+ префикс +":firstDate>";
+		КонецЕсли;
+		Если (ПустаяДата(док.ДатаИзготовления2) = 0 ) Тогда
+			ТекстЗапроса = ТекстЗапроса + "
+			|              <"+ префикс +":secondDate>
+			|" + ГМ.Преобразовать_СтрокаДата_в_XML(док.ДатаИзготовления2) + "
+			|              </"+ префикс +":secondDate>";
+		КонецЕсли;
+
+		Если ПустоеЗначение(ДатаИзготовленияСтр) = 0 Тогда
+			ТекстЗапроса = ТекстЗапроса + "
+			|              <"+ префикс +":informalDate>"+ СокрЛП(ДатаИзготовленияСтр) +"</"+префикс+":informalDate>";
+		КонецЕсли;
+		ТекстЗапроса = ТекстЗапроса + "
+		|                </"+ префикс +":dateOfProduction>";
+	КонецЕсли;
+
+	Попытка
+		ДатаСрокГодностиСтр	= док.ДатаСрокГодности;
+	Исключение
+		ДатаСрокГодностиСтр = "";
+	КонецПопытки;
+
+	Если (ПустаяДата(док.ДатаСрокГодности1) = 0 ) или (ПустоеЗначение(ДатаСрокГодностиСтр) = 0) Тогда
+		ТекстЗапроса = ТекстЗапроса + "
+			|                <"+префикс+":expiryDate>";
+		Если (ПустаяДата(док.ДатаСрокГодности1) = 0 ) Тогда
+			ТекстЗапроса = ТекстЗапроса + "
+			|              <"+префикс+":firstDate>
+			|" + ГМ.Преобразовать_СтрокаДата_в_XML(док.ДатаСрокГодности1) + "
+			|              </"+префикс+":firstDate>";
+		КонецЕсли;
+		Если (ПустаяДата(док.ДатаСрокГодности2) = 0 ) Тогда
+			ТекстЗапроса = ТекстЗапроса + "
+			|              <"+префикс+":secondDate>
+			|" + ГМ.Преобразовать_СтрокаДата_в_XML(док.ДатаСрокГодности2) + "
+			|              </"+префикс+":secondDate>";
+		КонецЕсли;
+		Если ПустоеЗначение(ДатаСрокГодностиСтр) = 0 Тогда
+			ТекстЗапроса = ТекстЗапроса + "
+			|              <"+префикс+":informalDate>"+ СокрЛП(ДатаСрокГодностиСтр) +"</"+префикс+":informalDate>";
+		КонецЕсли;
+
+		ТекстЗапроса = ТекстЗапроса + "
+			|            </"+префикс+":expiryDate>";
+	КонецЕсли;
+
+	Возврат ТекстЗапроса;
+КонецФункции
+
 
 Функция СохранитьСтатусЗапроса(док) Экспорт
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
@@ -3996,7 +4142,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 				|<merc:getStockEntryListRequest>
 				|        <merc:localTransactionId>[GUID]</merc:localTransactionId>
@@ -4078,49 +4224,57 @@
 
 		packingAmount = batch.selectSingleNode("ns2:packingAmount").text;
 
-		// dateOfProduction 1
-		ДатаИзготовления1="";
-		ДатаИзготовления="";
-		попытка
-			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
-			ДатаИзготовления1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ДатаИзготовления = ""+batch.selectSingleNode("ns2:dateOfProduction").text;
-			Исключение
-			КонецПопытки;
-		КонецПопытки;
-		ДатаИзготовления2="";
-		попытка
-			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
-			ДатаИзготовления2 = Дата(год, мес, день);
-		Исключение
-		КонецПопытки;
+//		// dateOfProduction 1
+//		ДатаИзготовления1="";
+//		ДатаИзготовления="";
+//		попытка
+//			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
+//			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
+//			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
+//			ДатаИзготовления1 = Дата(год, мес, день);
+//		Исключение
+//			Попытка
+//				ДатаИзготовления = ""+batch.selectSingleNode("ns2:dateOfProduction").text;
+//			Исключение
+//			КонецПопытки;
+//		КонецПопытки;
+//		ДатаИзготовления2="";
+//		попытка
+//			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
+//			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
+//			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
+//			ДатаИзготовления2 = Дата(год, мес, день);
+//		Исключение
+//		КонецПопытки;
+//
+//		//ДатаСрокГодности
+//		попытка
+//			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
+//			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
+//			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
+//			ДатаСрокГодности1 = Дата(год, мес, день);
+//		Исключение
+//			Попытка
+//				ДатаСрокГодности = ""+batch.selectSingleNode("ns2:expiryDate").text;
+//			Исключение
+//			КонецПопытки;
+//		КонецПопытки;
+//		ДатаСрокГодности2="";
+//		попытка
+//			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
+//			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
+//			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
+//			ДатаСрокГодности2 = Дата(год, мес, день);
+//		Исключение
+//		КонецПопытки;
 
-		//ДатаСрокГодности
-		попытка
-			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
-			ДатаСрокГодности1 = Дата(год, мес, день);
-		Исключение
-			Попытка
-				ДатаСрокГодности = ""+batch.selectSingleNode("ns2:expiryDate").text;
-			Исключение
-			КонецПопытки;
-		КонецПопытки;
-		ДатаСрокГодности2="";
-		попытка
-			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
-			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
-			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
-			ДатаСрокГодности2 = Дата(год, мес, день);
-		Исключение
-		КонецПопытки;
+		ДатаИзготовления1=""; ДатаИзготовления2="";	ДатаИзготовления="";
+		dateOfProduction = batch.selectSingleNode("ns2:dateOfProduction");
+		Дата_из_XML(dateOfProduction, ДатаИзготовления1, ДатаИзготовления2, ДатаИзготовления);
+
+		ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодности="";
+		expiryDate = batch.selectSingleNode("ns2:expiryDate");
+		Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);
 
 		Попытка
 			producer = batch.selectSingleNode("ns2:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
@@ -4667,7 +4821,8 @@
 	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'
 	|                  xmlns:vet='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
 	|                  xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production'
-	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'>
+	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'
+	|					xmlns:dt='http://api.vetrf.ru/schema/cdm/base' >
 	|   <SOAP-ENV:Header/>
 	|   <SOAP-ENV:Body>
 	|      <ws:submitApplicationRequest>
@@ -4675,7 +4830,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|";
 
@@ -4690,7 +4845,7 @@
             |";
         Запрос=Запрос+ "
             |        <merc:delivery>
-            |          <vet:deliveryDate>" + ДатаXML(док.ТтнДата, "T00:00:00") + "</vet:deliveryDate>
+            |          <vet:deliveryDate>" + Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vet:deliveryDate>
             |          <vet:consignor>
             |            <ent:businessEntity>
             |              <base:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</base:guid>
@@ -4732,71 +4887,74 @@
             |              <base:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</base:guid>
             |            </vet:unit>";
 
-            Если док.КоличествоМест>0 Тогда
-                Запрос=Запрос+"
-                |            <vet:packingList>
-                |              <com:packingForm>
-                |                <base:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</base:uuid>
-                |              </com:packingForm>
-                |            </vet:packingList>
-                |            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
-                |";
-            КонецЕсли;
-
+        Если док.КоличествоМест>0 Тогда
             Запрос=Запрос+"
-            |            <vet:dateOfProduction>
+            |            <vet:packingList>
+            |              <com:packingForm>
+            |                <base:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</base:uuid>
+            |              </com:packingForm>
+            |            </vet:packingList>
+            |            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
             |";
-        Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-            Запрос = Запрос + "
-            |              <vet:firstDate>
-            |                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:firstDate>
-            |";
-        КонецЕсли;
-        Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
-                (док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-            Запрос = Запрос + "
-            |              <vet:secondDate>
-            |                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:secondDate>
-            |";
-        КонецЕсли;
-        Запрос = Запрос + "
-            |              <vet:informalDate />
-            |            </vet:dateOfProduction>
-            |            <vet:expiryDate>
-            |";
+		КонецЕсли;
 
-        Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-            Запрос = Запрос + "
-                |              <vet:firstDate>
-                |                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
-                |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
-                |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
-                |                <base:hour>0</base:hour>
-                |              </vet:firstDate>
-                |";
-        КонецЕсли;
-        Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
-                (док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-            Запрос = Запрос + "
-                |              <vet:secondDate>
-                |                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
-                |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
-                |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
-                |                <base:hour>0</base:hour>
-                |              </vet:secondDate>
-                |";
-        КонецЕсли;
-        Запрос = Запрос + "
-            |              <vet:informalDate />
-            |            </vet:expiryDate>
+		Запрос = Запрос + Изготовление_СрокГодности_в_XML(док, "vet");
+//            Запрос=Запрос+"
+//            |            <vet:dateOfProduction>
+//            |";
+//        Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:firstDate>
+//            |                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:firstDate>
+//            |";
+//        КонецЕсли;
+//        Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
+//                (док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:secondDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:secondDate>
+//            |";
+//        КонецЕсли;
+//        Запрос = Запрос + "
+//            |              <vet:informalDate />
+//            |            </vet:dateOfProduction>
+//            |            <vet:expiryDate>
+//            |";
+//
+//        Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
+//            Запрос = Запрос + "
+//                |              <vet:firstDate>
+//                |                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
+//                |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
+//                |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
+//                |                <base:hour>0</base:hour>
+//                |              </vet:firstDate>
+//                |";
+//        КонецЕсли;
+//        Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
+//                (док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
+//            Запрос = Запрос + "
+//                |              <vet:secondDate>
+//                |                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
+//                |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
+//                |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
+//                |                <base:hour>0</base:hour>
+//                |              </vet:secondDate>
+//                |";
+//        КонецЕсли;
+        //Запрос = Запрос + "
+        //    |              <vet:informalDate />
+        //    |            </vet:expiryDate>
+		//	|";
+			Запрос = Запрос + "
             |            <vet:perishable>false</vet:perishable>
             |            <vet:countryOfOrigin>
             |              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -4829,7 +4987,7 @@
             |      <vet:waybill>
             |        <shp:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</shp:issueSeries>
             |        <shp:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</shp:issueNumber>
-            |        <shp:issueDate>"+ ДатаXML(док.ТтнДата) +"</shp:issueDate>
+            |        <shp:issueDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</shp:issueDate>
             |        <shp:type>1</shp:type>
             |        <shp:consignor>
             |          <ent:businessEntity />
@@ -4854,7 +5012,7 @@
             |      <vet:vetCertificate>
             |        <vet:issueSeries>"+ СокрЛП(док.ВсдСерия) +"</vet:issueSeries>
             |        <vet:issueNumber>"+ СокрЛП(док.ВсдНомер) +"</vet:issueNumber>
-            |        <vet:issueDate>"+ ДатаXML(док.ВсдДата) +"</vet:issueDate>
+            |        <vet:issueDate>"+ Преобразовать_Дата_в_Строка(док.ВсдДата) +"</vet:issueDate>
             |        <vet:form>" + СокрЛП(ПолучитьКонстанту("ФормаВСД")) + "</vet:form>
             |          <vet:consignor>
             |            <ent:businessEntity>
@@ -4906,62 +5064,66 @@
             |            </vet:packingList>
             |            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
             |";
-        КонецЕсли;
-        Запрос=Запрос+"
-            |            <vet:dateOfProduction>
-            |";
+		КонецЕсли;
 
-
-        Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-            Запрос = Запрос + "
-            |              <vet:firstDate>
-            |                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:firstDate>
-            |";
-        КонецЕсли;
-        Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
-                (док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-            Запрос = Запрос + "
-            |              <vet:secondDate>
-            |                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:secondDate>
-            |";
-        КонецЕсли;
-        Запрос = Запрос + "
-            |              <vet:informalDate />
-            |            </vet:dateOfProduction>
-            |            <vet:expiryDate>
-            |";
-        Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-            Запрос = Запрос + "
-            |              <vet:firstDate>
-            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:firstDate>
-            |";
-        КонецЕсли;
-        Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
-                (док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-            Запрос = Запрос + "
-            |              <vet:secondDate>
-            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:secondDate>
-            |";
-        КонецЕсли;
-        Запрос = Запрос + "
-            |              <vet:informalDate />
-            |            </vet:expiryDate>
+		Запрос = Запрос + Изготовление_СрокГодности_в_XML(док, "vet");
+//        Запрос=Запрос+"
+//            |            <vet:dateOfProduction>
+//            |";
+//
+//
+//        Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:firstDate>
+//            |                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:firstDate>
+//            |";
+//        КонецЕсли;
+//        Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
+//                (док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:secondDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:secondDate>
+//            |";
+//        КонецЕсли;
+//        Запрос = Запрос + "
+//            |              <vet:informalDate />
+//            |            </vet:dateOfProduction>
+//            |            <vet:expiryDate>
+//            |";
+//        Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:firstDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:firstDate>
+//            |";
+//        КонецЕсли;
+//        Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
+//                (док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:secondDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:secondDate>
+//            |";
+//        КонецЕсли;
+        //Запрос = Запрос + "
+        //    |              <vet:informalDate />
+        //    |            </vet:expiryDate>
+		//	|";
+		Запрос = Запрос + "
             |            <vet:perishable>false</vet:perishable>
             |            <vet:countryOfOrigin>
             |              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -5006,7 +5168,7 @@
             |              <vet:cargoReloadingPointList />
             |              <vet:waybillSeries>"+ СокрЛП(док.ТтнСерия) +"</vet:waybillSeries>
             |              <vet:waybillNumber>"+ СокрЛП(док.ТтнНомер) +"</vet:waybillNumber>
-            |              <vet:waybillDate>"+ ДатаXML(док.ТтнДата) +"</vet:waybillDate>
+            |              <vet:waybillDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vet:waybillDate>
             |              <vet:waybillType>1</vet:waybillType>
             |              <vet:cargoInspected>"+ булево(док.cargoInspected) +"</vet:cargoInspected>
             |              <vet:cargoExpertized>"+  булево(док.cargoExpertized) +"</vet:cargoExpertized>
@@ -5016,7 +5178,7 @@
             |                <com:post>"+ СокрЛП( ПолучитьКонстанту("param_vetdoctor_post")) +"</com:post>
             |                <com:login>"+ СокрЛП( ПолучитьКонстанту("param_vetdoctor_login")) +"</com:login>
             |              </vet:confirmedBy>
-            |              <vet:confirmedDate>"+ ДатаXML(док.ДатаДок,"T00:00:00") +"</vet:confirmedDate>
+            |              <vet:confirmedDate>"+ Преобразовать_Дата_в_Строка(док.ДатаДок,"T00:00:00") +"</vet:confirmedDate>
             |              <vet:locationProsperity>"+ СокрЛП(док.ВсдМестность) +"</vet:locationProsperity>
             |              <vet:importPermit />
             |              <vet:transferPermit />
@@ -5058,7 +5220,7 @@
             |    <com:login>"+СокрЛП( ПолучитьКонстанту("param_intiator_login") )+"</com:login>
             |  </merc:initiator>
             |        <merc:delivery>
-            |          <vet:deliveryDate>" + ДатаXML(док.ТтнДата, "T00:00:00") + "</vet:deliveryDate>
+            |          <vet:deliveryDate>" + Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vet:deliveryDate>
             |          <vet:consignor>
             |            <ent:businessEntity>
             |              <base:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</base:guid>
@@ -5107,62 +5269,67 @@
             |            </vet:packingList>
             |            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
             |";
-        КонецЕсли;
-        Запрос=Запрос+"
-            |            <vet:dateOfProduction>
-            |";
-        Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-            Запрос = Запрос + "
-            |              <vet:firstDate>
-            |                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:firstDate>
-            |";
-        КонецЕсли;
-        Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
-                (док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-            Запрос = Запрос + "
-            |              <vet:secondDate>
-            |                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:secondDate>
-            |";
-        КонецЕсли;
-        Запрос = Запрос + "
-            |              <vet:informalDate />
-            |            </vet:dateOfProduction>
-            |            <vet:expiryDate>
-            |";
-
-        Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-            Запрос = Запрос + "
-            |              <vet:firstDate>
-            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:firstDate>
-            |";
-        КонецЕсли;
-        Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
-                (док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-            Запрос = Запрос + "
-            |              <vet:secondDate>
-            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
-            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
-            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
-            |                <base:hour>0</base:hour>
-            |              </vet:secondDate>
-            |";
-        КонецЕсли;
-
-        Запрос = Запрос + "
-            |              <vet:informalDate />
-            |            </vet:expiryDate>
+		КонецЕсли;
+		Запрос = Запрос + Изготовление_СрокГодности_в_XML(док, "vet");
+//        Запрос=Запрос+"
+//            |            <vet:dateOfProduction>
+//            |";
+//		Если ПустаяДата(док.ДатаИзготовления1) =0 Тогда
+//
+//		КонецЕсли;
+//        Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:firstDate>
+//            |                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:firstDate>
+//            |";
+//        КонецЕсли;
+//        Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
+//                (док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:secondDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:secondDate>
+//            |";
+//        КонецЕсли;
+//        Запрос = Запрос + "
+//            |              <vet:informalDate />
+//            |            </vet:dateOfProduction>
+//            |            <vet:expiryDate>
+//            |";
+//
+//        Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:firstDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:firstDate>
+//            |";
+//        КонецЕсли;
+//        Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
+//                (док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
+//            Запрос = Запрос + "
+//            |              <vet:secondDate>
+//            |                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
+//            |                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
+//            |                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
+//            |                <base:hour>0</base:hour>
+//            |              </vet:secondDate>
+//            |";
+//        КонецЕсли;
+        //Запрос = Запрос + "
+        //    |              <vet:informalDate />
+        //    |            </vet:expiryDate>
+		//	|";
+		Запрос=Запрос+"
             |           <vet:perishable>"+булево(док.скоропортящийся)+"</vet:perishable>
             |            <vet:countryOfOrigin>
             |              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -5218,7 +5385,7 @@
             |      <vet:waybill>
             |        <shp:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</shp:issueSeries>
             |        <shp:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</shp:issueNumber>
-            |        <shp:issueDate>"+ ДатаXML(док.ТтнДата) +"</shp:issueDate>
+            |        <shp:issueDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</shp:issueDate>
             |        <shp:type>1</shp:type>
             |        <shp:consignor>
             |          <ent:businessEntity />
@@ -5452,7 +5619,7 @@
 //		|    <co:login>"+СокрЛП( ПолучитьКонстанту("param_intiator_login") )+"</co:login>
 //		|  </initiator>
 //			|        <delivery>
-//			|          <vd:deliveryDate>" + ДатаXML(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>
+//			|          <vd:deliveryDate>" + Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>
 //			|          <vd:consignor>
 //			|            <ent:businessEntity>
 //			|              <bs:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</bs:guid>
@@ -5578,7 +5745,7 @@
 //			|      <vd:waybill>
 //			|        <sh:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</sh:issueSeries>
 //			|        <sh:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</sh:issueNumber>
-//			|        <sh:issueDate>"+ ДатаXML(док.ТтнДата) +"</sh:issueDate>
+//			|        <sh:issueDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</sh:issueDate>
 //			|        <sh:type>1</sh:type>
 //			|        <sh:consignor>
 //			|          <ent:businessEntity />
@@ -5603,7 +5770,7 @@
 //			|      <vd:vetCertificate>
 //			|        <vd:issueSeries />
 //			|        <vd:issueNumber />
-//			|        <vd:issueDate>"+ ДатаXML(док.ТтнДата) +"</vd:issueDate>
+//			|        <vd:issueDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:issueDate>
 //			|        <vd:form>" + СокрЛП(ПолучитьКонстанту("ФормаВСД")) + "</vd:form>
 //			|          <vd:consignor>
 //			|            <ent:businessEntity>
@@ -5740,7 +5907,7 @@
 //			|              <vd:cargoReloadingPointList />
 //			|              <vd:waybillSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:waybillSeries>
 //			|              <vd:waybillNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:waybillNumber>
-//			|              <vd:waybillDate>"+ ДатаXML(док.ТтнДата) +"</vd:waybillDate>
+//			|              <vd:waybillDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:waybillDate>
 //			|              <vd:waybillType>1</vd:waybillType>
 //			|              <vd:cargoInspected>"+ булево(док.cargoInspected) +"</vd:cargoInspected>
 //			|              <vd:cargoExpertized>"+  булево(док.cargoExpertized) +"</vd:cargoExpertized>
@@ -5815,7 +5982,8 @@
 	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'
 	|                  xmlns:vet='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
 	|                  xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production'
-	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'>
+	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'
+	|					xmlns:dt='http://api.vetrf.ru/schema/cdm/base'>
 	|   <SOAP-ENV:Header/>
 	|   <SOAP-ENV:Body>
 	|      <ws:submitApplicationRequest>
@@ -5823,7 +5991,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|
 				|<merc:registerProductiveBatchRequest>
@@ -5901,60 +6069,65 @@
 					|            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
 					|";
 				КонецЕсли;
-				Запрос=Запрос+"
-				|            <vet:dateOfProduction>
-				|";
-				Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-					Запрос = Запрос+ "
-				|              <vet:firstDate>
-				|                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
-				|                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
-				|                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
-				|                <base:hour>0</base:hour>
-				|              </vet:firstDate>
-				|";
-				КонецЕсли;
-				Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
-						(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-					Запрос=Запрос+"
-					|              <vet:secondDate>
-					|                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
-					|                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
-					|                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
-					|                <base:hour>0</base:hour>
-					|              </vet:secondDate>
-					|";
-				КонецЕсли;
-				Запрос=Запрос+"
-				|              <vet:informalDate />
-				|            </vet:dateOfProduction>
-				|            <vet:expiryDate>
-				|";
 
-				Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-					Запрос=Запрос+"
-					|              <vet:firstDate>
-					|                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
-					|                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
-					|                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
-					|                <base:hour>0</base:hour>
-					|              </vet:firstDate>
-					|";
-				КонецЕсли;
-				Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
-						(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-					Запрос=Запрос+"
-					|              <vet:secondDate>
-					|                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
-					|                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
-					|                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
-					|                <base:hour>0</base:hour>
-					|              </vet:secondDate>
-					|";
-				КонецЕсли;
+				Запрос = Запрос + Изготовление_СрокГодности_в_XML(док, "vet");
+
+//				Запрос=Запрос+"
+//				|            <vet:dateOfProduction>
+//				|";
+//				Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
+//					Запрос = Запрос+ "
+//				|              <vet:firstDate>
+//				|                <base:year>"+ДатаГод(док.ДатаИзготовления1)+"</base:year>
+//				|                <base:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</base:month>
+//				|                <base:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</base:day>
+//				|                <base:hour>0</base:hour>
+//				|              </vet:firstDate>
+//				|";
+//				КонецЕсли;
+//				Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и
+//						(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
+//					Запрос=Запрос+"
+//					|              <vet:secondDate>
+//					|                <base:year>"+ ДатаГод(док.ДатаИзготовления2) +"</base:year>
+//					|                <base:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</base:month>
+//					|                <base:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</base:day>
+//					|                <base:hour>0</base:hour>
+//					|              </vet:secondDate>
+//					|";
+//				КонецЕсли;
+//				Запрос=Запрос+"
+//				|              <vet:informalDate />
+//				|            </vet:dateOfProduction>
+//				|            <vet:expiryDate>
+//				|";
+//
+//				Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
+//					Запрос=Запрос+"
+//					|              <vet:firstDate>
+//					|                <base:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</base:year>
+//					|                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</base:month>
+//					|                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</base:day>
+//					|                <base:hour>0</base:hour>
+//					|              </vet:firstDate>
+//					|";
+//				КонецЕсли;
+//				Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и
+//						(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
+//					Запрос=Запрос+"
+//					|              <vet:secondDate>
+//					|                <base:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</base:year>
+//					|                <base:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</base:month>
+//					|                <base:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</base:day>
+//					|                <base:hour>0</base:hour>
+//					|              </vet:secondDate>
+//					|";
+//				КонецЕсли;
+				//Запрос=Запрос+"
+				//|              <vet:informalDate />
+				//|            </vet:expiryDate>
+				//|";
 				Запрос=Запрос+"
-				|              <vet:informalDate />
-				|            </vet:expiryDate>
 				|            <vet:perishable>false</vet:perishable>
 				|            <vet:countryOfOrigin>
 				|              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -6028,7 +6201,8 @@
 	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'
 	|                  xmlns:vet='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
 	|                  xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production'
-	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'>
+	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'
+	|					xmlns:dt='http://api.vetrf.ru/schema/cdm/base'>
 	|   <SOAP-ENV:Header/>
 	|   <SOAP-ENV:Body>
 	|      <ws:submitApplicationRequest>
@@ -6036,7 +6210,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|
 	|<merc:resolveDiscrepancyRequest>
@@ -6047,7 +6221,7 @@
 		|  <merc:enterprise>
 		|    <base:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</base:guid>
 		|  </merc:enterprise>
-		|  <merc:inventoryDate>"+ ДатаXML(док.ДатаДок,"T00:00:00") +"</merc:inventoryDate>
+		|  <merc:inventoryDate>"+ Преобразовать_Дата_в_Строка(док.ДатаДок,"T00:00:00") +"</merc:inventoryDate>
 		|  <merc:responsible>
 		|    <com:login>"+СокрЛП( ПолучитьКонстанту("param_intiator_login") )+"</com:login>
 		|  </merc:responsible>
@@ -6095,60 +6269,63 @@
 				|            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
 				|";
 			КонецЕсли;
-            Запрос=Запрос+"
-			|            <vet:dateOfProduction>
-			|";
-			Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
-				Запрос=Запрос+"
-				|              <vet:firstDate>
-				|                <base:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</base:year>
-				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</base:month>
-				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</base:day>
-				|                <base:hour>0</base:hour>
-				|              </vet:firstDate>
-				|";
-			КонецЕсли;
-			Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и
-					(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
-				consignment=consignment+"
-				|              <vet:secondDate>
-				|                <base:year>"+ ДатаГод(док.Партия.ДатаИзготовления2) +"</base:year>
-				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления2) +"</base:month>
-				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления2) +"</base:day>
-				|                <base:hour>0</base:hour>
-				|              </vet:secondDate>
-				|";
-			КонецЕсли;
+			Запрос = Запрос + Изготовление_СрокГодности_в_XML(док, "vet");
+//            Запрос=Запрос+"
+//			|            <vet:dateOfProduction>
+//			|";
+//			Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
+//				Запрос=Запрос+"
+//				|              <vet:firstDate>
+//				|                <base:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</base:year>
+//				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</base:month>
+//				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</base:day>
+//				|                <base:hour>0</base:hour>
+//				|              </vet:firstDate>
+//				|";
+//			КонецЕсли;
+//			Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и
+//					(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
+//				consignment=consignment+"
+//				|              <vet:secondDate>
+//				|                <base:year>"+ ДатаГод(док.Партия.ДатаИзготовления2) +"</base:year>
+//				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления2) +"</base:month>
+//				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления2) +"</base:day>
+//				|                <base:hour>0</base:hour>
+//				|              </vet:secondDate>
+//				|";
+//			КонецЕсли;
+//			Запрос=Запрос+"
+//			|              <vet:informalDate />
+//			|            </vet:dateOfProduction>
+//			|            <vet:expiryDate>
+//			|";
+//
+//			Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
+//				Запрос=Запрос+"
+//				|              <vet:firstDate>
+//				|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</base:year>
+//				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</base:month>
+//				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</base:day>
+//				|                <base:hour>0</base:hour>
+//				|              </vet:firstDate>
+//				|";
+//			КонецЕсли;
+//			Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и
+//					(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
+//				Запрос=Запрос+"
+//				|              <vet:secondDate>
+//				|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности2) +"</base:year>
+//				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности2) +"</base:month>
+//				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности2) +"</base:day>
+//				|                <base:hour>0</base:hour>
+//				|              </vet:secondDate>
+//				|";
+//			КонецЕсли;
+			//Запрос=Запрос+"
+			//|              <vet:informalDate />
+			//|            </vet:expiryDate>
+			//|";
 			Запрос=Запрос+"
-			|              <vet:informalDate />
-			|            </vet:dateOfProduction>
-			|            <vet:expiryDate>
-			|";
-
-			Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
-				Запрос=Запрос+"
-				|              <vet:firstDate>
-				|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</base:year>
-				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</base:month>
-				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</base:day>
-				|                <base:hour>0</base:hour>
-				|              </vet:firstDate>
-				|";
-			КонецЕсли;
-			Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и
-					(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
-				Запрос=Запрос+"
-				|              <vet:secondDate>
-				|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности2) +"</base:year>
-				|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности2) +"</base:month>
-				|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности2) +"</base:day>
-				|                <base:hour>0</base:hour>
-				|              </vet:secondDate>
-				|";
-			КонецЕсли;
-			Запрос=Запрос+"
-			|              <vet:informalDate />
-			|            </vet:expiryDate>
 			|            <vet:perishable>false</vet:perishable>
 			|            <vet:countryOfOrigin>
 			|              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -6428,7 +6605,8 @@
 	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'
 	|                  xmlns:vet='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
 	|                  xmlns:prod='http://api.vetrf.ru/schema/cdm/argus/production'
-	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'>
+	|                  xmlns:shp='http://api.vetrf.ru/schema/cdm/argus/shipment'
+	|					xmlns:dt='http://api.vetrf.ru/schema/cdm/base'>
 	|   <SOAP-ENV:Header/>
 	|   <SOAP-ENV:Body>
 	|      <ws:submitApplicationRequest>
@@ -6436,7 +6614,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|<merc:prepareOutcomingConsignmentRequest xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
 	|        <merc:localTransactionId>[GUID]</merc:localTransactionId>
@@ -6447,7 +6625,7 @@
 
 	delivery = "
 	|        <merc:delivery>
-	|          <vet:deliveryDate>" + ДатаXML(док.ТтнДата, "T00:00:00") + "</vet:deliveryDate>
+	|          <vet:deliveryDate>" + Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vet:deliveryDate>
 	|          <vet:consignor>
 	|            <ent:businessEntity>
 	|              <base:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</base:guid>
@@ -6520,60 +6698,63 @@
 			|            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
 			|";
 		КонецЕсли;
-		consignment = consignment+ "
-		|            <vet:dateOfProduction>
-		|";
-		Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
-			consignment = consignment+ "
-		|              <vet:firstDate>
-		|                <base:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</base:year>
-		|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</base:month>
-		|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</base:day>
-		|                <base:hour>0</base:hour>
-		|              </vet:firstDate>
-		|";
-	КонецЕсли;
-		Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и
-				(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
-			consignment=consignment+"
-			|              <vet:secondDate>
-			|                <base:year>"+ ДатаГод(док.Партия.ДатаИзготовления2) +"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления2) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления2) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:secondDate>
-			|";
-		КонецЕсли;
-		consignment=consignment+"
-		|              <vet:informalDate />
-		|            </vet:dateOfProduction>
-		|            <vet:expiryDate>
-		|";
-
-		Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
-			consignment=consignment+"
-			|              <vet:firstDate>
-			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:firstDate>
-			|";
-		КонецЕсли;
-		Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и
-				(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
-			consignment=consignment+"
-			|              <vet:secondDate>
-			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности2) +"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности2) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности2) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:secondDate>
-			|";
-		КонецЕсли;
-		consignment=consignment+"
-		|              <vet:informalDate />
-		|            </vet:expiryDate>
+		Запрос = Запрос + Изготовление_СрокГодности_в_XML(док, "vet");
+//		consignment = consignment+ "
+//		|            <vet:dateOfProduction>
+//		|";
+//		Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
+//			consignment = consignment+ "
+//		|              <vet:firstDate>
+//		|                <base:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</base:year>
+//		|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</base:month>
+//		|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</base:day>
+//		|                <base:hour>0</base:hour>
+//		|              </vet:firstDate>
+//		|";
+//	КонецЕсли;
+//		Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и
+//				(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
+//			consignment=consignment+"
+//			|              <vet:secondDate>
+//			|                <base:year>"+ ДатаГод(док.Партия.ДатаИзготовления2) +"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления2) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления2) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:secondDate>
+//			|";
+//		КонецЕсли;
+//		consignment=consignment+"
+//		|              <vet:informalDate />
+//		|            </vet:dateOfProduction>
+//		|            <vet:expiryDate>
+//		|";
+//
+//		Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
+//			consignment=consignment+"
+//			|              <vet:firstDate>
+//			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:firstDate>
+//			|";
+//		КонецЕсли;
+//		Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и
+//				(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
+//			consignment=consignment+"
+//			|              <vet:secondDate>
+//			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности2) +"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности2) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности2) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:secondDate>
+//			|";
+//		КонецЕсли;
+		//consignment=consignment+"
+		//|              <vet:informalDate />
+		//|            </vet:expiryDate>
+		//|";
+		Запрос=Запрос+"
 		|            <vet:perishable>false</vet:perishable>
 		|            <vet:countryOfOrigin>
 		|              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -6593,7 +6774,7 @@
 		|            <vet:vetCertificate for='id"+ док.НомерСтроки +"'>
 		|              <vet:issueSeries />
 		|              <vet:issueNumber />
-		|              <vet:issueDate>"+ ДатаXML(док.ДатаДок) +"</vet:issueDate>
+		|              <vet:issueDate>"+ Преобразовать_Дата_в_Строка(док.ДатаДок) +"</vet:issueDate>
 		|              <vet:form>" + СокрЛП(ПолучитьКонстанту("ФормаВСД")) + "</vet:form>
 		|          <vet:consignor>
 		|            <ent:businessEntity>
@@ -6661,60 +6842,63 @@
 			|            <vet:packingAmount>"+ док.КоличествоМест +"</vet:packingAmount>
 			|";
 		КонецЕсли;
-		vetCertificate=vetCertificate+"
-		|            <vet:dateOfProduction>
-		|";
-
-		Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
-			vetCertificate=vetCertificate+"
-			|              <vet:firstDate>
-			|                <base:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:firstDate>
-			|";
-		КонецЕсли;
-		Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и
-				(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
-			vetCertificate=vetCertificate+"
-			|              <vet:secondDate>
-			|                <base:year>"+ ДатаГод(док.Партия.ДатаИзготовления2) +"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления2) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления2) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:secondDate>
-			|";
-		КонецЕсли;
-		vetCertificate=vetCertificate+"
-		|              <vet:informalDate />
-		|            </vet:dateOfProduction>
-		|            <vet:expiryDate>
-		|";
-		Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
-			vetCertificate=vetCertificate+"
-			|              <vet:firstDate>
-			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:firstDate>
-			|";
-		КонецЕсли;
-		Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и
-				(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
-			vetCertificate=vetCertificate+"
-			|              <vet:secondDate>
-			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности2) +"</base:year>
-			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности2) +"</base:month>
-			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности2) +"</base:day>
-			|                <base:hour>0</base:hour>
-			|              </vet:secondDate>
-			|";
-		КонецЕсли;
-		vetCertificate=vetCertificate+"
-		|              <vet:informalDate />
-		|            </vet:expiryDate>
+		vetCertificate = vetCertificate + Изготовление_СрокГодности_в_XML(док, "vet");
+//		vetCertificate=vetCertificate+"
+//		|            <vet:dateOfProduction>
+//		|";
+//
+//		Если (ПустоеЗначение(док.Партия.ДатаИзготовления1)=0) Тогда
+//			vetCertificate=vetCertificate+"
+//			|              <vet:firstDate>
+//			|                <base:year>"+ДатаГод(док.Партия.ДатаИзготовления1)+"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления1) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления1) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:firstDate>
+//			|";
+//		КонецЕсли;
+//		Если ((ПустоеЗначение(док.Партия.ДатаИзготовления2)=0) и
+//				(док.Партия.ДатаИзготовления2 > док.Партия.ДатаИзготовления1)) Тогда
+//			vetCertificate=vetCertificate+"
+//			|              <vet:secondDate>
+//			|                <base:year>"+ ДатаГод(док.Партия.ДатаИзготовления2) +"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаИзготовления2) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаИзготовления2) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:secondDate>
+//			|";
+//		КонецЕсли;
+//		vetCertificate=vetCertificate+"
+//		|              <vet:informalDate />
+//		|            </vet:dateOfProduction>
+//		|            <vet:expiryDate>
+//		|";
+//		Если (ПустоеЗначение(док.Партия.ДатаСрокГодности1)=0) Тогда
+//			vetCertificate=vetCertificate+"
+//			|              <vet:firstDate>
+//			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности1) +"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности1) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности1) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:firstDate>
+//			|";
+//		КонецЕсли;
+//		Если ((ПустоеЗначение(док.Партия.ДатаСрокГодности2)=0) и
+//				(док.Партия.ДатаСрокГодности2 > док.Партия.ДатаСрокГодности1)) Тогда
+//			vetCertificate=vetCertificate+"
+//			|              <vet:secondDate>
+//			|                <base:year>"+ ДатаГод(док.Партия.ДатаСрокГодности2) +"</base:year>
+//			|                <base:month>"+ ДатаМесяц(док.Партия.ДатаСрокГодности2) +"</base:month>
+//			|                <base:day>"+ ДатаЧисло(док.Партия.ДатаСрокГодности2) +"</base:day>
+//			|                <base:hour>0</base:hour>
+//			|              </vet:secondDate>
+//			|";
+//		КонецЕсли;
+		//vetCertificate=vetCertificate+"
+		//|              <vet:informalDate />
+		//|            </vet:expiryDate>
+		//|";
+		vetCertificate = vetCertificate + "
 		|            <vet:perishable>false</vet:perishable>
 		|            <vet:countryOfOrigin>
 		|              <base:uuid>"+ СокрЛП( ПолучитьКонстанту("Страна").UUID) +"</base:uuid>
@@ -6771,7 +6955,7 @@
 	|            <vet:waybill>
 	|              <shp:issueSeries />
 	|              <shp:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</shp:issueNumber>
-	|              <shp:issueDate>"+ ДатаXML(док.ТтнДата) +"</shp:issueDate>
+	|              <shp:issueDate>"+ Преобразовать_Дата_в_Строка(док.ТтнДата) +"</shp:issueDate>
 	|              <shp:type>1</shp:type>
 	|              <shp:consignor>
 	|                <ent:businessEntity />
@@ -7049,7 +7233,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|
 	|<merc:mergeStockEntriesRequest>
@@ -7441,7 +7625,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|            <app:issuerId>" + ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
-	|            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|                <merc:getVetDocumentListRequest>
 		|        <merc:localTransactionId>[GUID]</merc:localTransactionId>
@@ -7660,7 +7844,7 @@
 				ЗапуститьПриложение("https://mercury.vetrf.ru/pub/operatorui?_action=findVetDocumentFormByUuid&uuid="+тз_ВСД.док.UUID);
 			КонецЕсли;
 		КонецЦикла;
-	ИначеЕсли (Док.Вид() = "ВСД") или (Док.Вид() = "ВСД2") Тогда
+	ИначеЕсли (Док.Вид() = "ВСД") или (Док.Вид() = "ВСД2") или (Док.Вид() = "ВСД2_входящий") Тогда
 		Если ТестовыйРежим=1 Тогда
 			ЗапуститьПриложение("https://t2-mercury.vetrf.ru/pub/operatorui?_action=findVetDocumentFormByUuid&uuid="+Док.UUID);
 		Иначе
@@ -8686,7 +8870,7 @@
 	|         <app:application>
 	|            <app:serviceId>mercury-g2b.service</app:serviceId>
 	|             <app:issuerId>"+ПолучитьКонстанту("param_issuer_id")+"</app:issuerId>
-	|             <app:issueDate>"+ ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|             <app:issueDate>"+ Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
 	|            <app:data>
 	|               <merc:withdrawVetDocumentRequest>
 	|                  <merc:localTransactionId>[GUID]</merc:localTransactionId>
@@ -8695,7 +8879,7 @@
 	|                  </merc:initiator>
 	|                  <merc:vetDocumentId>"+ СокрЛП(док.UUID) +"</merc:vetDocumentId>
 	|                  <merc:withdrawReason>Неверно указан объём продукции</merc:withdrawReason>
-	|                  <merc:withdrawDate>"+ ДатаXML(док.ДатаДок, "T23:59:59") +"</merc:withdrawDate>
+	|                  <merc:withdrawDate>"+ Преобразовать_Дата_в_Строка(док.ДатаДок, "T23:59:59") +"</merc:withdrawDate>
 	|                  <merc:vetDoctor>
 	|                      <com:login>"+ ПолучитьКонстанту("param_vetdoctor_login")+"</com:login>
 	|                  </merc:vetDoctor>
@@ -9012,7 +9196,7 @@
 			Исключение
 			КонецПопытки;
 		КонецЕсли;
-		Если Конт.Выбран() = 0 Тогда
+		Если (Конт.Выбран() = 0) и (ПустоеЗначение( Конт.ДокОснование )=1) Тогда
 		    ЗагрузитьПараметрыВФорму(Конт);
 		КонецЕсли;
 	ИначеЕсли _ТипОбъекта = "ВнешнийОтчет" Тогда
