@@ -158,22 +158,22 @@ def decompile():
             t1 = format("gcomp -q -d -F %s -D %s -v --no-ini --no-version --no-empty-mxl" % (filename, newsourcepath))
             result = subprocess.check_call(['cmd.exe', '/C', t1])            
 
-            # очистка src = оставим только 1s
-            t2 = '.git\\hooks\\clean_dir2.bat {0}'.format( newsourcepath )
-            info("clean t2 = %s" % t2)
-            info("CONVERT: %s" % t2)
-            result = subprocess.check_call(['cmd.exe', '/C', t2])
-
             #изменим кодировку cp1251 на utf-8 
             #утилита iconv.exe должна запускаться в cmd = добавлена в PATH          
             #файлов 1s, mdp, frm, txt
             t3 = 'bash .git/hooks/convert_utf8.sh {0}/'.format( newpath2 )
-            info(" t3 = %s" % t3)
-            info(" CONVERT: %s" % t3)
+            info(" t3 CONVERT: %s" % t3)
             result = subprocess.check_call(['cmd.exe', '/C', t3])
+
+            # очистка src = оставим только 1s.utf + frm
+            #t2 = '.git\\hooks\\clean_dir2.bat {0}'.format( newsourcepath )
+            t2 = 'bash .git\\hooks\\clean_dir.sh {0}'.format( newsourcepath )
+            info("clean t2 = %s" % t2)
+            result = subprocess.check_call(['cmd.exe', '/C', t2])
+
             #result = subprocess.check_call(['git', 'add', '--all', newsourcepath])
-            result = subprocess.check_call(['git', 'add', '*.1s', newsourcepath])
-            #result = subprocess.check_call(['git', 'add', '*.frm', newsourcepath])
+            #result = subprocess.check_call(['git', 'add', '*.1s', newsourcepath])
+            result = subprocess.check_call(['git', 'add', '*.frm', newsourcepath])
             #result = subprocess.check_call(['git', 'add', '*.mxl', newsourcepath])
             result = subprocess.check_call(['git', 'add', '*.utf', newsourcepath])
             #raise Exception(" !!!!!!!!!!!!!!")
@@ -207,23 +207,22 @@ def decompile():
             t1 = format("gcomp -d -v -F %s -D %s" % (filename, newsourcepath))
             result = subprocess.check_call(['cmd.exe', '/C', t1])
 
-            # очистка src = оставим только 1s
-            t2 = '.git\\hooks\\clean_dir2.bat {0}'.format( newsourcepath )
-            info("clean t2 = %s" % t2)
-            info("CONVERT: %s" % t2)
-            result = subprocess.check_call(['cmd.exe', '/C', t2])
-
             #изменим кодировку cp1251 на utf-8 
             #утилита iconv.exe должна запускаться в cmd = добавлена в PATH          
             #файлов 1s, mdp, frm, txt
             t3 = 'bash .git/hooks/convert_utf8.sh {0}'.format( newsourcepath )
-            info("t3 = %s" % t3)
-            info("CONVERT: %s" % t3)
+            info("t3 CONVERT: %s" % t3)
             result = subprocess.check_call(['cmd.exe', '/C', t3])
 
+            # очистка src = оставим только 1s.utf + frm
+            #t2 = '.git\\hooks\\clean_dir2.bat {0}'.format( newsourcepath )
+            t2 = 'bash .git\\hooks\\clean_dir.sh {0}'.format( newsourcepath )
+            info("clean t2 = %s" % t2)
+            result = subprocess.check_call(['cmd.exe', '/C', t2])
+
             #result = subprocess.check_call(['git', 'add', '--all', newsourcepath])
-            result = subprocess.check_call(['git', 'add', '*.1s', newsourcepath])
-            #result = subprocess.check_call(['git', 'add', '*.frm', newsourcepath])
+            #result = subprocess.check_call(['git', 'add', '*.1s', newsourcepath])
+            result = subprocess.check_call(['git', 'add', '*.frm', newsourcepath])
             #result = subprocess.check_call(['git', 'add', '*.mxl', newsourcepath])
             result = subprocess.check_call(['git', 'add', '*.utf', newsourcepath])
             if not result == 0:
