@@ -5,7 +5,6 @@
 /unpack/
 /logs/
 *.mdp
-*.frm
 *.CDX
 *.DBF
 *.exe
@@ -31,9 +30,7 @@ history.prm
 Лог_запуска_отчетов.txt
 ОбъектыМетаданных.txt
 Структура.mdp
-Форма.frm
 *.mxl
 *.txt
-*.frm
 Описание.txt
 1cv7.cur.md
