@@ -110,7 +110,7 @@
    |         <app:application>
    |            <app:serviceId>mercury-g2b.service</app:serviceId>
    |            <app:issuerId>"+ ГМ.СписокКонстант.Получить("param_issuer_id")+"</app:issuerId>
-   |            <app:issueDate>"+ ГМ.ДатаXML(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+   |            <app:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
    |            <app:data>
 	|      <merc:modifyBusinessEntityRequest>
 	|        <merc:localTransactionId>[GUID]</merc:localTransactionId>
