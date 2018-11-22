@@ -1,2 +1,2 @@
-%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\regasm.exe soapdll_test.dll /codebase
+%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\regasm.exe %~dp0soapdll_test.dll /codebase
 pause
