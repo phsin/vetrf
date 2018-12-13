@@ -680,6 +680,8 @@
 	ГМ.ПометитьНаУдалениеСправочник("ВСД_ФормыУпаковки");
 	ЗаполнитьФормыУпаковки();
     ЗафиксироватьТранзакцию();
+		
+	ГМ.ИнициализацияХС_ЗагрузитьЕдиницыИзмерения();	
 
 	НачатьТранзакцию();
 	ГМ.ПометитьНаУдалениеСправочник("ВСД_Цель");
@@ -723,64 +725,70 @@
 	Результат = ГМ.ХС_ПолучитьGuid(Отправитель_ХозСубъект);
 
 	ИмяФайла = ГМ.Компонента.LogFilename;
-	Если Результат="SUCCESS" Тогда
-	    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-	    objDom.load(ИмяФайла);
-		Попытка
-			be = objDom.selectSingleNode("//businessEntity");
-		Исключение
-			Сообщить("Получен пустой ответ сервера. Заполните параметры подключения.","!");
-			Возврат;
-		КонецПопытки;
-		guid = be.selectSingleNode("guid").text;
-		Попытка
-			name = be.selectSingleNode("name").text;
-		Исключение
-			name = be.selectSingleNode("fio").text;
-		КонецПопытки;
-		country = be.selectSingleNode("juridicalAddress").selectSingleNode("country").selectSingleNode("guid").text;
-		countryName = be.selectSingleNode("juridicalAddress").selectSingleNode("country").selectSingleNode("name").text;
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+		
+    objDom.load(ИмяФайла);
+	Попытка		
+		be = objDom.selectSingleNode("//ent:businessEntity");
+	Исключение
+		Сообщить("Получен пустой ответ сервера. Заполните параметры подключения.","!");
+		Возврат;
+	КонецПопытки;
+	guid = be.selectSingleNode("bs:guid").text;
+	Попытка
+		name = be.selectSingleNode("ent:name").text;
+	Исключение
+		name = be.selectSingleNode("bs:fio").text;
+	КонецПопытки;
+	country = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:country").selectSingleNode("bs:guid").text;
+	countryName = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:country").selectSingleNode("ikar:name").text;
 
-		Страна 	= ГМ.НайтиСтрануПоGUID(country, countryName);
+	Страна 	= ГМ.НайтиСтрануПоGUID(country, countryName);
 
-		НачатьТранзакцию();
-		ГМ.ПометитьНаУдалениеСправочник("ВСД_Регион");
-		ГМ.ИнициализацияХС_ЗагрузитьРегионы(Страна);
+	НачатьТранзакцию();
+	ГМ.ПометитьНаУдалениеСправочник("ВСД_Регион");
+	ГМ.ИнициализацияХС_ЗагрузитьРегионы(Страна);
+	ЗафиксироватьТранзакцию();
 
-		ГМ.ПометитьНаУдалениеСправочник("ВСД_ЕдиницыИзмерения");
-		ГМ.ИнициализацияХС_ЗагрузитьЕдиницыИзмерения();
-        ЗафиксироватьТранзакцию();
+	region = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:region").selectSingleNode("bs:guid").text;
+	regionName = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:region").selectSingleNode("ikar:name").text;
 
-		region = be.selectSingleNode("juridicalAddress").selectSingleNode("region").selectSingleNode("guid").text;
-		regionName = be.selectSingleNode("juridicalAddress").selectSingleNode("region").selectSingleNode("name").text;
+	Регион 	= ГМ.НайтиРегионПоGUID(region, regionName);
 
-		Регион 	= ГМ.НайтиРегионПоGUID(region, regionName);
-
-		Попытка
-			locality = be.selectSingleNode("juridicalAddress").selectSingleNode("locality").selectSingleNode("guid").text;
-			localityName = be.selectSingleNode("juridicalAddress").selectSingleNode("locality").selectSingleNode("name").text;
-		Исключение
-			Сообщить("Площадка не выбрана. Создайте площадку в ГИС Меркурий","!!");
-			Возврат;
-		КонецПопытки;
-		Город 	= ГМ.НайтиГородПоGUID(locality, localityName);
-
-		Если ПустоеЗначение(param_issuer_id)=1 Тогда
-			param_issuer_id = guid;
-		Иначе
-			Если НЕ(param_issuer_id = guid) Тогда
-				Сообщить("Ошибка в param_issuer_id, должно быть "+guid,"!");
-			Иначе
-				Сообщить("param_issuer_id - правильно "+name,"i");
-			КонецЕсли;
-		КонецЕсли;
-
-		ГМ.ЗагрузитьПлощадки( Отправитель_ХозСубъект );
-
-		ВыбРеквизит = "Отправитель_Площадка";
-		ОткрытьПлощадкиПоХС(Отправитель_ХозСубъект);
-
+	ГМ.ЗагрузитьПлощадки( Отправитель_ХозСубъект );
+	
+    objDom.load(ГМ.Компонента.LogFilename);
+	Сообщить( ГМ.Компонента.LogFilename );
+	Если ГМ.НайтиОшибки()>0 Тогда
+		Сообщить("Площадка не привязана к ХС. 
+		|Создайте площадку в ГИС Меркурий и выполните привязку к ХС в Меркурий_Обмен.ert","!");
+		Возврат;		
 	КонецЕсли;
+	be = objDom.selectSingleNode("//ent:enterprise");	
+	//be = objDom.selectSingleNode("//*[local-name() = 'businessEntity']");
+	Попытка		
+		locality = be.selectSingleNode("ent:owner").selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:locality").selectSingleNode("bs:guid").text;
+		localityName = be.selectSingleNode("ent:owner").selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:locality").selectSingleNode("ikar:name").text;		
+		Город 	= ГМ.НайтиГородПоGUID(locality, localityName);
+	Исключение
+		Сообщить("Город не указан в ent:juridicalAddress
+		|Загрузите города вручную с помощью Меркурий_Обмен.ert");
+	КонецПопытки;
+
+	Если ПустоеЗначение(param_issuer_id)=1 Тогда
+		param_issuer_id = guid;
+	Иначе
+		Если НЕ(param_issuer_id = guid) Тогда
+			Сообщить("Ошибка в param_issuer_id, должно быть "+guid,"!");
+		Иначе
+			Сообщить("param_issuer_id - правильно "+name,"i");
+		КонецЕсли;
+	КонецЕсли;
+
+	
+
+	ВыбРеквизит = "Отправитель_Площадка";
+	ОткрытьПлощадкиПоХС(Отправитель_ХозСубъект);
 
 КонецПроцедуры
 
