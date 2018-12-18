@@ -1,3 +1,0 @@
-#!/bin/sh
-echo "Start commiting..."
-python.exe .git/hooks/pyv8unpack.py
