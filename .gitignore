@@ -35,3 +35,5 @@ gcomp.log
 ExtFrmsTree.ini
 SubSystems.ini
 *.zip
+prepare_zip.bat
+list_zip.txt
