@@ -730,24 +730,41 @@
 	Результат = ГМ.ХС_ПолучитьGuid(Отправитель_ХозСубъект);
 
 	ИмяФайла = ГМ.Компонента.LogFilename;
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    //objDom=СоздатьОбъект("MSXML2.DOMDocument");
+	objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+		|xmlns:default='http://www.w3.org/2001/XMLSchema'
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+		|xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar' 
+		|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
+		|xmlns:ws='http://api.vetrf.ru/schema/cdm/cerberus/enterprise/ws-definitions'
+		|" );
 		
     objDom.load(ИмяФайла);
 	Попытка		
-		be = objDom.selectSingleNode("//ent:businessEntity");
+		businessEntity = objDom.selectSingleNode("//*[local-name() = 'businessEntity']");
 	Исключение
 		Сообщить("Получен пустой ответ сервера. Заполните параметры подключения.","!");
 		Возврат;
 	КонецПопытки;
-	guid = be.selectSingleNode("bs:guid").text;
+	guid = businessEntity.selectSingleNode("*[local-name() = 'guid']").text;
 	Попытка
-		name = be.selectSingleNode("ent:name").text;
+		name = businessEntity.selectSingleNode("*[local-name() = 'name']").text;
+		//name = be.selectSingleNode("ent:name").text;
 	Исключение
-		name = be.selectSingleNode("bs:fio").text;
+		Попытка
+			//name = be.selectSingleNode("ent:fio").text;
+			name = businessEntity.selectSingleNode("*[local-name() = 'fio']").text;
+		Исключение
+			Сообщить("Площадка не определена","!");
+		КонецПопытки;
 	КонецПопытки;
-	country = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:country").selectSingleNode("bs:guid").text;
-	countryName = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:country").selectSingleNode("ikar:name").text;
-
+	country 	= businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("*[local-name() = 'country']").selectSingleNode("*[local-name() = 'guid']").text;
+	countryName = businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("*[local-name() = 'country']").selectSingleNode("*[local-name() = 'name']").text;	
+	
 	Страна 	= ГМ.НайтиСтрануПоGUID(country, countryName);
 
 	НачатьТранзакцию();
@@ -755,8 +772,8 @@
 	ГМ.ИнициализацияХС_ЗагрузитьРегионы(Страна);
 	ЗафиксироватьТранзакцию();
 
-	region = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:region").selectSingleNode("bs:guid").text;
-	regionName = be.selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:region").selectSingleNode("ikar:name").text;
+	region 		= businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("*[local-name() = 'region']").selectSingleNode("*[local-name() = 'guid']").text;
+	regionName 	= businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("*[local-name() = 'region']").selectSingleNode("*[local-name() = 'name']").text;
 
 	Регион 	= ГМ.НайтиРегионПоGUID(region, regionName);
 
@@ -769,15 +786,15 @@
 		|Создайте площадку в ГИС Меркурий и выполните привязку к ХС в Меркурий_Обмен.ert","!");
 		Возврат;		
 	КонецЕсли;
-	be = objDom.selectSingleNode("//ent:enterprise");	
-	//be = objDom.selectSingleNode("//*[local-name() = 'businessEntity']");
+	//be = objDom.selectSingleNode("//ent:enterprise");	
+	be = objDom.selectSingleNode("//*[local-name() = 'enterprise']");
 	Попытка		
 		locality = be.selectSingleNode("ent:owner").selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:locality").selectSingleNode("bs:guid").text;
 		localityName = be.selectSingleNode("ent:owner").selectSingleNode("ent:juridicalAddress").selectSingleNode("ikar:locality").selectSingleNode("ikar:name").text;		
 		Город 	= ГМ.НайтиГородПоGUID(locality, localityName);
 	Исключение
-		Сообщить("Город не указан в ent:juridicalAddress
-		|Загрузите города вручную с помощью Меркурий_Обмен.ert");
+		Сообщить("Город не указан в juridicalAddress
+		|Загрузите города вручную");
 	КонецПопытки;
 
 	Если ПустоеЗначение(param_issuer_id)=1 Тогда
