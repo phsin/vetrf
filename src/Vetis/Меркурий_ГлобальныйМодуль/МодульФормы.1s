@@ -3030,7 +3030,7 @@
 	Состояние("");
 КонецФункции
 
-Функция ЗагрузитьВидыПродукции_ЗапросXML( guid )
+Функция ЗагрузитьВидыПродукции_ЗапросXML( guid, Смещение=0 )
 	Запрос = "
 	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
 	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions'
@@ -3041,7 +3041,7 @@
 	|    <ws:getSubProductByProductListRequest>
 	|      <base:listOptions>
 	|        <base:count>1000</base:count>
-	|        <base:offset>0</base:offset>
+	|        <base:offset>" + Смещение + "</base:offset>
 	|      </base:listOptions>
 	|      <prod:productGuid>"+ guid +"</prod:productGuid>
 	|    </ws:getSubProductByProductListRequest>
@@ -3051,7 +3051,7 @@
 	Возврат Запрос;
 КонецФункции
 
-Функция ИнициализацияХС_ЗагрузитьВидыПродукции(guid, Владелец) Экспорт
+Функция ИнициализацияХС_ЗагрузитьВидыПродукции(guid, Владелец, Смещение=0) Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("Загрузить_ВидПродукции");
@@ -3069,7 +3069,7 @@
 	//Сообщить("Загрузка видов продукции "+Владелец,"i");
 	//Результат = Компонента.GetSubProductByProductList( guid );
 
-	ЗапросXML = ЗагрузитьВидыПродукции_ЗапросXML( guid );
+	ЗапросXML = ЗагрузитьВидыПродукции_ЗапросXML( guid, Смещение );
 	метод = Компонента.GetMethod();
     метод.Service = "platform/services/ProductService";
     метод.Action = "GetSubProductByProductList";
@@ -3086,9 +3086,14 @@
 
 
 	Спр = СоздатьОбъект("Справочник.ВСД_ВидПродукции");
-
-	List = objDom.selectNodes("//pro:subProduct") ;
-	Для i1 = 0 По List.length - 1 Цикл
+	
+	subProductList = objDom.selectSingleNode("//pro:subProductList");		
+	КолвоПолучено = Число(subProductList.getAttribute("count"));
+	КолвоВсего = Число(subProductList.getAttribute("total"));
+	
+	List = objDom.selectNodes("//pro:subProduct");
+	//Попытка КолвоПолучено = Число(List.length); исключение КолвоПолучено = 1; КонецПопытки;	
+	Для i1 = 0 По КолвоПолучено - 1 Цикл
 	    item = List.item(i1);
 
 		uuid = item.selectSingleNode("bs:uuid").text;
@@ -3118,6 +3123,12 @@
 		Спр.Записать();
 		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
 	КонецЦикла;
+	
+	//Если КолвоПолучено=1000 Тогда 
+	Если КолвоВсего > КолвоПолучено Тогда 
+		Смещение = Смещение + КолвоПолучено;
+		ИнициализацияХС_ЗагрузитьВидыПродукции(guid, Владелец, Смещение);
+	КонецЕсли;
 
 	Возврат 1;
 КонецФункции
