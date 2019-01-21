@@ -1,7 +1,7 @@
 rem Удаление xml файлов старше 30 дней в каталоге
 
 set offset=30
-set logsDir="C:\1C\prioskol\Complex\Vetis\logs\"
+set logsDir="C:\1C\Complex\Vetis\logs\"
 rem pushd %logsDir% && (forfiles /d -%offset% /m *.xml /c "cmd /c del /f /q @file")
 rem popd
 cd  %logsDir%
