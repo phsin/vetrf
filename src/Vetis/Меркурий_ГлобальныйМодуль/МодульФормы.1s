@@ -35,6 +35,7 @@
 Функция ЗагрузитьПараметры(ВыбФирма = "") Экспорт Далее
 Функция ИмяФайлаНастроек() Экспорт Далее
 Функция  ПолучитьПартии(Отправитель_Площадка, Смещение=0, УдалятьПартии=1) Экспорт Далее
+Функция ПолучитьРезультатСервер(appID) Экспорт Далее
 
 //******************************************************************************
 // ЗагрузитьКомпоненту(ИмяФайлаКомп)
@@ -4276,50 +4277,8 @@
 КонецФункции
 
 
-//=========================== ВСД Партии =================================
+//{=========================== ВСД Партии =================================
 
-//Функция ПолучитьПартии_ТекстЗапросаXML(Отправитель_Площадка, Смещение=0) Экспорт
-//	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
-//	ОбъектВыполнения = ПроверитьПереопределениеФункции("ПолучитьПартии_ТекстЗапросаXML");
-//	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
-//		Возврат ОбъектВыполнения.ПолучитьПартии_ТекстЗапросаXML(Отправитель_Площадка, Смещение);
-//	КонецЕсли;
-//	//}
-//
-//	//стандартное поведение функции
-//	Если ПустоеЗначение(Отправитель_Площадка.GUID)=1 Тогда
-//		Сообщить("В выбранной Площадке пустой GUID");
-//		Возврат "REJECTED";
-//	КонецЕсли;
-//
-//	//выражение [GUID] будет заменено на новый Guid в формате: d82d83f7-944b-45e9-88dc-67892eae1e3e
-//	Запрос = "      <getStockEntryListRequest xmlns:sch='http://www.w3.org/2001/XMLSchema'
-//	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document'
-//	|xmlns:sh='http://api.vetrf.ru/schema/cdm/argus/shipment'
-//	|xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
-//	|xmlns:app='http://api.vetrf.ru/schema/cdm/application'
-//	|xmlns:co='http://api.vetrf.ru/schema/cdm/argus/common'
-//	|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
-//	|xmlns:pr='http://api.vetrf.ru/schema/cdm/argus/production'
-//	|xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar'
-//	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
-//	|xmlns='http://api.vetrf.ru/schema/cdm/mercury/applications'>
-//	|        <localTransactionId>[GUID]</localTransactionId>
-//	|        <initiator>
-//	|          <co:login>"+ПолучитьКонстанту("param_intiator_login")+"</co:login>
-//	|        </initiator>
-//	|        <bs:listOptions>
-//	|          <bs:count>1000</bs:count>
-//	|          <bs:offset>"+Смещение+"</bs:offset>
-//	|        </bs:listOptions>
-//	|        <ent:enterpriseGuid>"+СокрЛП(Отправитель_Площадка.GUID)+"</ent:enterpriseGuid>
-//	|      </getStockEntryListRequest>
-//	|";
-//
-//	Возврат Запрос;
-//КонецФункции
-
-//
 Функция ПолучитьПартии_ТекстЗапросаSoap(Отправитель_Площадка, Смещение=0) Экспорт
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("ПолучитьПартии_ТекстЗапросаSoap");
@@ -4393,31 +4352,30 @@
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
 		guid = stockEntry.selectSingleNode("bs:guid").text;
 		st = stockEntry.selectSingleNode("bs:status").text;
-		entryNumber = stockEntry.selectSingleNode("ns2:entryNumber").text;
+		entryNumber = stockEntry.selectSingleNode("*[local-name()='entryNumber']").text;
 		updateDate = stockEntry.selectSingleNode("bs:updateDate").text;
 		createDate = stockEntry.selectSingleNode("bs:createDate").text;
 
-		batch = stockEntry.selectSingleNode("ns2:batch");
+		batch = stockEntry.selectSingleNode("*[local-name()='batch']");
 
-		product 	= batch.selectSingleNode("ns2:product").selectSingleNode("bs:guid").text;
-		subProduct 	= batch.selectSingleNode("ns2:subProduct").selectSingleNode("bs:guid").text;
+		product 	= batch.selectSingleNode("*[local-name()='product']").selectSingleNode("bs:guid").text;
+		subProduct 	= batch.selectSingleNode("*[local-name()='subProduct']").selectSingleNode("bs:guid").text;
 
-		Попытка	productItemName = batch.selectSingleNode("*[local-name()='productItem']").selectSingleNode("*[local-name()='name']").text; Исключение productItemName = ""; КонецПопытки;
-		Попытка productItemUuid = batch.selectSingleNode("*[local-name()='productItem']").selectSingleNode("bs:uuid").text; Исключение	productItemUuid=""; 	КонецПопытки;
-		Попытка productItemGuid = batch.selectSingleNode("*[local-name()='productItem']").selectSingleNode("bs:guid").text; 	Исключение	productItemGuid="";		КонецПопытки;
-
-		productItem = batch.selectSingleNode("*[local-name()='productItem']");
-
-		volume 		= batch.selectSingleNode("ns2:volume").text;
-		unit		= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:guid").text;
+		productItem = batch.selectSingleNode("*[local-name()='productItem']");		
+		Попытка	productItemName = productItem.selectSingleNode("*[local-name()='name']").text; Исключение productItemName = ""; КонецПопытки;
+		Попытка productItemUuid = productItem.selectSingleNode("*[local-name()='uuid']").text; Исключение productItemUuid=""; КонецПопытки;
+		Попытка productItemGuid = productItem.selectSingleNode("*[local-name()='guid']").text; Исключение productItemGuid=""; КонецПопытки;
+		
+		volume 		= batch.selectSingleNode("*[local-name()='volume']").text;
+		unit		= batch.selectSingleNode("*[local-name()='unit']").selectSingleNode("bs:guid").text;
 
 		Попытка
-			unitGuid	= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:guid").text;
+			unitGuid	= batch.selectSingleNode("*[local-name()='unit']").selectSingleNode("bs:guid").text;
 		Исключение
 			unitGuid = "";
 		КонецПопытки;
 		Попытка
-			unitUuid	= batch.selectSingleNode("ns2:unit").selectSingleNode("bs:uuid").text;
+			unitUuid	= batch.selectSingleNode("*[local-name()='unit']").selectSingleNode("bs:uuid").text;
 		Исключение
 			unitUuid = "";
 		КонецПопытки;
@@ -4425,90 +4383,42 @@
 		Попытка
 			packingFormUuid	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("bs:uuid").text;
 		Исключение
-			//Сообщить("Не удалось получить элемент [packingForm] [uuid]","!");
 			packingFormUuid = "";
 		КонецПопытки;
 		Попытка
 			packingFormName	= batch.selectSingleNode("*[local-name()='packingList']").selectSingleNode("*[local-name()='packingForm']").selectSingleNode("*[local-name()='name']").text;
 		Исключение
 			packingFormName="";
-			//Сообщить("Не удалось получить элемент [packingForm] [name]","!");
 		КонецПопытки;
 
-		packingAmount = batch.selectSingleNode("ns2:packingAmount").text;
-
-//		// dateOfProduction 1
-//		ДатаИзготовления1="";
-//		ДатаИзготовления="";
-//		попытка
-//			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
-//			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
-//			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
-//			ДатаИзготовления1 = Дата(год, мес, день);
-//		Исключение
-//			Попытка
-//				ДатаИзготовления = ""+batch.selectSingleNode("ns2:dateOfProduction").text;
-//			Исключение
-//			КонецПопытки;
-//		КонецПопытки;
-//		ДатаИзготовления2="";
-//		попытка
-//			год = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
-//			мес = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
-//			день = ""+batch.selectSingleNode("ns2:dateOfProduction").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
-//			ДатаИзготовления2 = Дата(год, мес, день);
-//		Исключение
-//		КонецПопытки;
-//
-//		//ДатаСрокГодности
-//		попытка
-//			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:year").text;
-//			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:month").text;
-//			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:firstDate").selectSingleNode("bs:day").text;
-//			ДатаСрокГодности1 = Дата(год, мес, день);
-//		Исключение
-//			Попытка
-//				ДатаСрокГодности = ""+batch.selectSingleNode("ns2:expiryDate").text;
-//			Исключение
-//			КонецПопытки;
-//		КонецПопытки;
-//		ДатаСрокГодности2="";
-//		попытка
-//			год = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:year").text;
-//			мес = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:month").text;
-//			день = ""+batch.selectSingleNode("ns2:expiryDate").selectSingleNode("ns2:secondDate").selectSingleNode("bs:day").text;
-//			ДатаСрокГодности2 = Дата(год, мес, день);
-//		Исключение
-//		КонецПопытки;
+		Попытка
+			packingAmount = batch.selectSingleNode("*[local-name()='packingAmount']").text;
+		Исключение
+			packingAmount = "";
+		КонецПопытки;
 
 		ДатаИзготовления1=""; ДатаИзготовления2="";	ДатаИзготовления="";
-		dateOfProduction = batch.selectSingleNode("ns2:dateOfProduction");
+		dateOfProduction = batch.selectSingleNode("*[local-name()='dateOfProduction']");
 		Дата_из_XML(dateOfProduction, ДатаИзготовления1, ДатаИзготовления2, ДатаИзготовления);
 
 		ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодности="";
-		expiryDate = batch.selectSingleNode("ns2:expiryDate");
+		expiryDate = batch.selectSingleNode("*[local-name()='expiryDate']");
 		Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);
 
 		Попытка
-			producer = batch.selectSingleNode("ns2:producerList").selectSingleNode("ent:producer").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+			producer = batch.selectSingleNode("*[local-name()='producerList']").selectSingleNode("*[local-name()='producer']").selectSingleNode("*[local-name()='enterprise']").selectSingleNode("bs:guid").text;
 		Исключение
 			producer = "";
 		КонецПопытки;
 
 		Попытка
-			owner = batch.selectSingleNode("ns2:owner").selectSingleNode("bs:guid").text; //ХозСубъект
+			owner = batch.selectSingleNode("*[local-name()='owner']").selectSingleNode("bs:guid").text; //ХозСубъект
 			ВладелецХС = НайтиХСпоGUID(owner);
 		Исключение
 			ВладелецХС = "";
 		КонецПопытки;
 
 		Партия = НайтиПартиюПоGUID(guid);
-
-		Если active="false" Тогда
-			Сообщить("Изменения в партию "+Партия+" uuid ["+uuid+"] не внесены. Признак партии = не активна","i");
-			Партия.Удалить(0);
-			Возврат Партия;
-		КонецЕсли;
 
 		Сообщить(" ВСД_Партия от "+createDate+" # "+entryNumber);
 
@@ -4557,10 +4467,16 @@
 
 		Партия.ВсдДата = СтрокаВДату(createDate);
 
-		Если Партия.Количество=0 Тогда
+		//Если active="false" Тогда
+		//	Сообщить("Изменения в партию "+Партия+" uuid ["+uuid+"] не внесены. Признак партии = не активна","i");
+		//	Партия.Удалить(0);
+		//	Возврат Партия;
+		//КонецЕсли;
+		
+		Если (Партия.Количество=0) или (active="false") Тогда
 
 			Если ( ПустоеЗначение( Партия.ТекущийЭлемент() ) =0 ) Тогда
-				Сообщить("Количество партии guid ["+guid+"] uuid ["+uuid+"] = 0. Партия удалена. ");
+				Сообщить("Количество партии guid ["+guid+"] uuid ["+uuid+"] = 0. Признак партии = не активна, Партия удалена. ");				
 				Партия.Удалить(0);
 			Иначе
 				Сообщить("Количество партии guid ["+guid+"] uuid ["+uuid+"] = 0. Партия пропущена. ");
@@ -4662,7 +4578,155 @@
 
 КонецФункции
 
-//=================== ВСД ==========================================
+
+Функция  ПолучитьПартии(Отправитель_Площадка, Смещение=0, УдалятьПартии=1) Экспорт
+	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+	ОбъектВыполнения = ПроверитьПереопределениеФункции("ПолучитьПартии");
+	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+		Возврат ОбъектВыполнения.ПолучитьПартии(Отправитель_Площадка, Смещение,УдалятьПартии);
+	КонецЕсли;
+	//}
+
+	//стандартное поведение функции
+	Если ПустоеЗначение(Отправитель_Площадка.GUID)=1 Тогда
+		Сообщить("В выбранной Площадке пустой GUID");
+		Возврат "REJECTED";
+	КонецЕсли;
+
+	t1 = Старт();	
+	
+	//При объединении партий в Меркурии - старые партии пропадают, появляются новые
+	// поэтому в 1С остаются "остатки", которые нужно удалять
+	Если (ПолучитьКонстанту("ОчищатьСправочникВСД_Партии")=1) и (УдалятьПартии=1) Тогда  //при след рекурсиях не удаляем
+		Сообщить("Очистка 1с справочника ВСД_Партии");
+		Состояние("Удаление справочника ВСД_Партии");
+		Отправитель_Площадка = ПолучитьКонстанту("Отправитель_Площадка");
+
+		СпрПартия = СоздатьОбъект("Справочник.ВСД_Партия");
+		НачатьТранзакцию(); // Ускоримся
+		СпрПартия.ВыбратьЭлементы();
+		Пока СпрПартия.ПолучитьЭлемент() = 1 Цикл
+			Если СпрПартия.Получатель_Площадка = Отправитель_Площадка Тогда
+				СпрПартия.Удалить(0);
+			КонецЕсли;
+		КонецЦикла;
+		ЗафиксироватьТранзакцию();
+	КонецЕсли;
+
+	ЗапросXML = ПолучитьПартии_ТекстЗапросаSoap(Отправитель_Площадка, Смещение);
+
+	метод = Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";
+
+	//appID = ОтправитьЗапросXML(ЗапросXML,, Смещение, УдалятьПартии);
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	УдалитьXML( Компонента.LogFilename);
+
+	Если ПустоеЗначение(appID)=0 Тогда
+		Результат = "";
+		Для А=1 По 10 Цикл
+			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
+
+				Пауза( );
+
+				Сообщить("Отправляем запрос на получение ответа [Актуальные партии]" );
+				Результат = ПолучитьРезультатСервер( appID );
+				Сообщить("Результат = "+Результат);
+
+				ЗагрузитьXML_Партии( Компонента.LogFilename, Смещение, УдалятьПартии );
+
+				УдалитьXML( Компонента.LogFilename );
+
+			КонецЕсли;
+		КонецЦикла;
+
+	КонецЕсли;
+
+	Финиш(t1, Сам(), "ПолучитьПартии", );
+	
+	Возврат appID;
+
+КонецФункции
+
+Функция Партии_ПоGUID_Запрос( ВыбПартия )
+	
+	Запрос = "
+	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+	|  <SOAP-ENV:Header/>
+	|  <SOAP-ENV:Body>
+	|    <apldef:submitApplicationRequest>	
+	|      <apldef:apiKey>"+ ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
+	|      <apl:application>
+	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|        <apl:issuerId>"+ ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
+	|        <apl:issueDate>" + Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
+	|        <apl:data>
+	|          <merc:getStockEntryByGuidRequest>
+	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|            <merc:initiator>
+	|              <vd:login>"+ ПолучитьКонстанту("param_intiator_login") +"</vd:login>
+	|            </merc:initiator>
+	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
+	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
+	|          </merc:getStockEntryByGuidRequest>
+	|        </apl:data>
+	|      </apl:application>
+	|    </apldef:submitApplicationRequest>
+	|  </SOAP-ENV:Body>
+	|</SOAP-ENV:Envelope>
+	|";	
+	Возврат Запрос;
+КонецФункции
+
+Функция Партии_ПолучитьПоGUID( ВыбПартия ) Экспорт
+	t1 = Старт();	
+	
+	Сообщить("Отправляем запрос партий по GUID "+ВыбПартия);
+	ЗапросXML = Партии_ПоGUID_Запрос( ВыбПартия );	
+	Service = "platform/services/2.0/ApplicationManagementService";
+	Action = "submitApplicationRequest";	
+	
+	метод = Компонента.GetMethod();
+    метод.Service = Service;
+    метод.Action = Action;
+
+	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	УдалитьXML( Компонента.LogFilename);
+	
+	Если ПустоеЗначение(appID)=0 Тогда
+		Результат = "";
+		Для А=1 По 10 Цикл
+			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
+
+				Пауза( );
+
+				Сообщить("Отправляем запрос на получение ответа [партии по GUID]" );
+				Результат = ПолучитьРезультатСервер( appID );
+				Сообщить("Результат = "+Результат);
+
+				ЗагрузитьXML_Партии( Компонента.LogFilename, 0, 0 );
+
+				УдалитьXML( Компонента.LogFilename );
+
+			КонецЕсли;
+		КонецЦикла;
+
+	КонецЕсли;
+
+	Финиш(t1, Сам(), "ПолучитьПартии", );
+	
+	Возврат appID;
+КонецФункции
+
+//} Партии
+
+//{ =================== ВСД Общие ==========================================
 
 Функция ПолучитьРезультатСервер(appID) Экспорт
 	Запрос ="<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'><SOAP-ENV:Header/><SOAP-ENV:Body>
@@ -4732,43 +4796,6 @@
 	Возврат Результат;
 КонецФункции
 
-//Функция  ОтправитьЗапросXML(ЗапросXML, док="",Смещение = 0, УдалятьПартии = 0) Экспорт
-//	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
-//	ОбъектВыполнения = ПроверитьПереопределениеФункции("ОтправитьЗапросXML");
-//	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
-//		Возврат ОбъектВыполнения.ОтправитьЗапросXML(ЗапросXML, док, Смещение, УдалятьПартии);
-//	КонецЕсли;
-//	//}
-//
-//	//стандартное поведение функции
-//	Если ПустоеЗначение(док)=0 Тогда
-//		Сообщить("Отправляем запрос "+док.Вид()+" ["+док+"]" ,"i");
-//	Иначе
-//		Сообщить("Отправляем запрос" ,"i");
-//	КонецЕсли;
-//	результат = Компонента.SendRequestXML(ЗапросXML);
-//
-//	appID = Компонента.ApplicationId;
-//
-//	УдалитьXML( Компонента.LogFilename);
-//
-//	СохранитьЗапросВДокументе(док);
-//
-//	Если ПустоеЗначение(appID)=0 Тогда
-//
-//		Результат = ПолучитьРезультат_ВСД(appID, док, Смещение, УдалятьПартии ); //ДокОб.ТекущийДокумент()
-//		Сообщить("Результат = "+Результат);
-//		Для А=1 По 10 Цикл
-//			Если (Результат="IN_PROCESS") Тогда
-//				Результат = ПолучитьРезультат_ВСД(appID, док, Смещение, УдалятьПартии ); //ДокОб.ТекущийДокумент()
-//			КонецЕсли;
-//		КонецЦикла;
-//	КонецЕсли;
-//
-//	Возврат appID;
-//
-//КонецФункции
-
 Функция  ОтправитьТранзакцию(ЗапросXML, док) Экспорт
 	метод = Компонента.GetMethod();
     метод.Service = "platform/services/ApplicationManagementService";
@@ -4798,125 +4825,7 @@
 	Возврат appID;
 КонецФункции
 
-//========================== Партии ===============================================
-
-// новая версия - XML запрос формируем в 1С и отправляем в Ветис
-Функция  ПолучитьПартии(Отправитель_Площадка, Смещение=0, УдалятьПартии=1) Экспорт
-	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
-	ОбъектВыполнения = ПроверитьПереопределениеФункции("ПолучитьПартии");
-	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
-		Возврат ОбъектВыполнения.ПолучитьПартии(Отправитель_Площадка, Смещение,УдалятьПартии);
-	КонецЕсли;
-	//}
-
-	//стандартное поведение функции
-	Если ПустоеЗначение(Отправитель_Площадка.GUID)=1 Тогда
-		Сообщить("В выбранной Площадке пустой GUID");
-		Возврат "REJECTED";
-	КонецЕсли;
-
-	t1 = Старт();	
-	
-	//При объединении партий в Меркурии - старые партии пропадают, появляются новые
-	// поэтому в 1С остаются "остатки", которые нужно удалять
-	Если (ПолучитьКонстанту("ОчищатьСправочникВСД_Партии")=1) и (УдалятьПартии=1) Тогда  //при след рекурсиях не удаляем
-		Сообщить("Очистка 1с справочника ВСД_Партии");
-		Состояние("Удаление справочника ВСД_Партии");
-		Отправитель_Площадка = ПолучитьКонстанту("Отправитель_Площадка");
-
-		СпрПартия = СоздатьОбъект("Справочник.ВСД_Партия");
-		НачатьТранзакцию(); // Ускоримся
-		СпрПартия.ВыбратьЭлементы();
-		Пока СпрПартия.ПолучитьЭлемент() = 1 Цикл
-			Если СпрПартия.Получатель_Площадка = Отправитель_Площадка Тогда
-				СпрПартия.Удалить(0);
-			КонецЕсли;
-		КонецЦикла;
-		ЗафиксироватьТранзакцию();
-	КонецЕсли;
-
-	ЗапросXML = ПолучитьПартии_ТекстЗапросаSoap(Отправитель_Площадка, Смещение);
-
-	метод = Компонента.GetMethod();
-    метод.Service = "platform/services/ApplicationManagementService";
-    метод.Action = "submitApplicationRequest";
-
-	//appID = ОтправитьЗапросXML(ЗапросXML,, Смещение, УдалятьПартии);
-	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
-
-	УдалитьXML( Компонента.LogFilename);
-
-	Если ПустоеЗначение(appID)=0 Тогда
-
-		Результат = "";
-		//Сообщить("Результат = "+Результат);
-		Для А=1 По 10 Цикл
-			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
-				//Результат = ПолучитьРезультат_ВСД(appID, "", Смещение, УдалятьПартии ); //ДокОб.ТекущийДокумент()
-
-				Пауза( );
-
-				Сообщить("Отправляем запрос на получение ответа [Актуальные партии]" );
-				//Результат = Компонента.SendRequestResult( appID );
-				Результат = ПолучитьРезультатСервер( appID );
-				Сообщить("Результат = "+Результат);
-
-				ЗагрузитьXML_Партии( Компонента.LogFilename, Смещение, УдалятьПартии );
-
-				УдалитьXML( Компонента.LogFilename );
-
-			КонецЕсли;
-		КонецЦикла;
-
-	КонецЕсли;
-
-	Финиш(t1, Сам(), "ПолучитьПартии", );
-	
-	Возврат appID;
-
-КонецФункции
-
-//Процедура ПолучитьПоследнююВерсиюПартии(ВыбПартия, Отправитель_Площадка)
-//	//Если ПустоеЗначение(ВыбПлощадка)=1 Тогда
-//	//	Предупреждение("Выберите Площадку");
-//	//	Возврат;
-//	//КонецЕсли;
-//
-//	Если ПустоеЗначение(Отправитель_Площадка.GUID)=1 Тогда
-//		Сообщить("У Площадки пустой GUID");
-//		Возврат;
-//	КонецЕсли;
-//
-//	Если ПустоеЗначение(ВыбПартия.GUID)=1 Тогда
-//		Сообщить("В выбранной партии пустой GUID");
-//		Возврат;
-//	КонецЕсли;
-//
-//	Результат = Компонента.GetStockEntryVersionList(
-//		СокрЛП(ВыбПартия.GUID),
-//		СокрЛП(Отправитель_Площадка.GUID)
-//		);
-//
-//	//Отладка();
-//
-//КонецПроцедуры
-
-//Процедура ПолучитьПоследнююВерсиюПартииОтвет(appID)
-//
-//	Результат = Компонента.GetStockEntryVersionListResult(СокрЛП(appID));
-//
-//	//Отладка();
-//
-//	Если Результат="COMPLETED" Тогда
-//
-//		//тз = ЗагрузитьТЗ(Компонента.ResultString);
-//		//тз.ВыбратьСтроку();
-//		//ЗаписатьПартии(тз);
-//
-//	КонецЕсли;
-//
-//
-//КонецПроцедуры
+//} ВСД Общие
 
 //========================== ВСД Входящий =================================
 
