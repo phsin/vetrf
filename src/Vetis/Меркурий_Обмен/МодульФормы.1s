@@ -594,6 +594,11 @@
 	ЗафиксироватьТранзакцию();	
 КонецПроцедуры
 
+Процедура ПолучитьСписокВСД()
+	ТипДок = VetDocumentType.ПолучитьЗначение( VetDocumentType.ТекущаяСтрока() ); 
+	СтатусДок = VetDocumentStatus.ПолучитьЗначение( VetDocumentStatus.ТекущаяСтрока() );  
+	ГМ.ПолучитьСписокВСД(Отправитель_Площадка, ТипДок, СтатусДок, Смещение );
+КонецПроцедуры
 
 Попытка
 	ЗагрузитьВнешнююКомпоненту("1cpp.dll");
@@ -608,3 +613,38 @@
 
 productType = 1; //мясо
 ВыбФирма = "";
+
+
+ //{ VetDocumentType
+    //    TRANSPORT, = 1	= Транспортный ВСД.
+    //    PRODUCTIVE, = 2 	= Производственный ВСД.
+    //    RETURNABLE, = 3 	= Возвратный ВСД.
+    //    INCOMING, = 4  	= Входящий ВСД.
+    //    OUTGOING, = 5  	= Исходящий ВСД.
+    //}
+
+	VetDocumentType.ДобавитьЗначение("TRANSPORT", "Транспортный ВСД");
+	VetDocumentType.ДобавитьЗначение("PRODUCTIVE", "Производственный ВСД");
+	VetDocumentType.ДобавитьЗначение("RETURNABLE", "Возвратный ВСД");
+	VetDocumentType.ДобавитьЗначение("INCOMING", "Входящий ВСД");
+	VetDocumentType.ДобавитьЗначение("OUTGOING", "Исходящий ВСД");
+
+    //{ VetDocumentStatus
+    //
+    //    /// <remarks/>
+    //    CREATED, = 1
+    //
+    //    /// <remarks/>
+    //    CONFIRMED, = 2
+    //
+    //    /// <remarks/>
+    //    WITHDRAWN, = 3
+    //
+    //    /// <remarks/>
+    //    UTILIZED, = 4
+    //}
+
+VetDocumentStatus.ДобавитьЗначение("CREATED", "Созданные / CREATED");
+VetDocumentStatus.ДобавитьЗначение("CONFIRMED", "Подтвержденные / CONFIRMED");
+VetDocumentStatus.ДобавитьЗначение("WITHDRAWN", "Аннулированные / WITHDRAWN");
+VetDocumentStatus.ДобавитьЗначение("UTILIZED", "Погашенные / UTILIZED");
