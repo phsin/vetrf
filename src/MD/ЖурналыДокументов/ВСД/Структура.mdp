@@ -103,6 +103,8 @@
 				Документ.ВСД_Инвентаризация.applicationID
 				Документ.ВСД_ОбъединениеПартий.applicationID
 				Документ.ВСД2_ОбъединениеПартий.applicationID
+				Документ.ВСД2.applicationID
+				Документ.ВСД.applicationID
 			}
 		}
 	}
