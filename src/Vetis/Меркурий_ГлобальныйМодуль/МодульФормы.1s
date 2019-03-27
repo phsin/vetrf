@@ -2665,7 +2665,6 @@
 
 
 	метод = Компонента.GetMethod();
-	//метод.BaseUrl = "https://api.vetrf.ru:8002/";
 	метод.Service = "platform/cerberus/services/EnterpriseService";
 	метод.Action = "GetEnterpriseByGUID";
 
@@ -2676,6 +2675,7 @@
 	Возврат appID;
 КонецФункции
 
+//старая версия 
 Функция ЗагрузитьПлощадкуПоGUID(GUID, ХС="") Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
@@ -2687,8 +2687,6 @@
 
 	//стандартное поведение функции
 
-	//Сообщить(" Запрос getEnterpriseByGuid [ "+СокрЛП(GUID)+" ]","i");
-	//Результат = Компонента.getEnterpriseByGuid( СокрЛП(GUID) );
 	Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
@@ -2713,6 +2711,7 @@
 	Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
 	УровнейВСправочнике = Метаданные.Справочник("ВСД_Площадка").КоличествоУровней;
 	ВыбОбъект="";
+	
 	// не работает!!!
 	//Если Спр.ВыбратьЭлементыПоРеквизиту("GUID",Guid,0,0)=0 Тогда
 	//	Если (ХС<>"") Тогда
@@ -2723,6 +2722,7 @@
 	//		ВыбОбъект = Спр;
 	//	КонецЕсли;
 	//КонецЕсли;
+	
 	Если ЭтоSQL=1 Тогда
 
 		ТекстЗапроса = "select
@@ -3031,7 +3031,7 @@
 	УдалитьXML( Компонента.LogFilename );
 КонецФункции
 
-Функция НайтиПлощадку(Guid) Экспорт
+Функция НайтиПлощадку(Guid, Обновить=1) Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("НайтиПлощадку");
@@ -3054,7 +3054,9 @@
 		Сообщить("Площадка GUID ["+guid+"] не найдена: ","!");
 		//создать площадку
 
-		Рез = ЗагрузитьПлощадкуПоGUID(guid);
+		Если Обновить=1 Тогда 
+			Рез = ЗагрузитьПлощадкуПоGUID(guid);
+		КонецЕсли;
 
 	КонецЕсли;
 
@@ -3219,6 +3221,423 @@
 	Запрос.Выгрузить(тз);
 	Возврат тз;
 КонецФункции
+
+Функция Площадка_ЗагрузитьПоGUID( ВыбПлощадка, GUID, ХС="" ) Экспорт
+	Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
+
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(Компонента.LogFilename);
+
+	Если НайтиОшибки()>0 Тогда
+		Возврат Результат;
+	КонецЕсли;
+
+	СпрОбъект = СоздатьОбъект("Справочник.ВСД_Площадка");
+	//УровнейВСправочнике = Метаданные.Справочник("ВСД_Площадка").КоличествоУровней;
+	//ВыбОбъект="";
+	//Если ПустоеЗначение(ВыбПлощадка)=0 Тогда
+		СпрОбъект.НайтиЭлемент( ВыбПлощадка );
+	//Иначе
+	//	СпрСсылка = НайтиПлощадку( GUID );
+	//	Если ПустоеЗначение( СпрСсылка )=1 Тогда 
+	//		СпрОбъект.Новый();
+	//	Иначе
+	//		СпрОбъект.НайтиЭлемент( СпрСсылка);
+	//	КонецЕсли;			
+	//КонецЕсли;
+
+	НачатьТранзакцию();
+	Попытка
+		
+		enterprise = objDom.selectSingleNode("//ent:enterprise") ;
+		//name = enterprise.selectSingleNode("ent:name").text;
+		
+		active = enterprise.selectSingleNode("bs:active").text;
+		Если Врег(active)="TRUE" Тогда  
+			СпрОбъект.active =1;
+			СпрОбъект.СнятьПометкуУдаления();
+		Иначе 
+			СпрОбъект.active =0;
+			СпрОбъект.ПометкаУдаления(0);
+		КонецЕсли;
+	    СпрОбъект.Адрес = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:addressView").text;
+	    Попытка 
+			СтранаGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:country").selectSingleNode("bs:guid").text;
+			СтранаName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:country").selectSingleNode("ikar:name").text;
+			СпрОбъект.Страна = НайтиСтрануПоGUID( СтранаGUID, СтранаName );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			regionGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:region").selectSingleNode("bs:guid").text;
+			regionName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:region").selectSingleNode("ikar:name").text;
+			//СпрОбъект.Регион = НайтиРегионПоGUID( regionGUID, regionName );
+			СпрОбъект.Регион = Справочник_НайтиПоGUID( "ВСД_Регион", regionGUID, regionName, СпрОбъект.Страна );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			districtGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:district").selectSingleNode("bs:guid").text;
+			districtName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:district").selectSingleNode("ikar:name").text;
+			//СпрОбъект.Район = НайтиРайонПоGUID( districtGUID, districtName );
+			СпрОбъект.Район = Справочник_НайтиПоGUID( "ВСД_Район", districtGUID, districtName, СпрОбъект.Регион );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			localityGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:locality").selectSingleNode("bs:guid").text;
+			localityName = "";
+			//localityName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:locality").selectSingleNode("ikar:name").text;
+			//СпрОбъект.Город = НайтиГородПоGUID( localityGUID, localityName );
+			СпрОбъект.Город = Справочник_НайтиПоGUID( "ВСД_Город", localityGUID, localityName, СпрОбъект.Регион );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			streetGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:street").selectSingleNode("bs:guid").text;
+			streetName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:street").selectSingleNode("ikar:name").text;
+			СпрОбъект.Улица = Справочник_НайтиПоGUID( "ВСД_Улица", streetGUID, streetName, СпрОбъект.Город );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Дом = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:house").text;
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Строение = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:building").text;
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Помещение = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:room").text;
+		Исключение
+		КонецПопытки;
+		
+		СпрОбъект.Наименование = enterprise.selectSingleNode("ent:name").text;
+		СпрОбъект.GUID = enterprise.selectSingleNode("bs:guid").text;
+		СпрОбъект.UUID = enterprise.selectSingleNode("bs:uuid").text;
+	
+		УдалитьXML( Компонента.LogFilename);
+		
+		Если ПустоеЗначение(ХС)=0 Тогда			
+			СпрОбъект.GUIDХозСубъекта = ХС.GUID;			
+		Иначе						
+			Если ПустоеЗначение(ХС)=0 Тогда			
+				Сообщить("Не выбран ХозСубъект "+ СпрОбъект+" "+ СпрОбъект.Наименование +" "+СпрОбъект.Адрес );
+				//Сообщить("ХозСубъект не записан","!");			
+			КонецЕсли;
+		КонецЕсли;
+		Сообщить("Записан "+СпрОбъект.Вид()+" ["+СпрОбъект+"] GUID = "+ СпрОбъект.Guid+" Адрес: "+СпрОбъект.Адрес);					
+		СпрОбъект.Записать();
+		Результат = СпрОбъект.ТекущийЭлемент();
+		ЗафиксироватьТранзакцию();		
+		
+	Исключение
+		Сообщить("Площадка не найдена "+GUID,"!");
+		Сообщить(ОписаниеОшибки());
+	КонецПопытки;
+	
+	Возврат Результат;
+КонецФункции
+
+//{ ******************  Площадки СОЗДАТЬ **************************
+
+Процедура Площадка_СоздатьСвязь_ПолучитьОтвет( applicationID )
+
+	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Не указано applicationID");
+		Возврат;
+	КонецЕсли;
+
+	Сообщить("Отправляем запрос результата ["+applicationID+"] " );
+	Результат = ГМ.ПолучитьРезультатСервер( applicationID );
+
+	Если ГМ.НайтиОшибки()>0 Тогда
+		Возврат;
+	КонецЕсли;
+
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ГМ.Компонента.LogFilename);
+
+    businessEntity=objDom.selectSingleNode("//merc:businessEntity") ;
+	guid = businessEntity.selectSingleNode("bs:guid").text;
+	uuid = businessEntity.selectSingleNode("bs:uuid").text;
+	active = businessEntity.selectSingleNode("bs:active").text;
+	enterprise = businessEntity.selectSingleNode("ent:activityLocation").selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
+	Сообщить("Успешно установлена связь ВСД_Площадка ["+enterprise+"] ВСД_ХозСубъект ["+guid+"]","i");
+
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+КонецПроцедуры
+
+Функция Площадка_СоздатьСвязь_ЗапросXML(Площадка)
+	Запрос = "
+	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+	|                  xmlns:app='http://api.vetrf.ru/schema/cdm/application'
+	|                  xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/applications'
+	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|                  xmlns:com='http://api.vetrf.ru/schema/cdm/argus/common'
+	|                  xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:submitApplicationRequest>
+	|         <ws:apiKey>" + ГМ.ПолучитьКонстанту("param_api_key") + "</ws:apiKey>
+	|         <app:application>
+	|            <app:serviceId>mercury-g2b.service</app:serviceId>
+	|            <app:issuerId>" + ГМ.ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
+	|            <app:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:data>
+	|               <merc:modifyActivityLocationsRequest>
+	|                   <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|                   <merc:initiator>
+	|                      <com:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</com:login>
+	|                   </merc:initiator>
+	|                  <merc:modificationOperation>
+	|                      <ent:type>CREATE</ent:type>
+	|                      <ent:businessEntity>
+	|                          <base:guid>"+ Площадка.GuidХозСубъекта +"</base:guid>
+	|                      </ent:businessEntity>
+	|                      <ent:enterpriseList count='1' total='1' offset='0'>
+	|                          <ent:enterprise>
+	|                              <base:guid>"+Площадка.GUID +"</base:guid>
+	|                          </ent:enterprise>
+	|                     </ent:enterpriseList>
+	|                 </merc:modificationOperation>
+	|             </merc:modifyActivityLocationsRequest>
+	|          </app:data>
+	|        </app:application>
+	|     </ws:submitApplicationRequest>
+	|</soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+
+	возврат Запрос;
+КонецФункции
+
+Процедура Площадка_СоздатьСвязь(Площадка) Экспорт
+	Если ПустоеЗначение(Площадка.GuidХозСубъекта)=1 Тогда
+		Сообщить("не указан GUID хоз субъекта");
+		Возврат;
+	КонецЕсли;
+
+	Если ПустоеЗначение(Площадка.GUID)=1 Тогда
+		Сообщить("Выб площадке не указан GUID");
+		Возврат;
+	КонецЕсли;
+
+	ГМ.Пауза();
+	Сообщить(" Запрос CreateActivityLocationsOperation [ "+СокрЛП(Площадка)+" ]","i");
+	//Результат = ГМ.Компонента.CreateActivityLocationsOperation(
+	//		СокрЛП(Площадка.GuidХозСубъекта),
+	//		СокрЛП(Площадка.GUID)
+	//);
+
+
+	Сообщить(" Запрос CreateEnterprise [ "+СокрЛП(Площадка)+" ]","i");
+	ЗапросXML = Площадка_СоздатьСвязь_ЗапросXML(Площадка);
+
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";
+
+	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	//Отладка();
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+
+	ГМ.Пауза();
+	Площадка_СоздатьСвязь_ПолучитьОтвет( appID )
+
+КонецПроцедуры
+
+Процедура Площадка_ПолучитьОтвет( applicationID , Площадка)
+
+	Если ПустоеЗначение(applicationID)=1 Тогда
+		Сообщить("Не указано applicationID");
+		Возврат;
+	КонецЕсли;
+
+	ГМ.Пауза();
+
+	Сообщить("Отправляем запрос результата ["+applicationID+"] " );
+	Результат = ГМ.ПолучитьРезультатСервер( applicationID );
+
+   	Сообщить("Загрузка XML-файла: "+ГМ.Компонента.LogFilename);
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load(ГМ.Компонента.LogFilename);
+
+	Если ГМ.НайтиОшибки()>0 Тогда
+		Возврат;
+	КонецЕсли;
+
+    enterprise=objDom.selectSingleNode("//merc:enterprise") ;
+	guid = enterprise.selectSingleNode("bs:guid").text;
+	uuid = enterprise.selectSingleNode("bs:uuid").text;
+	name = enterprise.selectSingleNode("ent:name").text;
+	active = enterprise.selectSingleNode("bs:active").text;
+
+	если ПустоеЗначение(GUID)=0 Тогда
+		Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
+		Спр.НайтиЭлемент(Площадка);
+		спр.GUID = GUID;
+		спр.uuid = uuid;
+		спр.Записать();
+		Сообщить("Успешно записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+"] GUID = "+GUID,"i");
+
+		Площадка = Спр.ТекущийЭлемент();
+	Иначе
+		Сообщить("Пустой GUID Площадки");
+	КонецЕсли;
+
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+
+	Площадка_СоздатьСвязь(Площадка);
+
+КонецПроцедуры
+
+Функция Площадка_Создать_ЗапросXML(Площадка)
+	Деятельность = "Деаятельность";
+	Причина = "Причина";
+	
+	ЗапросXML = "
+	|<soapenv:Envelope
+	|     xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
+	|xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+	|xmlns:app='http://api.vetrf.ru/schema/cdm/application'
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/applications'
+	|xmlns:base='http://api.vetrf.ru/schema/cdm/base'
+	|xmlns:com='http://api.vetrf.ru/schema/cdm/argus/common'
+	|xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
+	|xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|   <soapenv:Header/>
+	|   <soapenv:Body>
+	|      <ws:submitApplicationRequest>
+	|         <ws:apiKey>" + ГМ.ПолучитьКонстанту("param_api_key") + "</ws:apiKey>
+	|         <app:application>
+	|            <app:serviceId>mercury-g2b.service</app:serviceId>
+	|            <app:issuerId>" + ГМ.ПолучитьКонстанту("param_issuer_id") + "</app:issuerId>
+	|            <app:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
+	|            <app:data>
+	|                <merc:modifyEnterpriseRequest>
+	|                   <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|                   <merc:initiator>
+	|                      <com:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</com:login>
+	|                   </merc:initiator>
+	|                   <merc:modificationOperation>
+	|                       <ent:type>CREATE</ent:type>
+	|                       <ent:resultingList count='1' total='1' offset='0'>
+	|                       <ent:enterprise>
+	|                           <ent:name>"+СокрЛП(Площадка.Наименование)+"</ent:name>
+	|                           <ent:type>1</ent:type>
+	|              <ent:address>
+	|                <ikar:country>
+	|                  <base:guid>"+СокрЛП(Площадка.Страна.GUID)+"</base:guid>
+	|                </ikar:country>
+	|                <ikar:federalDistrict /> ";
+	Если ПустоеЗначение(Площадка.Регион.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:region>
+		|                  <base:guid>"+СокрЛП(Площадка.Регион.GUID)+"</base:guid>
+		|                </ikar:region>
+		|";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:region> ";
+	КонецЕсли;
+	Если ПустоеЗначение(Площадка.Район.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:district>
+		|                  <base:guid>"+СокрЛП(Площадка.Район.GUID)+"</base:guid>
+		|                </ikar:district>
+		|";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|<ikar:district />
+		|";
+	КонецЕсли;
+	Если ПустоеЗначение(Площадка.Город.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:locality>
+		|                  <base:guid>"+СокрЛП(Площадка.Город.GUID)+"</base:guid>
+		|                </ikar:locality> ";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:locality /> ";
+	КонецЕсли;
+	ЗапросXML=ЗапросXML+"
+	|                <ikar:subLocality /> ";
+	Если ПустоеЗначение(Площадка.Улица.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:street>
+		|                  <base:guid>"+СокрЛП(Площадка.Улица.GUID)+"</base:guid>
+		|                </ikar:street > ";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|                <ikar:street /> ";
+	КонецЕсли;
+	ЗапросXML=ЗапросXML+"
+	|                <ikar:addressView>"+СокрЛП(Площадка.Адрес)+"</ikar:addressView>
+	|              </ent:address>
+	|                          <ent:activityList count='1' total='1' offset='0'>
+	|                             <ent:activity>
+	|                                 <ent:name>" + (Деятельность) + "</ent:name>
+	|                             </ent:activity>
+	|                         </ent:activityList>
+	|                         <ent:owner>
+	|                            <base:guid>"+СокрЛП(Площадка.GuidХозСубъекта)+"</base:guid>
+	|                         </ent:owner>
+	|                    </ent:enterprise>
+	|              </ent:resultingList>
+	|              <ent:reason>"+ Причина +"</ent:reason>
+	|           </merc:modificationOperation>
+	|        </merc:modifyEnterpriseRequest>
+	|      </app:data>
+	|    </app:application>
+	|   </ws:submitApplicationRequest>
+	| </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+
+	Возврат ЗапросXML;
+КонецФункции
+
+Процедура Площадка_Создать(Площадка) Экспорт
+
+	Если ПустоеЗначение(Площадка.GuidХозСубъекта)=1 Тогда
+		Сообщить("Не указан Guid ХозСубъекта");
+		Возврат;
+	КонецЕсли;
+
+	Если ПустоеЗначение(Площадка.Страна.GUID)=1 Тогда
+		Сообщить("Не указан Страна.GUID");
+		Возврат;
+	КонецЕсли;
+
+//	Если ПустоеЗначение(Регион.GUID)=1 Тогда
+//		Сообщить("Не указан Регион.GUID");
+//		Возврат;
+//	КонецЕсли;
+//
+//	Если ПустоеЗначение(Город.GUID)=1 Тогда
+//		Сообщить("Не указан Город.GUID");
+//		Возврат;
+//	КонецЕсли;
+
+	Сообщить(" Запрос CreateEnterprise [ "+СокрЛП(Площадка)+" ]","i");
+	ЗапросXML = Площадка_Создать_ЗапросXML(Площадка);
+
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Action = "submitApplicationRequest";
+
+	//appID = ГМ.ОтправитьЗапросXML(ЗапросXML);
+	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	Если ПустоеЗначение(appID)=0 Тогда
+
+		Площадка_ПолучитьОтвет( appID, Площадка )
+
+	КонецЕсли;
+
+КонецПроцедуры
+
+//} ******************  Площадки СОЗДАТЬ **************************
 
 //} ******************  Площадки **************************
 
