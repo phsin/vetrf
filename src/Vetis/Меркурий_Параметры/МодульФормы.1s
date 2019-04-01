@@ -744,12 +744,12 @@
 
 	region 		= businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("*[local-name() = 'region']").selectSingleNode("*[local-name() = 'guid']").text;
 	regionName 	= businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("*[local-name() = 'region']").selectSingleNode("*[local-name() = 'name']").text;
-	Регион 	= ГМ.НайтиРегионПоGUID(region, regionName);
+	Регион 	= ГМ.Справочник_НайтиПоGUID( "ВСД_Регион", region, regionName, Страна);
 
 	Попытка		
 		locality = businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("ikar:locality").selectSingleNode("bs:guid").text;
 		localityName = businessEntity.selectSingleNode("*[local-name() = 'juridicalAddress']").selectSingleNode("ikar:locality").selectSingleNode("ikar:name").text;		
-		Город 	= ГМ.НайтиГородПоGUID(locality, localityName);
+		Город 	= ГМ.Справочник_НайтиПоGUID( "ВСД_Город", locality, localityName, Регион);
 	Исключение
 		Сообщить("Город не указан в juridicalAddress
 		|Загрузите города вручную");

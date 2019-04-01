@@ -10,5 +10,5 @@ perl CompressMetadata.pl -q -d Src\Vetis
 
 rem Пересоберем ert прямо в репозитории
 rem cscript decompile_ert.js --ini-file compile-ert.ini
-rem compile.bat
+compile.bat
 
