@@ -138,12 +138,18 @@ function DecompileMD(DestDir, Sections)
     var gcomp_options = Sections['decompile-md']['options'];
 
     echo('decompileMD '+DestFolder);
-
+try {
+  //die "foo";
     var file = fso.GetFile('1cv7.md');
     file.Copy('1cv7.cur.md', true);
 
     CmdLine = 'gcomp -d -F 1cv7.cur.md -D "'+DestFolder.Path+'" '+gcomp_options;
     RunCmd(CmdLine);
+} catch (e) {
+  //warn "caught error: $_"; # not $@
+  echo('!!! error decompile MD '+DestFolder+'\1cv7.md = '+e.message);
+};
+
 }
 
 function DecompileDir(DestDir, Sections)
