@@ -2154,11 +2154,15 @@
 	Попытка
 		name = businessEntity.selectSingleNode("*[local-name() = 'name']").text;
 	Исключение
-		Попытка
-			name = businessEntity.selectSingleNode("*[local-name() = 'fio']").text;
-		Исключение
-			name = "";
-		КонецПопытки;
+        Попытка //[+]serpent, 12.04.2019
+			name = businessEntity.selectSingleNode("*[local-name() = 'fullName']").text;
+        Исключение
+            Попытка
+                name = businessEntity.selectSingleNode("*[local-name() = 'fio']").text;
+            Исключение
+                name = "";
+            КонецПопытки;
+        КонецПопытки;
 	КонецПопытки;
 	
 	active = businessEntity.selectSingleNode("*[local-name() = 'active']").text;
