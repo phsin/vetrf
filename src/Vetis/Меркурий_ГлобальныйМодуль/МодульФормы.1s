@@ -1810,7 +1810,7 @@
 			Спр.ParentGUID = Родитель.GUID;
 			Спр.Записать();
 			ЗафиксироватьТранзакцию();
-			Сообщить("Создан "+Спр.Вид()+" - "+GUID);
+			Сообщить("Создан "+Спр.Вид()+" - "+GUID+" - "+name);
 			Результат = Спр.ТекущийЭлемент();
 		Иначе 
 			Сообщить(ВидСправочника+" не найден, выполните инициализацию ");
@@ -3847,7 +3847,6 @@
 
 	//стандартное поведение функции
 	Сообщить(" Запрос GetAllCountryList ","i");
-	//Результат = Компонента.GetCountryList( );
 
 	ЗапросXML = ЗагрузитьСтраны_ЗапросXML();
 	метод = Компонента.GetMethod();
@@ -3856,9 +3855,7 @@
 
 	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
 
-	//Отладка();
-
-	 Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
+	Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
 
     objDom=СоздатьОбъект("MSXML2.DOMDocument");
     objDom.load(Компонента.LogFilename);
@@ -3877,8 +3874,6 @@
 		uuid = country.selectSingleNode("bs:uuid").text;
 		guid = country.selectSingleNode("bs:guid").text;
 		st = country.selectSingleNode("bs:status").text;
-		//updateDate = product.selectSingleNode("updateDate").text;
-		//createDate = product.selectSingleNode("createDate").text;
 		name = country.selectSingleNode("ikar:name").text;
 		//fullname = country.selectSingleNode("ikar:fullName").text;
 
@@ -3895,6 +3890,8 @@
 		Спр.Записать();
 		Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
+
+	УдалитьXML( Компонента.LogFilename);
 
 	Сообщить("Загрузка стран завершена");
 КонецФункции
@@ -3931,10 +3928,8 @@
 	//}
 
 	//стандартное поведение функции
-	//Страна_GUID = ?(ПустоеЗначение(Страна)=1,"",Страна.GUID);
 
 	Сообщить(" Запрос GetRegionList ["+СокрЛП(Страна.GUID) +"]","i");
-	//Результат = Компонента.GetRegionList( СокрЛП(Страна.GUID) );
 
 	ЗапросXML = ЗагрузитьРегионы_ЗапросXML( Страна.GUID );
 	метод = Компонента.GetMethod();
@@ -3961,28 +3956,15 @@
 		uuid = region.selectSingleNode("bs:uuid").text;
 		guid = region.selectSingleNode("bs:guid").text;
 		st = region.selectSingleNode("bs:status").text;
-		//updateDate = product.selectSingleNode("updateDate").text;
-		//createDate = product.selectSingleNode("createDate").text;
 		name = region.selectSingleNode("ikar:name").text;
 		view = region.selectSingleNode("ikar:view").text;
 
 		Справочник_НайтиПоGUID( "ВСД_Регион", guid, view, Страна );
 		
-		//Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
-		//	Спр.СнятьПометкуУдаления();
-		//Иначе
-		//	Сообщить("Новый ВСД_Регион ["+name+"] ","i");
-		//	Спр.Новый();
-		//	//рез = Спр.ТекущийЭлемент();
-		//КонецЕсли;
-		//Спр.Наименование = view;
-		//Спр.GUID = guid;
-		//Спр.UUID = UUID;
-		//Спр.ParentGUID = Страна.GUID;
-		//Спр.Записать();
-		//Сообщить("Записан "+Спр.Вид()+" = "+Спр);
     КонецЦикла;
 
+	УдалитьXML( Компонента.LogFilename);
+	
 	Сообщить("Загрузка завершена");
 КонецФункции
 
@@ -4022,7 +4004,6 @@
 	КонецЕсли;
 
 	Сообщить(" Запрос GetDistrictListByRegion ["+СокрЛП(Регион.GUID) +"]","i");
-	//Результат = Компонента.GetDistrictList( СокрЛП(Регион.GUID) );
 
 	ЗапросXML = ЗагрузитьРайоны_ЗапросXML( Регион.GUID );
 	метод = Компонента.GetMethod();
@@ -4048,26 +4029,13 @@
 		uuid = district.selectSingleNode("bs:uuid").text;
 		guid = district.selectSingleNode("bs:guid").text;
 		st = district.selectSingleNode("bs:status").text;
-		//updateDate = product.selectSingleNode("updateDate").text;
-		//createDate = product.selectSingleNode("createDate").text;
 		name = district.selectSingleNode("ikar:name").text;
 		view = district.selectSingleNode("ikar:view").text;
 
 		Справочник_НайтиПоGUID( "ВСД_Район", guid, view, Регион );
-		//Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
-		//	Спр.СнятьПометкуУдаления();
-		//Иначе
-		//	Сообщить("Новый ВСД_Район ["+name+"] ","i");
-		//	Спр.Новый();
-		//	//рез = Спр.ТекущийЭлемент();
-		//КонецЕсли;
-		//Спр.Наименование = view;
-		//Спр.GUID = guid;
-		//Спр.UUID = UUID;
-		//Спр.ParentGUID = Регион.GUID;
-		//Спр.Записать();
-		//Сообщить("Записан "+Спр.Вид()+" = "+Спр);
-    КонецЦикла;
+	КонецЦикла;
+	
+	УдалитьXML( Компонента.LogFilename);
 
 	Сообщить("Загрузка завершена");
 КонецФункции
@@ -4095,11 +4063,7 @@
 
 Функция ИнициализацияХС_ЗагрузитьГорода(Регион) Экспорт
 
-	//стандартное поведение функции
-	//Страна_GUID = ?(ПустоеЗначение(Страна)=1,"",Страна_GUID);
-
 	Сообщить(" Запрос getLocalityListByRegion "+Регион+" ["+СокрЛП(Регион.GUID) +"]","i");
-	//Результат = Компонента.GetLocalityListByRegion( СокрЛП(Регион.GUID) );
 
 	ЗапросXML = ЗагрузитьГорода_ЗапросXML( Регион.GUID );
 	метод = Компонента.GetMethod();
@@ -4128,23 +4092,10 @@
 		name = item.selectSingleNode("ikar:name").text;
 		view = item.selectSingleNode("ikar:view").text;
 
-		Справочник_НайтиПоGUID( "ВСД_Город", guid, view, Регион );
-		//НачатьТранзакцию(); // Ускоримся
-		//Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
-		//	Спр.СнятьПометкуУдаления();
-		//Иначе
-		//	Сообщить("Новый ВСД_Город ["+name+"] ","i");
-		//	Спр.Новый();
-		//	//рез = Спр.ТекущийЭлемент();
-		//КонецЕсли;
-		//Спр.Наименование = name;
-		//Спр.GUID = guid;
-		//Спр.UUID = UUID;
-		//Спр.ParentGUID = Регион.GUID;
-		//Спр.Записать();
-		//ЗафиксироватьТранзакцию();
-		//Сообщить("Записан "+Спр.Вид()+" = "+Спр);
-    КонецЦикла;
+		Справочник_НайтиПоGUID( "ВСД_Город", guid, name, Регион );
+	КонецЦикла;
+	
+	УдалитьXML( Компонента.LogFilename);
 
 	Сообщить("Загрузка завершена");
 КонецФункции
@@ -4185,7 +4136,6 @@
 	КонецЕсли;
 
 	Сообщить(" Запрос getLocalityListByDistrictRequest ["+СокрЛП(Район.GUID) +"]","i");
-	//Результат = Компонента.GetDistrictList( СокрЛП(Регион.GUID) );
 
 	ЗапросXML = ЗагрузитьНаселенныеПунктыПоРайону_ЗапросXML( Район.GUID );
 	метод = Компонента.GetMethod();
@@ -4211,27 +4161,15 @@
 		uuid = locality.selectSingleNode("bs:uuid").text;
 		guid = locality.selectSingleNode("bs:guid").text;
 		st = locality.selectSingleNode("bs:status").text;
-		//updateDate = product.selectSingleNode("updateDate").text;
-		//createDate = product.selectSingleNode("createDate").text;
 		name = locality.selectSingleNode("ikar:name").text;
 		view = locality.selectSingleNode("ikar:view").text;
 
-		Справочник_НайтиПоGUID( "ВСД_Город", guid, view, Район );
-		//Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
-		//	Спр.СнятьПометкуУдаления();
-		//Иначе
-		//	Сообщить("Новый ВСД_НаселПункт ["+name+"] ","i");
-		//	Спр.Новый();
-		//	//рез = Спр.ТекущийЭлемент();
-		//КонецЕсли;
-		//Спр.Наименование = name;
-		//Спр.GUID = guid;
-		//Спр.UUID = UUID;
-		//Спр.ParentGUID = Район.GUID;
-		//Спр.Записать();
-		//Сообщить("Записан "+Спр.Вид()+" = "+Спр);
+		Справочник_НайтиПоGUID( "ВСД_Город", guid, name, Район );
+
     КонецЦикла;
 
+	УдалитьXML( Компонента.LogFilename);
+	
 	Сообщить("Загрузка завершена");
 КонецФункции
 
@@ -4261,9 +4199,6 @@
 
 Функция ИнициализацияХС_ЗагрузитьУлицы(Город, Смещение=0) Экспорт
 
-	//стандартное поведение функции
-	//Страна_GUID = ?(ПустоеЗначение(Страна)=1,"",Страна_GUID);
-
 	Сообщить(" Запрос getStreetListByLocalityRequest "+Город+" ["+СокрЛП(Город.GUID) +"]","i");
 	ЗапросXML = Список_Улиц_ЗапросXML( Город, Смещение );
 
@@ -4272,8 +4207,6 @@
     метод.Action = "GetStreetListByLocality";
 
 	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
-
-	//Отладка();
 
 	Сообщить("Загрузка XML-файла: " + Компонента.LogFilename);
 
@@ -4293,32 +4226,20 @@
 		uuid = item.selectSingleNode("bs:uuid").text;
 		guid = item.selectSingleNode("bs:guid").text;
 		st = item.selectSingleNode("bs:status").text;
-		//updateDate = product.selectSingleNode("updateDate").text;
-		//createDate = product.selectSingleNode("createDate").text;
 		name = item.selectSingleNode("ikar:name").text;
 		view = item.selectSingleNode("ikar:view").text;
 
-
 		Справочник_НайтиПоGUID( "ВСД_Улица", guid, view, Город );
 		
-//		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
-//			Спр.СнятьПометкуУдаления();
-//		Иначе
-//			Сообщить("Новый ВСД_Улица ["+name+"] ","i");
-//			Спр.Новый();
-//			//рез = Спр.ТекущийЭлемент();
-//		КонецЕсли;
-//		Спр.Наименование = view;
-//		Спр.GUID = guid;
-//		Спр.UUID = UUID;
-//		Спр.ParentGUID = Город.GUID;
-//		Спр.Записать();
-//
-//		Сообщить("Записан ВСД_Улица ["+name+"] ","");
-
     КонецЦикла;
 	ЗафиксироватьТранзакцию();
 
+	УдалитьXML( Компонента.LogFilename);
+	
+	Если List.length=1000 Тогда 
+		ИнициализацияХС_ЗагрузитьУлицы(Город, Смещение+List.length );
+	КонецЕсли;
+	
 	Сообщить("Загрузка завершена");
 КонецФункции
 
