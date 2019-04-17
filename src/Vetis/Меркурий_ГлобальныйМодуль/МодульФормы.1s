@@ -5191,79 +5191,79 @@
 
 КонецФункции
 
-Функция Партии_ПоGUID_Запрос( ВыбПартия )
-	
-	Запрос = "
-	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
-	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
-	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
-	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>	
-	|      <apldef:apiKey>"+ ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
-	|        <apl:issueDate>" + Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
-	|        <apl:data>
-	|          <merc:getStockEntryByGuidRequest>
-	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ ПолучитьКонстанту("param_intiator_login") +"</vd:login>
-	|            </merc:initiator>
-	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
-	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
-	|          </merc:getStockEntryByGuidRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
-	|</SOAP-ENV:Envelope>
-	|";	
-	Возврат Запрос;
-КонецФункции
-
-Функция Партии_ПолучитьПоGUID( ВыбПартия ) Экспорт
-	t1 = Старт();	
-	
-	Сообщить("Отправляем запрос партий по GUID "+ВыбПартия);
-	ЗапросXML = Партии_ПоGUID_Запрос( ВыбПартия );	
-	Service = "platform/services/2.0/ApplicationManagementService";
-	Action = "submitApplicationRequest";	
-	
-	метод = Компонента.GetMethod();
-    метод.Service = Service;
-    метод.Action = Action;
-
-	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
-
-	УдалитьXML( Компонента.LogFilename);
-	
-	Если ПустоеЗначение(appID)=0 Тогда
-		Результат = "";
-		Для А=1 По 10 Цикл
-			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
-
-				Пауза( );
-
-				Сообщить("Отправляем запрос на получение ответа [партии по GUID]" );
-				Результат = ПолучитьРезультатСервер( appID );
-				Сообщить("Результат = "+Результат);
-
-				ЗагрузитьXML_Партии( Компонента.LogFilename, 0, 0 );
-
-				УдалитьXML( Компонента.LogFilename );
-
-			КонецЕсли;
-		КонецЦикла;
-
-	КонецЕсли;
-
-	Финиш(t1, Сам(), "ПолучитьПартии", );
-	
-	Возврат appID;
-КонецФункции
+//Функция Партии_ПоGUID_Запрос( ВыбПартия )
+//	
+//	Запрос = "
+//	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+//	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+//	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+//	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+//	|  <SOAP-ENV:Header/>
+//	|  <SOAP-ENV:Body>
+//	|    <apldef:submitApplicationRequest>	
+//	|      <apldef:apiKey>"+ ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
+//	|      <apl:application>
+//	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+//	|        <apl:issuerId>"+ ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
+//	|        <apl:issueDate>" + Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
+//	|        <apl:data>
+//	|          <merc:getStockEntryByGuidRequest>
+//	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
+//	|            <merc:initiator>
+//	|              <vd:login>"+ ПолучитьКонстанту("param_intiator_login") +"</vd:login>
+//	|            </merc:initiator>
+//	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
+//	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
+//	|          </merc:getStockEntryByGuidRequest>
+//	|        </apl:data>
+//	|      </apl:application>
+//	|    </apldef:submitApplicationRequest>
+//	|  </SOAP-ENV:Body>
+//	|</SOAP-ENV:Envelope>
+//	|";	
+//	Возврат Запрос;
+//КонецФункции
+//
+//Функция Партии_ПолучитьПоGUID( ВыбПартия ) Экспорт
+//	t1 = Старт();	
+//	
+//	Сообщить("Отправляем запрос партий по GUID "+ВыбПартия);
+//	ЗапросXML = Партии_ПоGUID_Запрос( ВыбПартия );	
+//	Service = "platform/services/2.0/ApplicationManagementService";
+//	Action = "submitApplicationRequest";	
+//	
+//	метод = Компонента.GetMethod();
+//    метод.Service = Service;
+//    метод.Action = Action;
+//
+//	appID = ОтправитьЗапросSoap(ЗапросXML, метод);
+//
+//	УдалитьXML( Компонента.LogFilename);
+//	
+//	Если ПустоеЗначение(appID)=0 Тогда
+//		Результат = "";
+//		Для А=1 По 10 Цикл
+//			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
+//
+//				Пауза( );
+//
+//				Сообщить("Отправляем запрос на получение ответа [партии по GUID]" );
+//				Результат = ПолучитьРезультатСервер( appID );
+//				Сообщить("Результат = "+Результат);
+//
+//				ЗагрузитьXML_Партии( Компонента.LogFilename, 0, 0 );
+//
+//				УдалитьXML( Компонента.LogFilename );
+//
+//			КонецЕсли;
+//		КонецЦикла;
+//
+//	КонецЕсли;
+//
+//	Финиш(t1, Сам(), "ПолучитьПартии", );
+//	
+//	Возврат appID;
+//КонецФункции
 
 //} Партии
 

@@ -418,13 +418,20 @@
 	//стандартное поведение функции
 		//t = stockEntry.text;
 		active = stockEntry.selectSingleNode("bs:active").text;
+		last = stockEntry.selectSingleNode("bs:last").text;
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
 		guid = stockEntry.selectSingleNode("bs:guid").text;
 
 		Партия = ГМ.НайтиПартиюПоGUID(guid);
 
+		Попытка Партия.active = ?( active="true",1,0) Исключение	КонецПопытки;
+		Попытка Партия.last = ?( last="true",1,0) Исключение	КонецПопытки;
+				
 		Если active="false" Тогда
 			Сообщить("Изменения в партию "+Партия+" uuid ["+uuid+"] не внесены. Признак партии = не активна","i");
+			Если Партия.Выбран()=1 Тогда 
+				Партия.Записать();
+			КонецЕсли;
 			Партия.Удалить(0);
 			Возврат Партия;
 		КонецЕсли;
@@ -652,6 +659,81 @@
 
 	//Возвращает последнюю созданную партию = для гашения 1 запрос/документ = 1 партия
 	Возврат Партия;
+КонецФункции
+
+
+Функция Партии_ПоGUID_Запрос( ВыбПартия )
+	
+	Запрос = "
+	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+	|  <SOAP-ENV:Header/>
+	|  <SOAP-ENV:Body>
+	|    <apldef:submitApplicationRequest>	
+	|      <apldef:apiKey>"+ ГМ.ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
+	|      <apl:application>
+	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|        <apl:issuerId>"+ ГМ.ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
+	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
+	|        <apl:data>
+	|          <merc:getStockEntryByGuidRequest>
+	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|            <merc:initiator>
+	|              <vd:login>"+ ГМ.ПолучитьКонстанту("param_intiator_login") +"</vd:login>
+	|            </merc:initiator>
+	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
+	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
+	|          </merc:getStockEntryByGuidRequest>
+	|        </apl:data>
+	|      </apl:application>
+	|    </apldef:submitApplicationRequest>
+	|  </SOAP-ENV:Body>
+	|</SOAP-ENV:Envelope>
+	|";	
+	Возврат Запрос;
+КонецФункции
+
+Функция Партии_ПолучитьПоGUID( ВыбПартия ) Экспорт
+	t1 = ГМ.Старт();	
+	
+	Сообщить("Отправляем запрос партий по GUID "+ВыбПартия);
+	ЗапросXML = Партии_ПоGUID_Запрос( ВыбПартия );	
+	Service = "platform/services/2.0/ApplicationManagementService";
+	Action = "submitApplicationRequest";	
+	
+	метод = ГМ.Компонента.GetMethod();
+    метод.Service = Service;
+    метод.Action = Action;
+
+	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+
+	ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
+	
+	Если ПустоеЗначение(appID)=0 Тогда
+		Результат = "";
+		Для А=1 По 10 Цикл
+			Если ((Результат="IN_PROCESS") или (ПустоеЗначение(Результат)=1)) Тогда
+
+				ГМ.Пауза( );
+
+				Сообщить("Отправляем запрос на получение ответа [партии по GUID]" );
+				Результат = ГМ.ПолучитьРезультатСервер( appID );
+				Сообщить("Результат = "+Результат);
+
+				ЗагрузитьXML_Партии2( ГМ.Компонента.LogFilename );
+
+				ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
+
+			КонецЕсли;
+		КонецЦикла;
+
+	КонецЕсли;
+
+	ГМ.Финиш(t1, Сам(), "ПолучитьПартии", );
+	
+	Возврат appID;
 КонецФункции
 //}
 
@@ -3038,8 +3120,8 @@
     Для i1 = 0 По productItemList.length - 1 Цикл
         productItem = productItemList.item(i1);
 
-		active 	 = productItem.selectSingleNode("bs:active").text;
-		last 	 = productItem.selectSingleNode("bs:last").text;
+		active 	 = НРЕГ(productItem.selectSingleNode("bs:active").text);
+		last 	 = НРЕГ(productItem.selectSingleNode("bs:last").text);
 
 		//st  	 = productItem.selectSingleNode("bs:status").text;
 		//prodType = productItem.selectSingleNode("dt:productType").text;
@@ -3056,17 +3138,9 @@
 			КонецЕсли;
 		КонецЕсли;
 
-		Если ((last="true") и (active="false")) Тогда
-			//Если СпрОбъект.Выбран()=1 Тогда
-				СпрОбъект.GUID = "";
-				СпрОбъект.Записать();
-				СпрОбъект.Удалить(0);
-			//КонецЕсли;
-		КонецЕсли;
-		Если active="false" Тогда
-			Продолжить;
-		КонецЕсли;
-
+		//Если active="false" Тогда
+		//	Продолжить;
+		//КонецЕсли;
 
 		СпрОбъект.Наименование = productItem.selectSingleNode("dt:name").text;
 		СпрОбъект.Продукция = ГМ.НайтиПродукцию(productItem.selectSingleNode("dt:product").selectSingleNode("bs:guid").text);
@@ -3089,10 +3163,21 @@
 		//Площадка(и) производитель(и) - Пока в 1 экземпляре
 		Попытка СпрОбъект.Площадка = ГМ.НайтиПлощадку(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
 			//ГМ.ЗагрузитьПлощадкуПоGUID(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
-
+			
+		Попытка СпрОбъект.active = ?( active="true",1,0) Исключение	КонецПопытки;
+		Попытка СпрОбъект.last = ?( last="true",1,0) Исключение	КонецПопытки;
+			
 		СпрОбъект.Записать();
 
 		Сообщить("Записан ["+СпрОбъект.ТекущийЭлемент()+"] uuid =["+СпрОбъект.uuid+"]");
+		
+		//Если ((last="true") и (active="false")) Тогда
+		Если (active="false") Тогда
+			//СпрОбъект.GUID = "";
+			//СпрОбъект.Записать();
+			СпрОбъект.Удалить(0);
+			Сообщить("Удален ["+СпрОбъект.ТекущийЭлемент()+"] uuid =["+СпрОбъект.uuid+"]");
+		КонецЕсли;		
 	КонецЦикла;
 
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
