@@ -1850,7 +1850,7 @@
     |<apldef:submitApplicationRequest>
 	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|        <apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00", 1 ) + "</apl:issueDate>
 	|        <apl:data>
@@ -2006,6 +2006,12 @@
 			|                </vd:packageList>";
 		КонецЕсли;
 
+		Если ПустоеЗначение(док.ВидПроисхожденияНепищевойПродукции)=0 Тогда
+			consignment = consignment+ "
+			|<vd:applicableClassifications>
+			|   <vd:nonFoodSource>"+ док.ВидПроисхожденияНепищевойПродукции.Идентификатор() +"</vd:nonFoodSource>
+			|</vd:applicableClassifications>";
+		КонецЕсли;
 
 
 		consignment = consignment+ "
@@ -2315,7 +2321,8 @@
 	ЗапросXML = ВСД2_транзакция_ЗапросXML(док,тзУсловияПеревозки);
 
 	метод = ГМ.Компонента.GetMethod();
-	метод.Service = "platform/services/2.0/ApplicationManagementService";
+	//метод.Service = "platform/services/2.0/ApplicationManagementService";
+	метод.Service = "platform/services/2.1/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
