@@ -23,15 +23,6 @@ class МеркурийИнтеграция_2 = Меркурий_Интеграция_2.ert
 };
 
 
-// Классы системы FuncTest
-//include FuncTest_Classes\functest.prm
-
-// Юнит-тесты системы FuncTest
-//include FuncTest_UnitTests\defcls.prm
-
-// Юнит-тесты Меркурий
-//#include _Tests\defcls.prm
-
 класс Меркурий.ТабличноеПоле = класс_Меркурий_ТабличноеПоле.ert : ТабличноеПоле
 {
         Число ВыполнитьКоллБэкФункцию(ИмяМетода, Рез, ...);
