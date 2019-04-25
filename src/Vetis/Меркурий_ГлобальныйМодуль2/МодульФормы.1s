@@ -880,7 +880,7 @@
 КонецФункции
 
 //Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="",докОбъект = "" ) Экспорт
-Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="", СохранитьДокументВСД=0) Экспорт
+Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="", СохранитьДокументВСД=0, Префикс="") Экспорт
 	// Тестирование
 	// Параметр докОбъект это ТаблицаЗначений, в которую загрузим ВСД, вместо создания документов в БД.
 	
@@ -907,8 +907,14 @@
 		
 	applicationId = objDom.selectSingleNode("//*[local-name() = 'applicationId']").text ;
 
-	//vetDocumentList = objDom.selectNodes("//*[local-name() = 'vetDocument']") ;
-	vetDocumentList = objDom.selectNodes("//merc:vetDocument") ;
+	Если Префикс="" Тогда 		
+		vetDocumentList = objDom.selectNodes("//*[local-name() = 'vetDocument']") ;
+	Иначе		
+		// в StockEntry добавили реквизит vetDocument, поэтому надо искать с префиксом
+		//vetDocumentList = objDom.selectNodes("//merc:vetDocument") ;
+		vetDocumentList = objDom.selectNodes("//"+Префикс+":vetDocument") ;
+	КонецЕсли;
+	
 	Попытка
 	    Для i1 = 0 По vetDocumentList.length - 1 Цикл
 	        vetDocument=vetDocumentList.item(i1);
@@ -1278,7 +1284,7 @@
     Файл_Ответа_XML = ГМ.Компонента.LogFilenameResponse;
 	Если ПустоеЗначение(докСсылка)=0 Тогда
 		ГМ.СохранитьСтатусЗапроса(докСсылка);
-		ЗагрузитьXML_ВСД2( Файл_Ответа_XML , докСсылка, 1);
+		ЗагрузитьXML_ВСД2( Файл_Ответа_XML , докСсылка, 1, "merc");
 	КонецЕсли;
 
     ЗагрузитьXML_Партии2( Файл_Ответа_XML, докСсылка, Смещение, ПартияНачПериода, ПартияКонПериода);
