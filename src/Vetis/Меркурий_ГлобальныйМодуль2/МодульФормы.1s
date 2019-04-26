@@ -633,8 +633,8 @@
 		|xmlns:my='http://api.vetrf.ru/schema/cdm/application'
 		|" );
 
-    //stockEntryList = objDom.selectNodes("//*[local-name() = 'stockEntry']") ;
-	stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
+    stockEntryList = objDom.selectNodes("//*[local-name() = 'stockEntry']") ;
+	//stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
 
 	Сообщить("Получено "+stockEntryList.length+" записей","i");
 	// ЖД посмотрим, сколько пришло партий
