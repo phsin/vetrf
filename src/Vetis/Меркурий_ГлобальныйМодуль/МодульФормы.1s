@@ -8932,9 +8932,11 @@
 			|	INNER JOIN
 			|		$Документ.ВСД_транзакция as ДокВСД_1
 			|			ON Жур.IDDoc = ДокВСД_1.IDDoc
-			|				AND Жур.ISMARK = 0
 			// ВСД тоже фильтруем по фирме !!!
 			|				%УсловиеПоФирме%
+			|WHERE
+			| Жур.Date_Time_IDDoc BETWEEN :НачДата AND :КонДата~
+			| AND Жур.ISMARK = 0
 			|	) as ДокВСД
 			|	ON SUBSTRING(ДокВСД.ДокОснование, 5, 9) = Жур.IDDoc	
 			|
@@ -9078,9 +9080,11 @@
 			|	INNER JOIN
 			|		[Документ.ВСД_транзакция] as ДокВСД_1
 			|			ON Жур.IDDoc = ДокВСД_1.IDDoc
-			|				AND Жур.ISMARK = ''
 			// ВСД тоже фильтруем по фирме !!!
 			|				%УсловиеПоФирмеВСД%
+			|WHERE
+			| Жур.idx_date_time_iddoc BETWEEN :НачДата AND :КонДата~
+			| AND Жур.ISMARK = ''			
 			|	) as ДокВСД
 			|	ON SUBSTR(ДокВСД.ДокОснование, 5, 9) = Жур.IDDoc	
 			|
