@@ -149,7 +149,8 @@
 		Иначе
 			ответ=ответ+"
 			|                <ik:district /> ";
-		КонецЕсли;	
+		КонецЕсли;
+		ответ=ответ+"
 		|                <ik:locality>
 		|                  <base:guid>"+ СокрЛП(Город.GUID) +"</base:guid>
 		|                </ik:locality>
