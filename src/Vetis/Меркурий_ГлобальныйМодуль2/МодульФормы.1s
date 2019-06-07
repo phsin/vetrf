@@ -3341,6 +3341,11 @@
 		Попытка СпрОбъект.Площадка = ГМ.НайтиПлощадку(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
 			//ГМ.ЗагрузитьПлощадкуПоGUID(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
 			
+		//Попытка СпрОбъект.Площадка = ГМ.НайтиПлощадку(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
+		Попытка СпрОбъект.Производитель_ХозСубъект = ГМ.НайтиХСпоGUID(productItem.selectSingleNode("dt:producer").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
+		Попытка СпрОбъект.Собственник_ХозСубъект = ГМ.НайтиХСпоGUID(productItem.selectSingleNode("dt:tmOwner").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
+		Попытка	СпрОбъект.Производитель_Площадка = СпрОбъект.Площадка; Исключение КонецПопытки;
+			
 		Попытка СпрОбъект.active = ?( active="true",1,0) Исключение	КонецПопытки;
 		Попытка СпрОбъект.last = ?( last="true",1,0) Исключение	КонецПопытки;
 			
