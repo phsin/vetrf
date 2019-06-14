@@ -571,8 +571,8 @@
 	//}
 
 	//стандартное поведение функции
-	//Возврат глПользователь;
-	Возврат ИмяПользователя();
+	Возврат глПользователь;
+	//Возврат ИмяПользователя();
 КонецФункции
 
 Функция ПоказатьАвтора(Конт) Экспорт
@@ -1686,17 +1686,37 @@
 
 КонецФункции
 
-Функция Найти_Продукция_Элемент2(productItemName, productItemGuid, ВСД_Продукция, ВСД_ВидПродукции) Экспорт
+//Функция Найти_Продукция_Элемент2(productItemName, productItemGuid, ВСД_Продукция, ВСД_ВидПродукции) Экспорт
+Функция Найти_Продукция_Элемент2(productItem, ВСД_Продукция, ВСД_ВидПродукции) Экспорт
 
 	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
 	ОбъектВыполнения = ПроверитьПереопределениеФункции("Найти_Продукция_Элемент2");
 	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
-		//Возврат ОбъектВыполнения.Найти_Продукция_Элемент2(productItem, ВСД_Продукция, ВСД_ВидПродукции);
+		Возврат ОбъектВыполнения.Найти_Продукция_Элемент2(productItem, ВСД_Продукция, ВСД_ВидПродукции);
 	КонецЕсли;
 	//}
 
 	//стандартное поведение функции
 
+	Попытка
+		productItemName = productItem.selectSingleNode("*[local-name()='name']").text;
+	Исключение
+		//Сообщить("Не удалось получить элемент [productItem]","!");
+		productItemName = "";
+	КонецПопытки;
+		
+	Попытка
+		productItemGuid = productItem.selectSingleNode("bs:guid").text;
+	Исключение
+		productItemGuid="";
+	КонецПопытки;
+
+	Попытка
+		productItemUuid = productItem.selectSingleNode("bs:uuid").text;
+	Исключение
+		productItemUuid="";
+	КонецПопытки;
+	
 	Рез = "";
 	Спр = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
 
@@ -1754,19 +1774,22 @@
 	Если ПустоеЗначение(тз)=1 Тогда
 		//создать
 		Спр.Новый();
-		//Спр.Код = ;
-		Спр.Наименование = productItemName;
+		Если ПустоеЗначение(productItemName)=0 Тогда 
+			Спр.Наименование = productItemName;
+		Иначе
+			Спр.Наименование = productItemGuid;
+		КонецЕсли;
 		Спр.GUID = productItemGuid;
-		//Спр.Uuid = productItemUuid;
+		Спр.Uuid = productItemUuid;
 		Спр.Продукция = ВСД_Продукция;
 		Спр.ВидПродукции = ВСД_ВидПродукции;
-//		Спр.ТермическиеУсловияПеревозки = ПолучитьКонстанту("ТермУсловияПеревозки");//1;
-		Спр.ТермическоеСостояние = ПолучитьКонстанту("ТермУсловияПеревозки");
+		Спр.ТермическоеСостояние = ГМ.СписокКонстант.Получить("ТермУсловияПеревозки");//1;
 		Спр.Записать();
 
-		//получим наименование и все остальные реквизиты
-		Получить_Инфо_Продукции(Спр.ТекущийЭлемент())
-
+		Если ПустоеЗначение(productItemGuid)=0 Тогда				
+			//получим наименование и все остальные реквизиты
+			ГМ2.Получить_Инфо_Продукции(Спр.ТекущийЭлемент())
+		КонецЕсли;
 	Иначе
 		Спр.НайтиЭлемент(тз.ПолучитьЗначение(1,1));
 		//Спр.СделатьНеПроведенным();
@@ -1776,6 +1799,116 @@
 
 	Возврат рез;
 КонецФункции
+
+//Функция Найти_Продукция_Элемент3(productItem, ВСД_Продукция, ВСД_ВидПродукции) Экспорт
+//
+//	//{Проверим на переопределение функции, если переопределена вызовем из перекрывающего модуля
+//	ОбъектВыполнения = ПроверитьПереопределениеФункции("Найти_Продукция_Элемент3");
+//	Если ПустоеЗначение(ОбъектВыполнения)=0 Тогда
+//		Возврат ОбъектВыполнения.Найти_Продукция_Элемент3(productItem, ВСД_Продукция, ВСД_ВидПродукции);
+//	КонецЕсли;
+//	//}
+//
+//	//стандартное поведение функции
+//	Попытка
+//		productItemName = productItem.selectSingleNode("*[local-name()='name']").text;
+//	Исключение
+//		//Сообщить("Не удалось получить элемент [productItem]","!");
+//		productItemName = "";
+//	КонецПопытки;
+//		
+//	Попытка
+//		productItemGuid = productItem.selectSingleNode("bs:guid").text;
+//	Исключение
+//		productItemGuid="";
+//	КонецПопытки;
+//
+//	Попытка
+//		productItemUuid = productItem.selectSingleNode("bs:uuid").text;
+//	Исключение
+//		productItemUuid="";
+//	КонецПопытки;
+//	
+//	
+//	Рез = "";
+//	Спр = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
+//
+//	// в справочнике ограничение на длину Наименования = 100 симвовлов
+//	productItemName = Лев(productItemName, 100);
+//
+//	Если ЭтоSQL=1 ТОгда
+//
+//		ТекстЗапроса = "
+//		|select
+//	    |   Элемент.id [id $Справочник.ВСД_Продукция_Элемент]
+//	    |from $Справочник.ВСД_Продукция_Элемент as Элемент
+//	  	|where
+//	  	|";
+//	  	если ПустоеЗначение(productItemGuid)=0 Тогда
+//	  		ТекстЗапроса=ТекстЗапроса+"
+//		  	|	$Элемент.GUID= :productItemGuid
+//		  	|";
+//		Иначе
+//	  		ТекстЗапроса=ТекстЗапроса+"
+//		  	|	$Элемент.GUID = '' AND
+//		  	|	Элемент.descr = :productItemName
+//		  	|";
+//		КонецЕсли;
+//		RS.УстановитьТекстовыйПараметр("productItemGuid", productItemGuid);
+//		RS.УстановитьТекстовыйПараметр("productItemName", productItemName);
+//		//RS.Отладка(1);
+//		тз = RS.ВыполнитьИнструкцию(ТекстЗапроса);
+//	Иначе
+//
+//		Запрос = базаДанных.НовыйЗапрос();
+//		ТекстЗапроса = "
+//		|select
+//	    |   Элемент.id [id $Справочник.ВСД_Продукция_Элемент]
+//	    |from [Справочник.ВСД_Продукция_Элемент] as Элемент
+//	  	|where
+//	  	|";
+//	  	если ПустоеЗначение(productItemGuid)=0 Тогда
+//	  		ТекстЗапроса=ТекстЗапроса+"
+//		  	|	Элемент.GUID= :productItemGuid
+//		  	|";
+//		Иначе
+//	  		ТекстЗапроса=ТекстЗапроса+"
+//		  	|	Элемент.GUID = '' AND
+//		  	|	Элемент.descr = :productItemName
+//		  	|";
+//
+//		КонецЕсли;
+//		Запрос.Подставлять("productItemGuid", productItemGuid);
+//		Запрос.Подставлять("productItemName", productItemName);
+//		//тз.Отладка();
+//		ТЗ = Запрос.ВыполнитьЗапрос(ТекстЗапроса);
+//	КонецЕсли;
+//
+//	Если ПустоеЗначение(тз)=1 Тогда
+//		//создать
+//		Спр.Новый();	
+//		Спр.Наименование = productItemGuid;
+//		Спр.GUID = productItemGuid;
+//		Спр.Uuid = productItemUuid;
+//		Спр.Продукция = ВСД_Продукция;
+//		Спр.ВидПродукции = ВСД_ВидПродукции;
+//		Спр.ТермическоеСостояние = ГМ.СписокКонстант.Получить("ТермУсловияПеревозки");//1;
+//		Спр.Записать();
+//
+//		//получим наименование и все остальные реквизиты
+//		ГМ2.Получить_Инфо_Продукции(Спр.ТекущийЭлемент())
+//
+//	Иначе
+//		Спр.НайтиЭлемент(тз.ПолучитьЗначение(1,1));
+//		//Спр.СделатьНеПроведенным();
+//		Спр.СнятьПометкуУдаления();
+//	конецЕсли;
+//	рез = Спр.ТекущийЭлемент();
+//
+//	Возврат рез;
+//	
+//КонецФункции
+
 
 Функция НайтиВидПродукции(guid) Экспорт
 
@@ -4763,9 +4896,9 @@
 
 		productItem = batch.selectSingleNode("vetd:productItem");
 
-		Попытка	productItemName = batch.selectSingleNode("vetd:productItem").selectSingleNode("*[local-name()='name']").text; Исключение productItemName = ""; КонецПопытки;
-		Попытка productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text; Исключение	productItemUuid=""; 	КонецПопытки;
-		Попытка productItemGuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:guid").text; 	Исключение	productItemGuid="";		КонецПопытки;
+		//Попытка	productItemName = batch.selectSingleNode("vetd:productItem").selectSingleNode("*[local-name()='name']").text; Исключение productItemName = ""; КонецПопытки;
+		//Попытка productItemUuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:uuid").text; Исключение	productItemUuid=""; 	КонецПопытки;
+		//Попытка productItemGuid = batch.selectSingleNode("vetd:productItem").selectSingleNode("bs:guid").text; 	Исключение	productItemGuid="";		КонецПопытки;
 
 		volume 		= batch.selectSingleNode("vetd:volume").text;
 		unitGuid	= batch.selectSingleNode("vetd:unit").selectSingleNode("bs:guid").text;
@@ -4842,8 +4975,8 @@
 		докОбъект.Продукция 	= НайтиПродукцию(product);
 		докОбъект.ВидПродукции 	= НайтиВидПродукции(subProduct);
 
-		//докОбъект.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, докОбъект.Продукция, докОбъект.ВидПродукции);
-		докОбъект.Продукция_Элемент = Найти_Продукция_Элемент2(productItemName, productItemGuid, докОбъект.Продукция, докОбъект.ВидПродукции);
+		докОбъект.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, докОбъект.Продукция, докОбъект.ВидПродукции);
+		//докОбъект.Продукция_Элемент = Найти_Продукция_Элемент2(productItemName, productItemGuid, докОбъект.Продукция, докОбъект.ВидПродукции);
 
 		докОбъект.Количество 	= Число(volume);
 		докОбъект.КоличествоМест = Число(packingAmount);
@@ -4969,9 +5102,9 @@
 		subProduct 	= batch.selectSingleNode("*[local-name()='subProduct']").selectSingleNode("bs:guid").text;
 
 		productItem = batch.selectSingleNode("*[local-name()='productItem']");		
-		Попытка	productItemName = productItem.selectSingleNode("*[local-name()='name']").text; Исключение productItemName = ""; КонецПопытки;
-		Попытка productItemUuid = productItem.selectSingleNode("*[local-name()='uuid']").text; Исключение productItemUuid=""; КонецПопытки;
-		Попытка productItemGuid = productItem.selectSingleNode("*[local-name()='guid']").text; Исключение productItemGuid=""; КонецПопытки;
+		//Попытка	productItemName = productItem.selectSingleNode("*[local-name()='name']").text; Исключение productItemName = ""; КонецПопытки;
+		//Попытка productItemUuid = productItem.selectSingleNode("*[local-name()='uuid']").text; Исключение productItemUuid=""; КонецПопытки;
+		//Попытка productItemGuid = productItem.selectSingleNode("*[local-name()='guid']").text; Исключение productItemGuid=""; КонецПопытки;
 		
 		volume 		= batch.selectSingleNode("*[local-name()='volume']").text;
 		unit		= batch.selectSingleNode("*[local-name()='unit']").selectSingleNode("bs:guid").text;
@@ -5039,8 +5172,8 @@
 		Партия.ВидПродукции = НайтиВидПродукции(subProduct);
 
 		//Партия.Продукция_Элемент = Найти_Продукция_Элемент(productItemName, productItemUuid, Партия.Продукция, Партия.ВидПродукции);
-		//Партия.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, Партия.Продукция, Партия.ВидПродукции);
-		Партия.Продукция_Элемент = Найти_Продукция_Элемент2(productItemName, productItemGuid, Партия.Продукция, Партия.ВидПродукции);
+		Партия.Продукция_Элемент = Найти_Продукция_Элемент2(productItem, Партия.Продукция, Партия.ВидПродукции);
+		//Партия.Продукция_Элемент = Найти_Продукция_Элемент2(productItemName, productItemGuid, Партия.Продукция, Партия.ВидПродукции);
 
 		Партия.Количество 	= Число(volume);
 		Партия.КоличествоМест = Число(packingAmount);
