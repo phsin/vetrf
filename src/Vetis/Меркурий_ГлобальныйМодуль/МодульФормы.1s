@@ -46,7 +46,6 @@
 Функция ПолучитьРезультатСервер(appID) Экспорт Далее
 Функция ПолучитьКонстанту(НаименованиеКонстанты) Экспорт Далее
 
-
 //******************************************************************************
 // ЗагрузитьКомпоненту(ИмяФайлаКомп)
 //
@@ -2882,6 +2881,123 @@
 	Возврат appID;
 КонецФункции
 
+Функция Площадка_ЗагрузитьПоGUID( ВыбПлощадка, GUID, ХС="", ИмяФайлаXML="") Экспорт
+	
+	Если ПустоеЗначение(ИмяФайлаXML)=1 Тогда 
+		Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
+		ИмяФайлаXML = Компонента.LogFilename;
+	КонецЕсли;
+
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load( ИмяФайлаXML );
+
+	Если НайтиОшибки()>0 Тогда
+		Возврат Результат;
+	КонецЕсли;
+
+	СпрОбъект = СоздатьОбъект("Справочник.ВСД_Площадка");
+	//УровнейВСправочнике = Метаданные.Справочник("ВСД_Площадка").КоличествоУровней;
+	//ВыбОбъект="";
+	//Если ПустоеЗначение(ВыбПлощадка)=0 Тогда
+		СпрОбъект.НайтиЭлемент( ВыбПлощадка );
+	//Иначе
+	//	СпрСсылка = НайтиПлощадку( GUID );
+	//	Если ПустоеЗначение( СпрСсылка )=1 Тогда 
+	//		СпрОбъект.Новый();
+	//	Иначе
+	//		СпрОбъект.НайтиЭлемент( СпрСсылка);
+	//	КонецЕсли;			
+	//КонецЕсли;
+
+	НачатьТранзакцию();
+	Попытка
+		
+		enterprise = objDom.selectSingleNode("//ent:enterprise") ;
+		//name = enterprise.selectSingleNode("ent:name").text;
+		
+		active = enterprise.selectSingleNode("bs:active").text;
+		Если Врег(active)="TRUE" Тогда  
+			СпрОбъект.active =1;
+			СпрОбъект.СнятьПометкуУдаления();
+		Иначе 
+			СпрОбъект.active =0;
+			СпрОбъект.Удалить(0);
+		КонецЕсли;
+	    СпрОбъект.Адрес = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:addressView").text;
+	    Попытка 
+			СтранаGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:country").selectSingleNode("bs:guid").text;
+			СтранаName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:country").selectSingleNode("ikar:name").text;
+			СпрОбъект.Страна = НайтиСтрануПоGUID( СтранаGUID, СтранаName );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			regionGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:region").selectSingleNode("bs:guid").text;
+			regionName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:region").selectSingleNode("ikar:name").text;
+			//СпрОбъект.Регион = НайтиРегионПоGUID( regionGUID, regionName );
+			СпрОбъект.Регион = Справочник_НайтиПоGUID( "ВСД_Регион", regionGUID, regionName, СпрОбъект.Страна );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			districtGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:district").selectSingleNode("bs:guid").text;
+			districtName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:district").selectSingleNode("ikar:name").text;
+			//СпрОбъект.Район = НайтиРайонПоGUID( districtGUID, districtName );
+			СпрОбъект.Район = Справочник_НайтиПоGUID( "ВСД_Район", districtGUID, districtName, СпрОбъект.Регион );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			localityGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:locality").selectSingleNode("bs:guid").text;
+			localityName = "";
+			//localityName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:locality").selectSingleNode("ikar:name").text;
+			//СпрОбъект.Город = НайтиГородПоGUID( localityGUID, localityName );
+			СпрОбъект.Город = Справочник_НайтиПоGUID( "ВСД_Город", localityGUID, localityName, СпрОбъект.Регион );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			streetGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:street").selectSingleNode("bs:guid").text;
+			streetName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:street").selectSingleNode("ikar:name").text;
+			СпрОбъект.Улица = Справочник_НайтиПоGUID( "ВСД_Улица", streetGUID, streetName, СпрОбъект.Город );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Дом = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:house").text;
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Строение = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:building").text;
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Помещение = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:room").text;
+		Исключение
+		КонецПопытки;
+		
+		СпрОбъект.Наименование = enterprise.selectSingleNode("ent:name").text;
+		СпрОбъект.GUID = enterprise.selectSingleNode("bs:guid").text;
+		СпрОбъект.UUID = enterprise.selectSingleNode("bs:uuid").text;
+	
+		УдалитьXML( Компонента.LogFilename);
+		
+		Если ПустоеЗначение(ХС)=0 Тогда			
+			СпрОбъект.GUIDХозСубъекта = ХС.GUID;			
+		Иначе						
+			Если ПустоеЗначение(ХС)=0 Тогда			
+				Сообщить("Не выбран ХозСубъект "+ СпрОбъект+" "+ СпрОбъект.Наименование +" "+СпрОбъект.Адрес );
+				//Сообщить("ХозСубъект не записан","!");			
+			КонецЕсли;
+		КонецЕсли;
+		Сообщить("Записан "+СпрОбъект.Вид()+" ["+СпрОбъект+"] GUID = "+ СпрОбъект.Guid+" Адрес: "+СпрОбъект.Адрес);					
+		СпрОбъект.Записать();
+		Результат = СпрОбъект.ТекущийЭлемент();
+		ЗафиксироватьТранзакцию();		
+		
+	Исключение
+		Сообщить("Площадка не найдена "+GUID,"!");
+		Сообщить(ОписаниеОшибки());
+	КонецПопытки;
+	
+	Возврат Результат;
+КонецФункции
+
 //старая версия 
 Функция ЗагрузитьПлощадкуПоGUID(GUID, ХС="") Экспорт
 
@@ -3024,7 +3140,10 @@
 	КонецЕсли;
 
 	спр.Записать();
-	Сообщить("Записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+"] GUID = "+ Guid);
+	
+	Площадка_ЗагрузитьПоGUID( спр.ТекущийЭлемент(), guid, ХС, Компонента.LogFilename);
+	
+	//Сообщить("Записан ВСД_Площадка ["+Спр.ТекущийЭлемент()+"] GUID = "+ Guid);
 
 	возврат спр.ТекущийЭлемент();
 КонецФункции
@@ -3094,9 +3213,7 @@
 
 		Попытка
 			guid = activityLocation.selectSingleNode("ent:enterprise").selectSingleNode("bs:guid").text;
-
-			//Пауза();
-    		ЗагрузитьПлощадкуПоGUID(guid, ХС);
+    		ЗагрузитьПлощадкуПоGUID(guid, ХС);			
 		Исключение
         	Сообщить("Не удалось получить GUID площадки из файла "+Компонента.LogFilename);
 		КонецПопытки;
@@ -3427,119 +3544,6 @@
 	тз =СоздатьОбъект("ТаблицаЗначений");
 	Запрос.Выгрузить(тз);
 	Возврат тз;
-КонецФункции
-
-Функция Площадка_ЗагрузитьПоGUID( ВыбПлощадка, GUID, ХС="" ) Экспорт
-	Результат = ЗагрузитьПлощадку( СокрЛП(GUID) );
-
-    objDom=СоздатьОбъект("MSXML2.DOMDocument");
-    objDom.load(Компонента.LogFilename);
-
-	Если НайтиОшибки()>0 Тогда
-		Возврат Результат;
-	КонецЕсли;
-
-	СпрОбъект = СоздатьОбъект("Справочник.ВСД_Площадка");
-	//УровнейВСправочнике = Метаданные.Справочник("ВСД_Площадка").КоличествоУровней;
-	//ВыбОбъект="";
-	//Если ПустоеЗначение(ВыбПлощадка)=0 Тогда
-		СпрОбъект.НайтиЭлемент( ВыбПлощадка );
-	//Иначе
-	//	СпрСсылка = НайтиПлощадку( GUID );
-	//	Если ПустоеЗначение( СпрСсылка )=1 Тогда 
-	//		СпрОбъект.Новый();
-	//	Иначе
-	//		СпрОбъект.НайтиЭлемент( СпрСсылка);
-	//	КонецЕсли;			
-	//КонецЕсли;
-
-	НачатьТранзакцию();
-	Попытка
-		
-		enterprise = objDom.selectSingleNode("//ent:enterprise") ;
-		//name = enterprise.selectSingleNode("ent:name").text;
-		
-		active = enterprise.selectSingleNode("bs:active").text;
-		Если Врег(active)="TRUE" Тогда  
-			СпрОбъект.active =1;
-			СпрОбъект.СнятьПометкуУдаления();
-		Иначе 
-			СпрОбъект.active =0;
-			СпрОбъект.Удалить(0);
-		КонецЕсли;
-	    СпрОбъект.Адрес = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:addressView").text;
-	    Попытка 
-			СтранаGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:country").selectSingleNode("bs:guid").text;
-			СтранаName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:country").selectSingleNode("ikar:name").text;
-			СпрОбъект.Страна = НайтиСтрануПоGUID( СтранаGUID, СтранаName );
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			regionGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:region").selectSingleNode("bs:guid").text;
-			regionName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:region").selectSingleNode("ikar:name").text;
-			//СпрОбъект.Регион = НайтиРегионПоGUID( regionGUID, regionName );
-			СпрОбъект.Регион = Справочник_НайтиПоGUID( "ВСД_Регион", regionGUID, regionName, СпрОбъект.Страна );
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			districtGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:district").selectSingleNode("bs:guid").text;
-			districtName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:district").selectSingleNode("ikar:name").text;
-			//СпрОбъект.Район = НайтиРайонПоGUID( districtGUID, districtName );
-			СпрОбъект.Район = Справочник_НайтиПоGUID( "ВСД_Район", districtGUID, districtName, СпрОбъект.Регион );
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			localityGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:locality").selectSingleNode("bs:guid").text;
-			localityName = "";
-			//localityName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:locality").selectSingleNode("ikar:name").text;
-			//СпрОбъект.Город = НайтиГородПоGUID( localityGUID, localityName );
-			СпрОбъект.Город = Справочник_НайтиПоGUID( "ВСД_Город", localityGUID, localityName, СпрОбъект.Регион );
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			streetGUID = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:street").selectSingleNode("bs:guid").text;
-			streetName = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:street").selectSingleNode("ikar:name").text;
-			СпрОбъект.Улица = Справочник_НайтиПоGUID( "ВСД_Улица", streetGUID, streetName, СпрОбъект.Город );
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			СпрОбъект.Дом = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:house").text;
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			СпрОбъект.Строение = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:building").text;
-		Исключение
-		КонецПопытки;
-	    Попытка 
-			СпрОбъект.Помещение = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:room").text;
-		Исключение
-		КонецПопытки;
-		
-		СпрОбъект.Наименование = enterprise.selectSingleNode("ent:name").text;
-		СпрОбъект.GUID = enterprise.selectSingleNode("bs:guid").text;
-		СпрОбъект.UUID = enterprise.selectSingleNode("bs:uuid").text;
-	
-		УдалитьXML( Компонента.LogFilename);
-		
-		Если ПустоеЗначение(ХС)=0 Тогда			
-			СпрОбъект.GUIDХозСубъекта = ХС.GUID;			
-		Иначе						
-			Если ПустоеЗначение(ХС)=0 Тогда			
-				Сообщить("Не выбран ХозСубъект "+ СпрОбъект+" "+ СпрОбъект.Наименование +" "+СпрОбъект.Адрес );
-				//Сообщить("ХозСубъект не записан","!");			
-			КонецЕсли;
-		КонецЕсли;
-		Сообщить("Записан "+СпрОбъект.Вид()+" ["+СпрОбъект+"] GUID = "+ СпрОбъект.Guid+" Адрес: "+СпрОбъект.Адрес);					
-		СпрОбъект.Записать();
-		Результат = СпрОбъект.ТекущийЭлемент();
-		ЗафиксироватьТранзакцию();		
-		
-	Исключение
-		Сообщить("Площадка не найдена "+GUID,"!");
-		Сообщить(ОписаниеОшибки());
-	КонецПопытки;
-	
-	Возврат Результат;
 КонецФункции
 
 //{ ******************  Площадки СОЗДАТЬ **************************
@@ -12047,7 +12051,6 @@
 	КонецЕсли;
 	
 КонецФункции
-
 //} #########################  Меню ###############################
 
 Версия = "Версия: 1.13.02 от 27.06.2019";
