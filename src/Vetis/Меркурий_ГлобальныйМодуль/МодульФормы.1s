@@ -3465,7 +3465,7 @@
 			СпрОбъект.СнятьПометкуУдаления();
 		Иначе 
 			СпрОбъект.active =0;
-			СпрОбъект.ПометкаУдаления(0);
+			СпрОбъект.Удалить(0);
 		КонецЕсли;
 	    СпрОбъект.Адрес = enterprise.selectSingleNode("ent:address").selectSingleNode("ikar:addressView").text;
 	    Попытка 
