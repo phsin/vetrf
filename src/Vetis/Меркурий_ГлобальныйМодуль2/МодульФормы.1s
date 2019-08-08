@@ -710,7 +710,7 @@
     stockEntryList = objDom.selectNodes("//*[local-name() = 'stockEntry']") ;
 	//stockEntryList = objDom.selectNodes("//merc:stockEntry") ;
 
-	Сообщить("Получено "+stockEntryList.length+" записей","i");
+	Сообщить("Получено "+stockEntryList.length+" партий","i");
 	// ЖД посмотрим, сколько пришло партий
 	Попытка ПришлоПартий = Число(stockEntryList.length); исключение ПришлоПартий = 1; КонецПопытки;
 
@@ -981,13 +981,17 @@
 	КонецЦикла;
 
 	ДокВСД.Записать();
-	ДокВСД.Провести();
+	Если ДокВСД.СтатусВСД = Перечисление.ВСД_СтатусВСД.WITHDRAWN Тогда 
+		ДокВСД.Удалить(0);
+	Иначе		
+		ДокВСД.Провести();
+	КонецЕсли;
 	Сообщить("Записан ВСД от "+ДокВСД.ДатаДок+" ["+ДокВСД.uuid+"]");
 	
 КонецФункции
 
 //Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="",докОбъект = "" ) Экспорт
-Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="", СохранитьДокументВСД=0, Префикс="") Экспорт
+Функция ЗагрузитьXML_ВСД2(имяФайла, докОснование="", СохранитьДокументВСД=0, Префикс="нет") Экспорт
 	// Тестирование
 	// Параметр докОбъект это ТаблицаЗначений, в которую загрузим ВСД, вместо создания документов в БД.
 	
@@ -1014,12 +1018,16 @@
 		
 	applicationId = objDom.selectSingleNode("//*[local-name() = 'applicationId']").text ;
 
-	Если Префикс="" Тогда 		
+	Если Префикс="нет" Тогда 		
+	
 		vetDocumentList = objDom.selectNodes("//*[local-name() = 'vetDocument']") ;
-	Иначе		
+		
+	Иначе
+		
 		// в StockEntry добавили реквизит vetDocument, поэтому надо искать с префиксом
 		//vetDocumentList = objDom.selectNodes("//merc:vetDocument") ;
 		vetDocumentList = objDom.selectNodes("//"+Префикс+":vetDocument") ;
+		
 	КонецЕсли;
 	
 	Попытка
@@ -1377,7 +1385,7 @@
 КонецФункции
 
 
-Функция ПолучитьРезультат_ВСД_2(applicationID, докСсылка="", Смещение = 0,  ПартияНачПериода = "", ПартияКонПериода = "" ) Экспорт
+Функция ПолучитьРезультат_ВСД_2(applicationID, докСсылка="", Смещение = 0,  ПартияНачПериода = "", ПартияКонПериода = "", Префикс="merc") Экспорт
 	//Реквизит Смещение добавлен для возможности рекурсивного вызова ПолучитьПартии2
 	//стандартное поведение функции
 	Если ПустоеЗначение(applicationID)=1 Тогда
@@ -1395,7 +1403,7 @@
     Файл_Ответа_XML = ГМ.Компонента.LogFilenameResponse;
 	Если ПустоеЗначение(докСсылка)=0 Тогда
 		ГМ.СохранитьСтатусЗапроса(докСсылка);
-		ЗагрузитьXML_ВСД2( Файл_Ответа_XML , докСсылка, 1, "merc");
+		ЗагрузитьXML_ВСД2( Файл_Ответа_XML , докСсылка, 1, Префикс );
 	КонецЕсли;
 
     ЗагрузитьXML_Партии2( Файл_Ответа_XML, докСсылка, Смещение, ПартияНачПериода, ПартияКонПериода); 
@@ -1406,6 +1414,81 @@
 
 	Возврат Результат;
 КонецФункции
+
+Функция ЗагрузитьВСДпоUUID_ЗапросXML( док )
+	
+	Запрос = "
+	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+	| xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+	| xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+	| xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+	| xmlns:apl='http://api.vetrf.ru/schema/cdm/application' 
+	| xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+	| xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+	|  <SOAP-ENV:Header/>
+	|  <SOAP-ENV:Body>
+	|    <apldef:submitApplicationRequest>
+	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+	|      <apl:application>
+	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
+	|        <apl:data>
+	|          <merc:getVetDocumentByUuidRequest>
+	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|            <merc:initiator>
+	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|            </merc:initiator>
+	|            <bs:uuid>"+ СокрЛП(док.UUID) +"</bs:uuid>
+	|            <dt:enterpriseGuid>"+ СокрЛП(Док.Отправитель_Площадка.GUID) +"</dt:enterpriseGuid>
+	|          </merc:getVetDocumentByUuidRequest>
+	|        </apl:data>
+	|      </apl:application>
+	|    </apldef:submitApplicationRequest>
+	|  </SOAP-ENV:Body>
+	|</SOAP-ENV:Envelope>
+	|";
+	
+	Возврат Запрос;
+	
+КонецФункции
+
+Функция ЗагрузитьВСДпоUUID( докОснование ) Экспорт
+	
+	//тзДок = СоздатьОбъект("ТаблицаЗначений");
+	тзДок = ГМ.Выбрать_ВСД( докОснование );
+	
+	тзДок.ВыбратьСтроки();
+	Пока тзДок.ПолучитьСтроку() = 1 Цикл
+				
+		ЗапросXML = ЗагрузитьВСДпоUUID_ЗапросXML( тзДок.док );
+	
+		метод = ГМ.Компонента.GetMethod();
+		метод.Service = "platform/services/2.0/ApplicationManagementService";
+	    метод.Action = "submitApplicationRequest";
+	
+		appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+	
+		ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
+	
+	    Результат = "";
+		Если ПустоеЗначение(appID)=0 Тогда
+			Результат = ПолучитьРезультат_ВСД_2( appID, тзДок.док, 0, , ,  "нет" );
+			Сообщить("Результат = "+Результат);
+			Для А=1 По 10 Цикл
+				Если (Результат="IN_PROCESS") Тогда
+					Результат = ПолучитьРезультат_ВСД_2( appID, тзДок.док );
+				КонецЕсли;
+			КонецЦикла;
+		КонецЕсли;
+	
+		ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
+
+	КонецЦикла;
+	Возврат Результат;
+	
+КонецФункции
+
 //}
 
 //{====================  Получить Партии  ===================================
