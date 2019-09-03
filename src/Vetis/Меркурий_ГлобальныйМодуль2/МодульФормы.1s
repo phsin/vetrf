@@ -1130,7 +1130,12 @@
 	                Попытка тзРезультат.ТипТС = ТипТС; Исключение	КонецПопытки;
 				исключение	КонецПопытки;
 	
-				Попытка	тзРезультат.термическоесостояние = Перечисление.ВСД_ТермическиеУсловияПеревозки.ЗначениеПоИдентификатору(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportStorageType").text); Исключение	КонецПопытки;//ГМ.ТермическиеУсловияПеревозки.найтизначение(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportStorageType").text);Исключение	КонецПопытки;
+				Попытка	
+					тзРезультат.термическоесостояние = Перечисление.ВСД_ТермическиеУсловияПеревозки.ЗначениеПоИдентификатору(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportStorageType").text); 
+				Исключение	
+					тзРезультат.термическоесостояние = ГМ.СписокКонстант.Получить("ТермУсловияПеревозки")
+				КонецПопытки;
+					
 				// Маршрут Следования ЖД 17/07/18	 #1899 #1898
 				Попытка 
 					МаршрутСледования = МаршрутСледования_из_XML(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:shipmentRoute").selectNodes("vd:routePoint")); 
