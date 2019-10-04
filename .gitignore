@@ -36,3 +36,7 @@ SubSystems.ini
 *.zip
 prepare_zip.bat
 list_zip.txt
+sonar.bat 
+sonar_src 
+sonar-project.properties 
+.scannerwork 
