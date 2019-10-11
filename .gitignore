@@ -40,3 +40,5 @@ sonar.bat
 sonar_src 
 sonar-project.properties 
 .scannerwork 
+push-post.sh 
+push.bat
