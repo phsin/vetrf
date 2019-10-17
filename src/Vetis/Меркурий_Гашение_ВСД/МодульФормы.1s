@@ -18,13 +18,15 @@
 Перем ВыбФирма Экспорт;
 Перем оПривязки; //:Меркурий.Привязки
 
-Функция ПриИзмененииПлощадки()
+Процедура ПриИзмененииПлощадки()
+	
 	//В противном случае партии запишутся на первую попавшуюся площадку
 	// когда у ХС их несколько !!!!
 	//Необходимо учесть этот момент во всех обработках
 	ТЗВСД.УдалитьСтроки();
 	ГМ.СписокКонстант.Установить("Отправитель_Площадка",Отправитель_Площадка);	
-КонецФункции
+	
+КонецПроцедуры
 
 Процедура ПриИзмененииФирмы()
 	ГМ.Инициализация(Контекст);
@@ -678,855 +680,280 @@
 	|        <app:data>
 	|";
 	
-	//док = СоздатьОбъект("Документ.ВСД_входящий")
-
-	Если док.ВидВСД=1 Тогда 
-		//бумажный
-		
-		Запрос = Запрос+"<merc:processIncomingConsignmentRequest 
-			|  xmlns:sch='http://www.w3.org/2001/XMLSchema' 
-			|  xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
-			|  xmlns:sh='http://api.vetrf.ru/schema/cdm/argus/shipment' 
-			|  xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
-			|  xmlns:app='http://api.vetrf.ru/schema/cdm/application' 
-			|  xmlns:co='http://api.vetrf.ru/schema/cdm/argus/common' 
-			|  xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
-			|  xmlns:pr='http://api.vetrf.ru/schema/cdm/argus/production' 
-			|  xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar' 
-			|  xmlns:dt='http://api.vetrf.ru/schema/cdm/base' 		
-			|  xmlns='http://api.vetrf.ru/schema/cdm/mercury/applications'>
-			|  <localTransactionId>[GUID]</localTransactionId>
-			|  <initiator>
-			|    <co:login>"+СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") )+"</co:login>
-			|  </initiator>
-			|";
-		Запрос=Запрос+ "
-			|        <delivery>
-			|          <vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>
-			|          <vd:consignor>
-			|            <ent:businessEntity>
-			|              <dt:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</dt:guid>
-			|            </ent:businessEntity>
-			|            <ent:enterprise>
-			|              <dt:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</dt:guid>
-			|            </ent:enterprise>
-			|          </vd:consignor>
-			|          <vd:consignee>
-			|            <ent:businessEntity>
-			|              <dt:guid>"+ СокрЛП(док.Получатель_ХозСубъект.GUID) +"</dt:guid>
-			|            </ent:businessEntity>
-			|            <ent:enterprise>
-			|              <dt:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</dt:guid>
-			|            </ent:enterprise>
-			|          </vd:consignee>
-			|";
+	Запрос= Запрос+"<merc:processIncomingConsignmentRequest 
+		|  xmlns:sch='http://www.w3.org/2001/XMLSchema' 
+		|  xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
+		|  xmlns:sh='http://api.vetrf.ru/schema/cdm/argus/shipment' 
+		|  xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+		|  xmlns:app='http://api.vetrf.ru/schema/cdm/application' 
+		|  xmlns:co='http://api.vetrf.ru/schema/cdm/argus/common' 
+		|  xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
+		|  xmlns:pr='http://api.vetrf.ru/schema/cdm/argus/production' 
+		|  xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar' 
+		|  xmlns:dt='http://api.vetrf.ru/schema/cdm/base' 
+		|  xmlns='http://api.vetrf.ru/schema/cdm/mercury/applications'>
+		|  <localTransactionId>[GUID]</localTransactionId>
+		|  <initiator>
+		|    <co:login>"+СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") )+"</co:login>
+		|  </initiator>
+		|        <delivery>
+		|          <vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>
+		|          <vd:consignor>
+		|            <ent:businessEntity>
+		|              <dt:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</dt:guid>
+		|            </ent:businessEntity>
+		|            <ent:enterprise>
+		|              <dt:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</dt:guid>
+		|            </ent:enterprise>
+		|          </vd:consignor>
+		|          <vd:consignee>
+		|            <ent:businessEntity>
+		|              <dt:guid>"+ СокрЛП(док.Получатель_ХозСубъект.GUID) +"</dt:guid>
+		|            </ent:businessEntity>
+		|            <ent:enterprise>
+		|              <dt:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</dt:guid>
+		|            </ent:enterprise>
+		|          </vd:consignee>
+		|		<vd:consignment>
+		|            <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
+		|            <vd:product>
+		|              <dt:guid>"+ СокрЛП(док.Продукция.GUID) +"</dt:guid>
+		|            </vd:product>
+		|            <vd:subProduct>
+		|              <dt:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</dt:guid>
+		|            </vd:subProduct>
+		|            <vd:productItem>
+		|";
+	Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
 		Запрос = Запрос + "
-			|		<vd:consignment>
-			|            <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-			|            <vd:product>
-			|              <dt:guid>"+ СокрЛП(док.Продукция.GUID) +"</dt:guid>
-			|            </vd:product>
-			|            <vd:subProduct>
-			|              <dt:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</dt:guid>
-			|            </vd:subProduct>
-			|            <vd:productItem>
-			|";
-		Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
-			Запрос = Запрос + " <dt:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</dt:guid> ";
-		Иначе
-			Если ПустоеЗначение(НаименованиеПродукции) = 0 Тогда
-				Запрос = Запрос + " <pr:name>"+ СокрЛП(НаименованиеПродукции) +"</pr:name> ";    
-			Иначе
-				Запрос = Запрос + " <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name> ";	
-			КонецЕсли;
-						
-		КонецЕсли;
-		Запрос = Запрос + "
-			|              
-			|            </vd:productItem>
-			|            <vd:volume>"+ Док.Количество +"</vd:volume>
-			|            <vd:unit>
-			|              <dt:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</dt:guid>
-			|            </vd:unit>
-            |";
-		Если док.КоличествоМест>0 Тогда 
-			Запрос=Запрос+"			
-			|            <vd:packingList>
-			|              <co:packingForm>
-			|                <dt:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</dt:uuid>
-			|              </co:packingForm>
-			|            </vd:packingList>
-			|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
-			|";
-		КонецЕсли;
-		Запрос = Запрос + ГМ.Изготовление_СрокГодности_в_XML(док, "vd");
-		
-		//	Запрос=Запрос+"			
-		//	|            <vd:dateOfProduction>
-		//	|";
-		//Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-		//	Запрос = Запрос + "
-		//	|              <vd:firstDate>
-		//	|                <dt:year>"+ДатаГод(док.ДатаИзготовления1)+"</dt:year>
-		//	|                <dt:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</dt:month>
-		//	|                <dt:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</dt:day>
-		//	|                <dt:hour>0</dt:hour>
-		//	|              </vd:firstDate>
-		//	|";
-		//КонецЕсли;
-		//Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и 
-		//		(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-		//	Запрос = Запрос + "
-		//	|              <vd:secondDate>
-		//	|                <dt:year>"+ ДатаГод(док.ДатаИзготовления2) +"</dt:year>
-		//	|                <dt:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</dt:month>
-		//	|                <dt:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</dt:day>
-		//	|                <dt:hour>0</dt:hour>
-		//	|              </vd:secondDate>
-		//	|";
-		//КонецЕсли;
-		//Запрос = Запрос + "
-		//	|              <vd:informalDate />
-		//	|            </vd:dateOfProduction>
-		//	|            <vd:expiryDate>
-		//	|";
-		//	
-		//Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-		//	Запрос = Запрос + "
-		//		|              <vd:firstDate>
-		//		|                <dt:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</dt:year>
-		//		|                <dt:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</dt:month>
-		//		|                <dt:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</dt:day>
-		//		|                <dt:hour>0</dt:hour>
-		//		|              </vd:firstDate>
-		//		|";
-		//КонецЕсли;
-		//Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и 
-		//		(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-		//	Запрос = Запрос + "
-		//		|              <vd:secondDate>
-		//		|                <dt:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</dt:year>
-		//		|                <dt:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</dt:month>
-		//		|                <dt:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</dt:day>
-		//		|                <dt:hour>0</dt:hour>
-		//		|              </vd:secondDate>
-		//		|";
-		//КонецЕсли;
-		Запрос = Запрос + "
-			//|              <vd:informalDate />
-			//|            </vd:expiryDate>
-			|			<vd:perishable>"+ГМ.булево(док.скоропортящийся)+"</vd:perishable>
-			|            <vd:countryOfOrigin>
-			|              <dt:uuid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Страна").UUID) +"</dt:uuid>
-			|            </vd:countryOfOrigin>
-			|";
-		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда     
-			Запрос=Запрос+"
-			|      		 <vd:producerList>
-			|";
-			СпПроизводители = ЗначениеИзСтроки(Док.ПроизводительСписок);
-			к=0;
-			Для к = 1 По СпПроизводители.РазмерСписка() Цикл
-				Запрос=Запрос+"
-				|        		<ent:producer>
-				|          			<ent:enterprise>
-				|            			<dt:guid>"+ СокрЛП(СпПроизводители.ПолучитьЗначение(к).GUID) +"</dt:guid>
-				|          			</ent:enterprise>
-				|					<ent:role>PRODUCER</ent:role>
-				|        		</ent:producer>
-				|"; 
-			КонецЦикла;
-			Запрос=Запрос+"
-			|      		 </vd:producerList>
-			|";
-		КонецЕсли;
-		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда    
-			Запрос=Запрос+"
-			|      		 <vd:productMarkingList>
-			|";
-			МаркировкаСписок = ЗначениеИзСтроки(Док.МаркировкаСписок);
-			к=0;
-			Для к = 1 По МаркировкаСписок.РазмерСписка() Цикл
-				Запрос = Запрос + "
-				|              <vd:productMarking>"+  МаркировкаСписок.Получитьзначение(к) +"</vd:productMarking>
-				|"; 
-			КонецЦикла;	
-			Запрос=Запрос+"
-			|      		 </vd:productMarkingList>
-			|"; 
-		Иначе
-			Запрос=Запрос+"
-			|      		 <vd:productMarkingList />
-			|"; 
-		КонецЕсли;
-		Запрос=Запрос+"
-			|            <vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
-//			|            <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
-			|      		 <vd:sourceStockEntry />
-			|      </vd:consignment>
-			|    <vd:accompanyingForms>
-			|      <vd:waybill>
-			|        <sh:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</sh:issueSeries>
-			|        <sh:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</sh:issueNumber>
-			|        <sh:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</sh:issueDate>
-			|        <sh:type>1</sh:type>
-			|        <sh:consignor>
-			|          <ent:businessEntity />
-			|          <ent:enterprise />
-			|        </sh:consignor>
-			|        <sh:consignee>
-			|          <ent:businessEntity />
-			|          <ent:enterprise />
-			|        </sh:consignee>
-			|";
-		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда  
-			Запрос=Запрос+"			
-			|        <sh:broker>
-			|          <dt:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</dt:guid>
-			|        </sh:broker>
-			|";
-		КонецЕсли;
-		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда 
-			Запрос=Запрос+"			
-			|        <sh:transportInfo>
-			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
-			|          <sh:transportNumber>
-			|"; 
-			Если СокрЛП(Док.ТипТС) = "1" Тогда
-			    Запрос = Запрос+"
-			|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
-			|";
-			иначеЕсли СокрЛП(Док.ТипТС) = "2" Тогда
-		    Запрос = Запрос+"
-			|            <sh:wagonNumber>"+ СокрЛП(док.номерАвто) +"</sh:wagonNumber>
-			|"; 
-			иначеЕсли СокрЛП(Док.ТипТС) = "3" Тогда
-		    Запрос = Запрос+"
-			|            <sh:flightNumber>"+ СокрЛП(док.номерАвто) +"</sh:flightNumber>
-			|";
-			иначеЕсли (СокрЛП(Док.ТипТС) = "4") или (СокрЛП(Док.ТипТС) = "5") или (СокрЛП(Док.ТипТС) = "6") Тогда
-		    Запрос = Запрос+"
-			|            <sh:shipName>"+ СокрЛП(док.номерАвто) +"</sh:shipName>
-			|";
-			
-			КонецЕсли;	
-			Запрос=Запрос+"
-			|          </sh:transportNumber>
-			|        </sh:transportInfo>
-			|";
-		КонецЕсли;
-		
-			Запрос=Запрос+"
-			//|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
-			|        <sh:transportStorageType>"+ док.ТермическоеСостояние.Идентификатор() +"</sh:transportStorageType>
-			|        <sh:cargoReloadingPointList />
-			|      </vd:waybill>
-			|      <vd:vetCertificate>
-			|        <vd:issueSeries>"+ СокрЛП(док.ВсдСерия) +"</vd:issueSeries>
-			|        <vd:issueNumber>"+ СокрЛП(док.ВсдНомер) +"</vd:issueNumber>
-			|        <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ВсдДата) +"</vd:issueDate>
-			|        <vd:form>LIC2</vd:form>
-			|          <vd:consignor>
-			|            <ent:businessEntity>
-			|              <dt:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</dt:guid>
-			|            </ent:businessEntity>
-			|            <ent:enterprise>
-			|              <dt:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</dt:guid>
-			|            </ent:enterprise>
-			|          </vd:consignor>
-			|          <vd:consignee>
-			|            <ent:businessEntity>
-			|              <dt:guid>"+ СокрЛП(док.Получатель_ХозСубъект.GUID) +"</dt:guid>
-			|            </ent:businessEntity>
-			|            <ent:enterprise>
-			|              <dt:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</dt:guid>
-			|            </ent:enterprise>
-			|          </vd:consignee>
-			|
-			|        <vd:batch>
-			|            <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-			|            <vd:product>
-			|              <dt:guid>"+ СокрЛП(док.Продукция.GUID) +"</dt:guid>
-			|            </vd:product>
-			|            <vd:subProduct>
-			|              <dt:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</dt:guid>
-			|            </vd:subProduct>
-			|            <vd:productItem>
-			|";
-		Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
-			Запрос = Запрос + "	
-			|              <dt:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</dt:guid>
-			|";
-		КонецЕсли;
-		Запрос = Запрос + "		
-			|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
-			|            </vd:productItem>
-			|            <vd:volume>"+ Док.Количество +"</vd:volume>
-			|            <vd:unit>
-			|              <dt:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</dt:guid>
-			|            </vd:unit>
-			|";
-		Если док.КоличествоМест>0 Тогда 
-			Запрос=Запрос+"			
-			
-			|            <vd:packingList>
-			|              <co:packingForm>
-			|                <dt:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</dt:uuid>
-			|              </co:packingForm>
-			|            </vd:packingList>
-			|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
-			|";
-		КонецЕсли;
-		Запрос=Запрос+"			
-			|            <vd:dateOfProduction>
-			|";
-			
-			
-		Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-			Запрос = Запрос + "			
-			|              <vd:firstDate>
-			|                <dt:year>"+ДатаГод(док.ДатаИзготовления1)+"</dt:year>
-			|                <dt:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</dt:month>
-			|                <dt:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</dt:day>
-			|                <dt:hour>0</dt:hour>
-			|              </vd:firstDate>
-			|";
-		КонецЕсли;
-		Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и 
-				(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-			Запрос = Запрос + "	
-			|              <vd:secondDate>
-			|                <dt:year>"+ ДатаГод(док.ДатаИзготовления2) +"</dt:year>
-			|                <dt:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</dt:month>
-			|                <dt:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</dt:day>
-			|                <dt:hour>0</dt:hour>
-			|              </vd:secondDate>
-			|";
-		КонецЕсли;
-		Запрос = Запрос + "
-			|              <vd:informalDate />
-			|            </vd:dateOfProduction>
-			|            <vd:expiryDate>
-			|";
-		Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-			Запрос = Запрос + "					
-			|              <vd:firstDate>
-			|                <dt:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</dt:year>
-			|                <dt:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</dt:month>
-			|                <dt:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</dt:day>
-			|                <dt:hour>0</dt:hour>
-			|              </vd:firstDate>
-			|";
-		КонецЕсли;
-		Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и 
-				(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-			Запрос = Запрос + "				
-			|              <vd:secondDate>
-			|                <dt:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</dt:year>
-			|                <dt:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</dt:month>
-			|                <dt:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</dt:day>
-			|                <dt:hour>0</dt:hour>
-			|              </vd:secondDate>
-			|";
-		КонецЕсли;
-		Запрос = Запрос + "
-			|              <vd:informalDate />
-			|            </vd:expiryDate>
-			|			<vd:perishable>"+ГМ.булево(док.скоропортящийся)+"</vd:perishable>
-			|            <vd:countryOfOrigin>
-			|              <dt:uuid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Страна").UUID) +"</dt:uuid>
-			|            </vd:countryOfOrigin>
-			|";
-		
-		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда 
-			Запрос=Запрос+"
-			|      		 <vd:producerList>
-			|";
-			СпПроизводители = ЗначениеИзСтроки(Док.ПроизводительСписок);
-			к=0;
-			Для к = 1 По СпПроизводители.РазмерСписка() Цикл
-				Запрос=Запрос+"
-				|        		<ent:producer>
-				|          			<ent:enterprise>
-				|            			<dt:guid>"+ СокрЛП(СпПроизводители.ПолучитьЗначение(к).GUID) +"</dt:guid>
-				|          			</ent:enterprise>
-				|					<ent:role>PRODUCER</ent:role>
-				|        		</ent:producer>
-				|"; 
-			КонецЦикла;
-			Запрос=Запрос+"
-			|      		 </vd:producerList>
-			|";
-		КонецЕсли;
-		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда
-			Запрос=Запрос+"
-			|      		 <vd:productMarkingList>
-			|";
-			МаркировкаСписок = ЗначениеИзСтроки(Док.МаркировкаСписок);
-			к=0;
-			Для к = 1 По МаркировкаСписок.РазмерСписка() Цикл
-				Запрос = Запрос + "
-				|              <vd:productMarking>"+  МаркировкаСписок.Получитьзначение(к) +"</vd:productMarking>
-				|"; 
-			КонецЦикла;	
-			Запрос=Запрос+"
-			|      		 </vd:productMarkingList>
-			|"; 
-		Иначе
-			Запрос=Запрос+"
-			|      		 <vd:productMarkingList />
-			|"; 
-		КонецЕсли;
-		Запрос=Запрос+"
-			|			<vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
-			|              </vd:batch>
-			|              <vd:purpose>
-			|                <dt:guid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Цель").Guid ) +"</dt:guid>
-			|              </vd:purpose>
-			|";
-		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда
-			Запрос=Запрос+"			
-			|        <vd:broker>
-			|          <dt:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</dt:guid>
-			|        </vd:broker>
-			|";
-		КонецЕсли;
-		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда
-			Запрос=Запрос+"			
-			|        <vd:transportInfo>
-			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
-			|          <sh:transportNumber>
-			|"; 
-			Если СокрЛП(Док.ТипТС) = "1" Тогда
-			    Запрос = Запрос+"
-			|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
-			|";
-			иначеЕсли СокрЛП(Док.ТипТС) = "2" Тогда
-		    Запрос = Запрос+"
-			|            <sh:wagonNumber>"+ СокрЛП(док.номерАвто) +"</sh:wagonNumber>
-			|"; 
-			иначеЕсли СокрЛП(Док.ТипТС) = "3" Тогда
-		    Запрос = Запрос+"
-			|            <sh:flightNumber>"+ СокрЛП(док.номерАвто) +"</sh:flightNumber>
-			|";
-			иначеЕсли (СокрЛП(Док.ТипТС) = "4") или (СокрЛП(Док.ТипТС) = "5") или (СокрЛП(Док.ТипТС) = "6") Тогда
-		    Запрос = Запрос+"
-			|            <sh:shipName>"+ СокрЛП(док.номерАвто) +"</sh:shipName>
-			|";
-			
-			КонецЕсли;	
-			Запрос=Запрос+"
-			|          </sh:transportNumber>
-			|        </vd:transportInfo>
-			|";
-		КонецЕсли;
-		
-			Запрос=Запрос+"
-			//|              <vd:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</vd:transportStorageType>
-			|              <vd:transportStorageType>"+ док.ТермическоеСостояние.Идентификатор() +"</vd:transportStorageType>
-			|              <vd:cargoReloadingPointList />
-			|              <vd:waybillSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:waybillSeries>
-			|              <vd:waybillNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:waybillNumber>
-			|              <vd:waybillDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:waybillDate>
-			|              <vd:waybillType>1</vd:waybillType>
-			|              <vd:cargoInspected>"+ ГМ.булево(док.cargoInspected) +"</vd:cargoInspected>
-			|              <vd:cargoExpertized>"+  ГМ.булево(док.cargoExpertized) +"</vd:cargoExpertized>
-			|              <vd:expertiseInfo>"+ СокрЛП(док.ВсдЭкспертиза) +"</vd:expertiseInfo>
-			|              <vd:confirmedBy>
-			|          	     <co:fio>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_fio")) +"</co:fio>
-			|          		 <co:post>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_post")) +"</co:post>
-			|                <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|              </vd:confirmedBy>
-			|              <vd:confirmedDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок,"T00:00:00") +"</vd:confirmedDate>			
-			|              <vd:locationProsperity>"+ СокрЛП(док.ВсдМестность) +"</vd:locationProsperity>
-			|              <vd:importPermit />
-			|              <vd:transferPermit />
-			|              <vd:specialMarks>"+ СокрЛП(док.ОсобыеОтметки) +"</vd:specialMarks>
-			|              <vd:withdrawedBy />
-			|              <vd:utilizedBy />
-			|            </vd:vetCertificate>		
-			|    </vd:accompanyingForms>
-			|  </delivery>
-			|  <deliveryFacts>
-			|    <vd:vetCertificatePresence>PAPER</vd:vetCertificatePresence>
-			|    <vd:docInspection>
-			|      <vd:responsible>
-			|        <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|      </vd:responsible>
-			|      <vd:result>CORRESPONDS</vd:result>
-			|    </vd:docInspection>
-			|    <vd:vetInspection>
-			|      <vd:responsible>
-			|        <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|      </vd:responsible>
-			|      <vd:result>CORRESPONDS</vd:result>
-			|    </vd:vetInspection>
-			|    <vd:decision>ACCEPT_ALL</vd:decision>
-			|  </deliveryFacts>
-			|"; 
-// Дмитрий Акт несоответствия, временно выведено на вкладку Параметры, нужно потестить на продуктиве,
-// Потом можно добавить либо в ВСД_Входящее(чтобы запоминал) или просто в Таблицу обработки.
-       	Если _АктНесоотв = 1 Тогда
-			Запрос=Запрос+" 
-			|  <discrepancyReport>
-			|    <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:issueDate>
-			|    <vd:reason>
-			|      <vd:name>"+СокрЛП(тПричинаАкта)+"</vd:name>
-			|	 </vd:reason> 
-			|    <vd:description>"+?(ПустоеЗначение(тОписаниеНесоответствия)=1,"Описание несоответствия",СокрЛП(тОписаниеНесоответствия)) +"</vd:description>
-			|  </discrepancyReport>
-			|"; 
-        КонецЕсли;
-
-			Запрос=Запрос+" 
-
-			|</merc:processIncomingConsignmentRequest>
-			|";
+		|              <dt:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</dt:guid>
+		|";
 	Иначе
-		//Электронный
-		Запрос= Запрос+"<merc:processIncomingConsignmentRequest 
-			|  xmlns:sch='http://www.w3.org/2001/XMLSchema' 
-			|  xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document' 
-			|  xmlns:sh='http://api.vetrf.ru/schema/cdm/argus/shipment' 
-			|  xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
-			|  xmlns:app='http://api.vetrf.ru/schema/cdm/application' 
-			|  xmlns:co='http://api.vetrf.ru/schema/cdm/argus/common' 
-			|  xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise' 
-			|  xmlns:pr='http://api.vetrf.ru/schema/cdm/argus/production' 
-			|  xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar' 
-			|  xmlns:dt='http://api.vetrf.ru/schema/cdm/base' 
-			|  xmlns='http://api.vetrf.ru/schema/cdm/mercury/applications'>
-			|  <localTransactionId>[GUID]</localTransactionId>
-			|  <initiator>
-			|    <co:login>"+СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") )+"</co:login>
-			|  </initiator>
-			|        <delivery>
-			|          <vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>
-			|          <vd:consignor>
-			|            <ent:businessEntity>
-			|              <dt:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</dt:guid>
-			|            </ent:businessEntity>
-			|            <ent:enterprise>
-			|              <dt:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</dt:guid>
-			|            </ent:enterprise>
-			|          </vd:consignor>
-			|          <vd:consignee>
-			|            <ent:businessEntity>
-			|              <dt:guid>"+ СокрЛП(док.Получатель_ХозСубъект.GUID) +"</dt:guid>
-			|            </ent:businessEntity>
-			|            <ent:enterprise>
-			|              <dt:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</dt:guid>
-			|            </ent:enterprise>
-			|          </vd:consignee>
-			|		<vd:consignment>
-			|            <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-			|            <vd:product>
-			|              <dt:guid>"+ СокрЛП(док.Продукция.GUID) +"</dt:guid>
-			|            </vd:product>
-			|            <vd:subProduct>
-			|              <dt:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</dt:guid>
-			|            </vd:subProduct>
-			|            <vd:productItem>
-			|";
-		Если ПустоеЗначение(док.Продукция_Элемент.GUID)=0 Тогда
+		Если ПустоеЗначение(НаименованиеПродукции) = 0 Тогда
+			Запрос = Запрос + " <pr:name>"+ СокрЛП(НаименованиеПродукции) +"</pr:name> ";    
+		Иначе
+			Запрос = Запрос + " <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name> ";	
+		КонецЕсли;
+					
+	КонецЕсли;
+
+	Запрос = Запрос + "
+		|            </vd:productItem>
+		|            <vd:volume>"+ Док.Количество +"</vd:volume>
+		|            <vd:unit>
+		|              <dt:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</dt:guid>
+		|            </vd:unit>
+		|";
+	Если док.КоличествоМест>0 Тогда 
+		Запрос=Запрос+"			
+		|            <vd:packingList>
+		|              <co:packingForm>
+		|                <dt:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</dt:uuid>
+		|              </co:packingForm>
+		|            </vd:packingList>
+		|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
+		|";
+	КонецЕсли;
+	Запрос = Запрос + ГМ.Изготовление_СрокГодности_в_XML(док, "vd");
+
+	Запрос = Запрос + "
+		|			<vd:perishable>"+ГМ.булево(док.скоропортящийся)+"</vd:perishable>
+		|            <vd:countryOfOrigin>
+		|              <dt:uuid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Страна").UUID) +"</dt:uuid>
+		|            </vd:countryOfOrigin>
+		|";
+		
+	Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда
+		Запрос=Запрос+"
+		|      		 <vd:producerList>
+		|";
+		СпПроизводители = ЗначениеИзСтроки(Док.ПроизводительСписок);
+		к=0;
+		Для к = 1 По СпПроизводители.РазмерСписка() Цикл
+			Запрос=Запрос+"
+			|        		<ent:producer>
+			|          			<ent:enterprise>
+			|            			<dt:guid>"+ СокрЛП(СпПроизводители.ПолучитьЗначение(к).GUID) +"</dt:guid>
+			|          			</ent:enterprise>
+			|					<ent:role>PRODUCER</ent:role>
+			|        		</ent:producer>
+			|"; 
+		КонецЦикла;
+		Запрос=Запрос+"
+		|      		 </vd:producerList>
+		|";
+	КонецЕсли;
+	Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда
+		Запрос=Запрос+"
+		|      		 <vd:productMarkingList>
+		|";
+		МаркировкаСписок = ЗначениеИзСтроки(Док.МаркировкаСписок);
+		к=0;
+		Для к = 1 По МаркировкаСписок.РазмерСписка() Цикл
 			Запрос = Запрос + "
-			|              <dt:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</dt:guid>
-			|";
-		Иначе
-			Если ПустоеЗначение(НаименованиеПродукции) = 0 Тогда
-				Запрос = Запрос + " <pr:name>"+ СокрЛП(НаименованиеПродукции) +"</pr:name> ";    
-			Иначе
-				Запрос = Запрос + " <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name> ";	
-			КонецЕсли;
-						
-		КонецЕсли;
-
-		Запрос = Запрос + "
-//			|              <pr:name>"+ СокрЛП(док.Продукция_Элемент.Наименование) +"</pr:name>
-			|            </vd:productItem>
-			|            <vd:volume>"+ Док.Количество +"</vd:volume>
-			|            <vd:unit>
-			|              <dt:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</dt:guid>
-			|            </vd:unit>
-			|";
-		Если док.КоличествоМест>0 Тогда 
-			Запрос=Запрос+"			
-			|            <vd:packingList>
-			|              <co:packingForm>
-			|                <dt:uuid>"+ СокрЛП(док.ФормаУпаковки.GUID) +"</dt:uuid>
-			|              </co:packingForm>
-			|            </vd:packingList>
-			|            <vd:packingAmount>"+ док.КоличествоМест +"</vd:packingAmount>
-			|";
-		КонецЕсли;
-		Запрос = Запрос + ГМ.Изготовление_СрокГодности_в_XML(док, "vd");
-		//Запрос=Запрос+"
-		//	|            <vd:dateOfProduction>
-		//	|";
-		//	
-		//Если (ПустоеЗначение(док.ДатаИзготовления1)=0) Тогда
-		//	Запрос = Запрос + "
-		//	|              <vd:firstDate>
-		//	|                <dt:year>"+ДатаГод(док.ДатаИзготовления1)+"</dt:year>
-		//	|                <dt:month>"+ ДатаМесяц(док.ДатаИзготовления1) +"</dt:month>
-		//	|                <dt:day>"+ ДатаЧисло(док.ДатаИзготовления1) +"</dt:day>
-		//	|                <dt:hour>0</dt:hour>
-		//	|              </vd:firstDate>
-		//	|";
-		//КонецЕсли;
-		//Если ((ПустоеЗначение(док.ДатаИзготовления2)=0) и 
-		//		(док.ДатаИзготовления2 > док.ДатаИзготовления1)) Тогда
-		//	Запрос = Запрос + "
-		//	|              <vd:secondDate>
-		//	|                <dt:year>"+ ДатаГод(док.ДатаИзготовления2) +"</dt:year>
-		//	|                <dt:month>"+ ДатаМесяц(док.ДатаИзготовления2) +"</dt:month>
-		//	|                <dt:day>"+ ДатаЧисло(док.ДатаИзготовления2) +"</dt:day>
-		//	|                <dt:hour>0</dt:hour>
-		//	|              </vd:secondDate>
-		//	|";
-		//КонецЕсли;
-		//Если (ПустоеЗначение(док.ДатаИзготовленияСтрока)=0) Тогда
-		//	Запрос = Запрос + "
-		//	|              <vd:informalDate>"+ СокрЛП(док.ДатаИзготовленияСтрока) +"</vd:informalDate>";
-		//КонецЕсли;
-
-
-	//	Запрос = Запрос + "
-	////		|              <vd:informalDate />
-	//		|            </vd:dateOfProduction>
-	//		|            <vd:expiryDate>
-	//		|";
-	//		
-	//	Если (ПустоеЗначение(док.ДатаСрокГодности1)=0) Тогда
-	//		Запрос = Запрос + "
-	//		|              <vd:firstDate>
-	//		|                <dt:year>"+ ДатаГод(док.ДатаСрокГодности1) +"</dt:year>
-	//		|                <dt:month>"+ ДатаМесяц(док.ДатаСрокГодности1) +"</dt:month>
-	//		|                <dt:day>"+ ДатаЧисло(док.ДатаСрокГодности1) +"</dt:day>
-	//		|                <dt:hour>0</dt:hour>
-	//		|              </vd:firstDate>
-	//		|";
-	//	КонецЕсли;
-	//	Если ((ПустоеЗначение(док.ДатаСрокГодности2)=0) и 
-	//			(док.ДатаСрокГодности2 > док.ДатаСрокГодности1)) Тогда
-	//		Запрос = Запрос + "
-	//		|              <vd:secondDate>
-	//		|                <dt:year>"+ ДатаГод(док.ДатаСрокГодности2) +"</dt:year>
-	//		|                <dt:month>"+ ДатаМесяц(док.ДатаСрокГодности2) +"</dt:month>
-	//		|                <dt:day>"+ ДатаЧисло(док.ДатаСрокГодности2) +"</dt:day>
-	//		|                <dt:hour>0</dt:hour>
-	//		|              </vd:secondDate>
-	//		|";
-	//	КонецЕсли;  
-	//	Если (ПустоеЗначение(док.ДатаСрокГодностиСтрока)=0) Тогда
-	//		Запрос = Запрос + "
-	//		|              <vd:informalDate>"+ СокрЛП(док.ДатаСрокГодностиСтрока) +"</vd:informalDate>";
-	//	КонецЕсли;
-		Запрос = Запрос + "
-//			|              <vd:informalDate />
-			//|            </vd:expiryDate>
-			|			<vd:perishable>"+ГМ.булево(док.скоропортящийся)+"</vd:perishable>
-			|            <vd:countryOfOrigin>
-			|              <dt:uuid>"+ СокрЛП( ГМ.СписокКонстант.Получить("Страна").UUID) +"</dt:uuid>
-			|            </vd:countryOfOrigin>
-			|";
-		
-		
-//		Если Пустоезначение(Док.Продукция_Элемент.Площадка.guid)=0 Тогда
-//			Запрос=Запрос+"
-//			|      		 <vd:producerList>
-//			|        		<ent:producer>
-//			|          			<ent:enterprise>
-//			|            			<dt:guid>"+ СокрЛП(Док.Продукция_Элемент.Площадка.guid) +"</dt:guid>
-//			|          			</ent:enterprise>
-//			|					<ent:role>PRODUCER</ent:role>
-//			|        		</ent:producer>
-//			|      		 </vd:producerList>
-//			|";
-	
-		Если ПустоеЗначение(Док.ПроизводительСписок)=0 Тогда
-			Запрос=Запрос+"
-			|      		 <vd:producerList>
-			|";
-			СпПроизводители = ЗначениеИзСтроки(Док.ПроизводительСписок);
-			к=0;
-			Для к = 1 По СпПроизводители.РазмерСписка() Цикл
-				Запрос=Запрос+"
-				|        		<ent:producer>
-				|          			<ent:enterprise>
-				|            			<dt:guid>"+ СокрЛП(СпПроизводители.ПолучитьЗначение(к).GUID) +"</dt:guid>
-				|          			</ent:enterprise>
-				|					<ent:role>PRODUCER</ent:role>
-				|        		</ent:producer>
-				|"; 
-			КонецЦикла;
-			Запрос=Запрос+"
-			|      		 </vd:producerList>
-			|";
-		КонецЕсли;
-		Если ПустоеЗначение(Док.МаркировкаСписок)=0 Тогда
-			Запрос=Запрос+"
-			|      		 <vd:productMarkingList>
-			|";
-			МаркировкаСписок = ЗначениеИзСтроки(Док.МаркировкаСписок);
-			к=0;
-			Для к = 1 По МаркировкаСписок.РазмерСписка() Цикл
-				Запрос = Запрос + "
-				|              <vd:productMarking>"+  МаркировкаСписок.Получитьзначение(к) +"</vd:productMarking>
-				|"; 
-			КонецЦикла;	
-			Запрос=Запрос+"
-			|      		 </vd:productMarkingList>
+			|              <vd:productMarking>"+  МаркировкаСписок.Получитьзначение(к) +"</vd:productMarking>
 			|"; 
-		Иначе
-			Запрос=Запрос+"
-			|      		 <vd:productMarkingList />
-			|"; 
-		КонецЕсли;
+		КонецЦикла;	
+		Запрос=Запрос+"
+		|      		 </vd:productMarkingList>
+		|"; 
+	Иначе
+		Запрос=Запрос+"
+		|      		 <vd:productMarkingList />
+		|"; 
+	КонецЕсли;
 // ЖД Обрезанный до 98 символов productName отрабатывает на тестовой площадке нормально
 // можно заменить на 200 симв, если не погасит
-		Запрос=Запрос+"
-			|			<vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
+	Запрос=Запрос+"
+		|			<vd:lowGradeCargo>"+ГМ.булево(док.некачественный)+"</vd:lowGradeCargo>
 //			|           <vd:productName>"+ СокрЛП(док.НаименованиеПродукции) +"</vd:productName>
-			|      		<vd:sourceStockEntry />
-			|      </vd:consignment>
-			|
-			|    <vd:accompanyingForms>
-			|      <vd:waybill>
-			|        <sh:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</sh:issueSeries>
-			|        <sh:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</sh:issueNumber>
-			|        <sh:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</sh:issueDate>";
-			
-			Попытка
-				Запрос=Запрос+"			
-				|                  <sh:type>"+ док.ТтнТип +"</sh:type>";
-			Исключение
-				//Добавить Реквизит ттнТип в документ ВСД2_входящий
-				Сообщить("Добавьте Реквизит ттнТип (число 1.0) в документ ВСД2_входящий");
-				Сообщить("Отправляю с типом 1 - Товарно транспортная накладная");
-				Запрос=Запрос+"			
-				|                  <sh:type>1</sh:type>";
-			КонецПопытки;
-			Запрос=Запрос+"			
-			|        <sh:consignor>
-			|          <ent:businessEntity />
-			|          <ent:enterprise />
-			|        </sh:consignor>
-			|        <sh:consignee>
-			|          <ent:businessEntity />
-			|          <ent:enterprise />
-			|        </sh:consignee>
-			|";
-		Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда
-			Запрос=Запрос+"			
-			|        <sh:broker>
-			|          <dt:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</dt:guid>
-			|        </sh:broker>
-			|";
-		КонецЕсли;
-		Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда
-			Запрос=Запрос+"			
-			|        <sh:transportInfo>
-			|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
-			|          <sh:transportNumber>
-			|"; 
-			Если СокрЛП(Док.ТипТС) = "1" Тогда
-				Попытка
-					// Странный важный момент - контейнер д.б. первым !
-				Если ПустоеЗначение(док.номерКонтейнера)=0 Тогда
-			    	Запрос = Запрос+"
-					|            <sh:containerNumber>"+ СокрЛП(док.номерКонтейнера) +"</sh:containerNumber>
-					|";
-				КонецЕсли;
-				Исключение КонецПопытки;
-				
-			    Запрос = Запрос+"
-				|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
-				|";
-				Попытка
-				Если ПустоеЗначение(док.номерПолуприцепа)=0 Тогда
-			    	Запрос = Запрос+"
-					|            <sh:trailerNumber>"+ СокрЛП(док.номерПолуприцепа) +"</sh:trailerNumber>
-					|";
-				КонецЕсли;
-				Исключение КонецПопытки;
-			
-			иначеЕсли СокрЛП(Док.ТипТС) = "2" Тогда
-		    Запрос = Запрос+"
-			|            <sh:wagonNumber>"+ СокрЛП(док.номерАвто) +"</sh:wagonNumber>
-			|"; 
-			иначеЕсли СокрЛП(Док.ТипТС) = "3" Тогда
-		    Запрос = Запрос+"
-			|            <sh:flightNumber>"+ СокрЛП(док.номерАвто) +"</sh:flightNumber>
-			|";
-			иначеЕсли (СокрЛП(Док.ТипТС) = "4") или (СокрЛП(Док.ТипТС) = "5") или (СокрЛП(Док.ТипТС) = "6") Тогда
-		    Запрос = Запрос+"
-			|            <sh:shipName>"+ СокрЛП(док.номерАвто) +"</sh:shipName>
-			|";
-			
-			КонецЕсли;	
-			Запрос=Запрос+"
-			|          </sh:transportNumber>
-			|        </sh:transportInfo>
-			|";
-		КонецЕсли;
+		|      		<vd:sourceStockEntry />
+		|      </vd:consignment>
+		|
+		|    <vd:accompanyingForms>
+		|      <vd:waybill>
+		|        <sh:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</sh:issueSeries>
+		|        <sh:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</sh:issueNumber>
+		|        <sh:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</sh:issueDate>";
 		
-			Запрос=Запрос+"
-			//|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
-			|        <sh:transportStorageType>"+ док.ТермическоеСостояние.Идентификатор() +"</sh:transportStorageType>			
-			|        <sh:cargoReloadingPointList />
-			|      </vd:waybill>
-			|      <vd:vetCertificate>
-			|        <dt:uuid>"+ СокрЛП(док.UUID) +"</dt:uuid>
-			|      </vd:vetCertificate>
-			|    </vd:accompanyingForms>
-			|  </delivery>
-			|"; 
+		Попытка
+			Запрос=Запрос+"			
+			|                  <sh:type>"+ док.ТтнТип +"</sh:type>";
+		Исключение
+			//Добавить Реквизит ттнТип в документ ВСД2_входящий
+			Сообщить("Добавьте Реквизит ттнТип (число 1.0) в документ ВСД2_входящий");
+			Сообщить("Отправляю с типом 1 - Товарно транспортная накладная");
+			Запрос=Запрос+"			
+			|                  <sh:type>1</sh:type>";
+		КонецПопытки;
+		Запрос=Запрос+"			
+		|        <sh:consignor>
+		|          <ent:businessEntity />
+		|          <ent:enterprise />
+		|        </sh:consignor>
+		|        <sh:consignee>
+		|          <ent:businessEntity />
+		|          <ent:enterprise />
+		|        </sh:consignee>
+		|";
+	Если ПустоеЗначение(СокрЛП(док.Перевозчик_ХозСубъект.GUID))=0 Тогда
+		Запрос=Запрос+"			
+		|        <sh:broker>
+		|          <dt:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</dt:guid>
+		|        </sh:broker>
+		|";
+	КонецЕсли;
+	Если ПустоеЗначение(СокрЛП(док.ТипТС))=0 Тогда
+		Запрос=Запрос+"			
+		|        <sh:transportInfo>
+		|          <sh:transportType>"+СокрЛП(док.ТипТС)+"</sh:transportType>
+		|          <sh:transportNumber>
+		|"; 
+		Если СокрЛП(Док.ТипТС) = "1" Тогда
+			Попытка
+				// Странный важный момент - контейнер д.б. первым !
+			Если ПустоеЗначение(док.номерКонтейнера)=0 Тогда
+		    	Запрос = Запрос+"
+				|            <sh:containerNumber>"+ СокрЛП(док.номерКонтейнера) +"</sh:containerNumber>
+				|";
+			КонецЕсли;
+			Исключение КонецПопытки;
 			
-			Запрос=Запрос+"
-			|  <deliveryFacts>
-			|    <vd:vetCertificatePresence>ELECTRONIC</vd:vetCertificatePresence>
-			|    <vd:docInspection>
-			|      <vd:responsible>
-			|        <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|      </vd:responsible>
-			|      <vd:result>CORRESPONDS</vd:result>
-			|    </vd:docInspection>
-			|    <vd:vetInspection>
-			|      <vd:responsible>
-			|        <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
-			|      </vd:responsible>
-			|      <vd:result>CORRESPONDS</vd:result>
-			|    </vd:vetInspection>
-			|    <vd:decision>ACCEPT_ALL</vd:decision>
-			|  </deliveryFacts> 
-			|"; 
-// Дмитрий Акт несоответствия, временно выведено на вкладку Параметры, нужно потестить на продуктиве,
-// Потом можно добавить либо в ВСД_Входящее(чтобы запоминал) или просто в Таблицу обработки.
-       	Если _АктНесоотв = 1 Тогда
-			Запрос=Запрос+" 
-			|  <discrepancyReport>
-			|    <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:issueDate>
-			|    <vd:reason>
-			|      <vd:name>"+СокрЛП(тПричинаАкта)+"</vd:name>
-			|	 </vd:reason> 
-			|    <vd:description>"+?(ПустоеЗначение(тОписаниеНесоответствия)=1,"Описание несоответствия",СокрЛП(тОписаниеНесоответствия)) +"</vd:description>
-			|  </discrepancyReport>
-			|"; 
-        КонецЕсли;
-
-			Запрос=Запрос+" 
-			|</merc:processIncomingConsignmentRequest>";
-		КонецЕсли;
+		    Запрос = Запрос+"
+			|            <sh:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</sh:vehicleNumber>
+			|";
+			Попытка
+			Если ПустоеЗначение(док.номерПолуприцепа)=0 Тогда
+		    	Запрос = Запрос+"
+				|            <sh:trailerNumber>"+ СокрЛП(док.номерПолуприцепа) +"</sh:trailerNumber>
+				|";
+			КонецЕсли;
+			Исключение КонецПопытки;
+		
+		иначеЕсли СокрЛП(Док.ТипТС) = "2" Тогда
+	    Запрос = Запрос+"
+		|            <sh:wagonNumber>"+ СокрЛП(док.номерАвто) +"</sh:wagonNumber>
+		|"; 
+		иначеЕсли СокрЛП(Док.ТипТС) = "3" Тогда
+	    Запрос = Запрос+"
+		|            <sh:flightNumber>"+ СокрЛП(док.номерАвто) +"</sh:flightNumber>
+		|";
+		иначеЕсли (СокрЛП(Док.ТипТС) = "4") или (СокрЛП(Док.ТипТС) = "5") или (СокрЛП(Док.ТипТС) = "6") Тогда
+	    Запрос = Запрос+"
+		|            <sh:shipName>"+ СокрЛП(док.номерАвто) +"</sh:shipName>
+		|";
+		
+		КонецЕсли;	
+		Запрос=Запрос+"
+		|          </sh:transportNumber>
+		|        </sh:transportInfo>
+		|";
+	КонецЕсли;
 	
-	Запрос= Запрос+"
-	|        </app:data>
-	|      </app:application>
-	|    </ws:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
-	|</SOAP-ENV:Envelope>
-	|";		
+		Запрос=Запрос+"
+		//|        <sh:transportStorageType>"+ ГМ.ТермическиеУсловияПеревозки.ПолучитьЗначение( док.ТермическоеСостояние ) +"</sh:transportStorageType>
+		|        <sh:transportStorageType>"+ док.ТермическоеСостояние.Идентификатор() +"</sh:transportStorageType>			
+		|        <sh:cargoReloadingPointList />
+		|      </vd:waybill>
+		|      <vd:vetCertificate>
+		|        <dt:uuid>"+ СокрЛП(док.UUID) +"</dt:uuid>
+		|      </vd:vetCertificate>
+		|    </vd:accompanyingForms>
+		|  </delivery>
+		|  <deliveryFacts>
+		|"; 
+		
+	Если док.ВидВСД=1 Тогда 
+		// бумажный 
+		Запрос = Запрос + "
+		|    <vd:vetCertificatePresence>PAPER</vd:vetCertificatePresence> ";
+	Иначе
+		
+		Запрос = Запрос + "			
+		|    <vd:vetCertificatePresence>ELECTRONIC</vd:vetCertificatePresence> ";
+	КонецЕсли;
+	
+	Запрос = Запрос + "
+		|    <vd:docInspection>
+		|      <vd:responsible>
+		|        <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
+		|      </vd:responsible>
+		|      <vd:result>CORRESPONDS</vd:result>
+		|    </vd:docInspection>
+		|    <vd:vetInspection>
+		|      <vd:responsible>
+		|        <co:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_vetdoctor_login")) +"</co:login>
+		|      </vd:responsible>
+		|      <vd:result>CORRESPONDS</vd:result>
+		|    </vd:vetInspection>
+		|    <vd:decision>ACCEPT_ALL</vd:decision>
+		|  </deliveryFacts> 
+		|"; 
+	// Дмитрий Акт несоответствия, временно выведено на вкладку Параметры, нужно потестить на продуктиве,
+	// Потом можно добавить либо в ВСД_Входящее(чтобы запоминал) или просто в Таблицу обработки.
+   	Если _АктНесоотв = 1 Тогда
+		Запрос=Запрос+" 
+		|  <discrepancyReport>
+		|    <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:issueDate>
+		|    <vd:reason>
+		|      <vd:name>"+СокрЛП(тПричинаАкта)+"</vd:name>
+		|	 </vd:reason> 
+		|    <vd:description>"+?(ПустоеЗначение(тОписаниеНесоответствия)=1,"Описание несоответствия",СокрЛП(тОписаниеНесоответствия)) +"</vd:description>
+		|  </discrepancyReport>
+		|"; 
+    КонецЕсли;
+
+	Запрос=Запрос+" 
+		|           </merc:processIncomingConsignmentRequest>
+		|        </app:data>
+		|      </app:application>
+		|    </ws:submitApplicationRequest>
+		|  </SOAP-ENV:Body>
+		|</SOAP-ENV:Envelope>
+		|";		
+		
 	Возврат Запрос;
+	
 КонецФункции
 
 Функция ПолучитьРезультат_ГашениеВСД(applicationID, докСсылка="" ) Экспорт
@@ -1568,17 +995,17 @@
 
 	КонецЕсли;
     // Нужно партии загрузить
-	НоваяПартия = ГМ.ЗагрузитьXML_Партии( ГМ.Компонента.LogFilename, );	//докссылка
+	НоваяПартия = ГМ.ЗагрузитьXML_Партии( ГМ.Компонента.LogFilename );	//докссылка
 	Попытка докСсылка.Партия = НоваяПартия.ТекущийЭлемент(); Исключение КонецПопытки;
 		
-	Если ТипЗначенияСтр(докСсылка) = "Документ" Тогда
-		ДокОб = СоздатьОбъект("Документ");
-		ДокОб.НайтиДокумент(докСсылка);
+	//Если ТипЗначенияСтр(докСсылка) = "Документ" Тогда
+	//	ДокОб = СоздатьОбъект("Документ");
+	//	ДокОб.НайтиДокумент(докСсылка);
 		//Если (СокрЛП(ДокОб.Статус)="COMPLETED") Тогда
 		//	ДокОб.Партия = НоваяПартия.ТекущийЭлемент();
 		//	ДокОб.Провести();
 		//КонецЕсли;
-	КонецЕсли;
+	//КонецЕсли;
 
 	ГМ.УдалитьXML( ГМ.Компонента.LogFilename );
 
@@ -1698,11 +1125,11 @@
 		Сообщить("В условиях не указана Площадка","!");
 		Возврат "";
 	КонецЕсли;
-	vetDocumentType = vetDocumentType;
+
 	Если ПустоеЗначение(vetDocumentType)=1 Тогда
 		vetDocumentType = "INCOMING";
 	КонецЕсли;
-	vetDocumentStatus = vetDocumentStatus;
+
 	Если ПустоеЗначение(vetDocumentStatus)=1 Тогда
 		vetDocumentStatus = "CONFIRMED";
 	КонецЕсли;

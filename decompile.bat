@@ -1,5 +1,6 @@
 @echo off
 
+copy Vetis_IN\version.txt Vetis\
 
 cscript decompile_ert.js --ini-file decompile.ini 
 
