@@ -350,12 +350,14 @@
 		ТекстЗапроса = "
 		|select
 	    |   ДокВСД.iddoc [id $Документ."+ВидДокумента+"]
-	    |from $Документ."+ВидДокумента+" as ДокВСД With (NOLOCK)
+	    |from $Документ."+ВидДокумента+" as ДокВСД (NOLOCK)
 	  	|where
 	  	|	( $ДокВСД.UUID = :uuid)
 	  	|";
 		RS.УстановитьТекстовыйПараметр("uuid", uuid);
-		//RS.Отладка(1);
+		Если ГМ.ПолучитьКонстанту("ВыводитьПодробнуюИнформацию")=1 Тогда  
+			RS.Отладка(1);
+		КонецЕсли;		
 		тз = RS.ВыполнитьИнструкцию(ТекстЗапроса);
 	Иначе
 		Запрос = ГМ.базаДанных.НовыйЗапрос();
@@ -367,7 +369,9 @@
 	  	|	( ДокВСД.UUID = :uuid)
 	  	|";
 		Запрос.Подставлять("uuid", uuid);
-		//тз.Отладка();
+		Если ГМ.ПолучитьКонстанту("ВыводитьПодробнуюИнформацию")=1 Тогда 
+			Запрос.Отладка();
+		КонецЕсли;		
 		ТЗ = Запрос.ВыполнитьЗапрос(ТекстЗапроса);
 	КонецЕсли;
 
@@ -780,9 +784,13 @@
 Функция Партии_ПоGUID_Запрос( ВыбПартия )
 	
 	Запрос = "
-	|<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
-	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
-	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+	|<SOAP-ENV:Envelope 
+	|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+	|xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' 
+	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
 	|  <SOAP-ENV:Header/>
 	|  <SOAP-ENV:Body>
@@ -799,7 +807,7 @@
 	|              <vd:login>"+ ГМ.ПолучитьКонстанту("param_intiator_login") +"</vd:login>
 	|            </merc:initiator>
 	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
-	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
+	//|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
 	|          </merc:getStockEntryByGuidRequest>
 	|        </apl:data>
 	|      </apl:application>
@@ -2393,21 +2401,26 @@
 				Для i3=0 По conditionGroup.length - 1 Цикл
 					conditionList = conditionGroup.item(i3).selectNodes("dt:condition");
 					Для i4=0 По conditionList.length - 1 Цикл
-						condition = conditionList.item(i4);
-						УсловияПеревозки.НоваяСтрока();
-						УсловияПеревозки.Пометка = 2;
-						УсловияПеревозки.Решение = Решение;
-						УсловияПеревозки.ВидПродукции = ВидПродукции;
-						УсловияПеревозки.Название = condition.selectSingleNode("dt:text").text;
-						УсловияПеревозки.UUID = condition.selectSingleNode("bs:uuid").text;
-						УсловияПеревозки.GUID = condition.selectSingleNode("bs:guid").text;
-						Если Решение = 1 Тогда
-							Сообщить(Строка(i4+1)+". Перемещение разрешено.","i");
-						ИначеЕсли Решение = 2 Тогда
-							Сообщить(Лев(Строка(i4+1)+". Перемещение при условии: "+ РазделительСтрок + СокрЛП(УсловияПеревозки.Название),499));
-						Иначе
-							Сообщить(Строка(i4+1)+". Перемещение запрещено." +УсловияПеревозки.Название,"!");
-						КонецЕсли;
+						Попытка
+							
+							condition = conditionList.item(i4);
+							УсловияПеревозки.НоваяСтрока();
+							УсловияПеревозки.Пометка = 2;
+							УсловияПеревозки.Решение = Решение;
+							УсловияПеревозки.ВидПродукции = ВидПродукции;
+							УсловияПеревозки.Название = condition.selectSingleNode("dt:text").text;
+							УсловияПеревозки.UUID = condition.selectSingleNode("bs:uuid").text;
+							УсловияПеревозки.GUID = condition.selectSingleNode("bs:guid").text;
+							Если Решение = 1 Тогда
+								Сообщить(Строка(i4+1)+". Перемещение разрешено.","i");
+							ИначеЕсли Решение = 2 Тогда
+								Сообщить(Лев(Строка(i4+1)+". Перемещение при условии: "+ РазделительСтрок + СокрЛП(УсловияПеревозки.Название),499));
+							Иначе
+								Сообщить(Строка(i4+1)+". Перемещение запрещено." +УсловияПеревозки.Название,"!");
+							КонецЕсли;
+						Исключение
+							ГМ.СообщитьОбОшибке("Ошибка при загрузке условий переозки "+ОписаниеОшибки());
+						КонецПопытки;
 					КонецЦикла;
 				КонецЦикла;
 			КонецЦикла;
