@@ -807,7 +807,7 @@
 	|              <vd:login>"+ ГМ.ПолучитьКонстанту("param_intiator_login") +"</vd:login>
 	|            </merc:initiator>
 	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
-	//|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
+	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
 	|          </merc:getStockEntryByGuidRequest>
 	|        </apl:data>
 	|      </apl:application>
