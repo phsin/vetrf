@@ -15,8 +15,7 @@
 
 Процедура Конструктор()
 
-	Экземпляр = СоздатьОбъект("DynaValue");
-	Экземпляр.ДобавитьСвойство("uuid","");
+	тзПроизводители	= СоздатьОбъект("ТаблицаЗначений");
 	
 КонецПроцедуры
 
@@ -343,8 +342,16 @@
 		|xmlns:default='http://www.w3.org/2001/XMLSchema'
 		|xmlns:my='http://api.vetrf.ru/schema/cdm/application'
 		|xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'
-		|" );	
-	vetDocument = objDom.selectSingleNode("//*[local-name() = 'vetDocument']") ;
+		|" );
+		
+	Попытка
+			
+		vetDocument = objDom.selectSingleNode("//*[local-name() = 'vetDocument']") ;
+	Исключение
+		ГМ.СообщитьОбОшибке("Не удалось загрузить ВСД из "+ВсдОснование.ИмяФайлаXML+"
+		|"+ОписаниеОшибки(), Сам());
+		Возврат Сам();
+	КонецПопытки;
 	
 	//тзРезультат.ДокВСД = ВСД_Док;
 	//тзРезультат.ДокВСД = ВСД_Класс;
