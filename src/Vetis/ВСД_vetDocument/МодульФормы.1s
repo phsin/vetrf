@@ -8,6 +8,9 @@
 Перем НомерПартии Экспорт;
 Перем сзНомерПартии Экспорт;
 
+Перем specialMarks Экспорт;
+Перем locationProsperity Экспорт;
+
 //Служебные функции
 Функция Этот(Конт) 	Возврат Конт; КонецФункции
 Функция Сам() 	Возврат Этот(Контекст); КонецФункции
@@ -104,8 +107,8 @@
 			ВСД_Док.ТипТС = transportInfo.selectSingleNode("vd:transportType").text;//("*[local-name()='transportType'] ").text;
 			Если ВСД_Док.ТипТС = "1" Тогда
 				ВСД_Док.номеравто = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:vehicleNumber").text;
-				Попытка номерПолуприцепа = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:trailerNumber").text; Исключение КонецПопытки;
-				Попытка номерКонтейнера = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:containerNumber").text; Исключение КонецПопытки;
+				Попытка ВСД_Док.номерПолуприцепа = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:trailerNumber").text; Исключение КонецПопытки;
+				Попытка ВСД_Док.номерКонтейнера = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:containerNumber").text; Исключение КонецПопытки;
 			Иначеесли ВСД_Док.ТипТС = "2" Тогда
 				ВСД_Док.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='wagonNumber']").text;
 			Иначеесли ВСД_Док.ТипТС = "3" Тогда
@@ -274,9 +277,9 @@
 
 	Попытка ВСД_Док.cargoInspected = ?(vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:cargoInspected").text="true",1,0);	Исключение	КонецПопытки;
     Попытка	ВСД_Док.РезультатыИсследований = Перечисление.ВСД2_РезультатИсследований.ЗначениеПоИдентификатору(vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:cargoExpertized").text);Исключение	КонецПопытки;
-	Попытка	ВСД_Док.ОсобыеОтметки = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text;	Исключение	КонецПопытки;
-
-	Попытка	ВСД_Док.Местность = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:locationProsperity").text;Исключение	КонецПопытки; 
+		
+	Попытка	specialMarks = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text; Исключение КонецПопытки;
+	Попытка	locationProsperity = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:locationProsperity").text; Исключение КонецПопытки; 
 		
 	Попытка 
 		ЦельGuid = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:purpose").selectSingleNode("bs:guid").text;
@@ -435,6 +438,10 @@
 		тзСвязанныеДокументы = ГМ2.СвязанныеДокументы_из_XML( vetDocument.selectNodes("vd:referencedDocument"));		
 	Исключение 				
 	КонецПопытки;
+	
+	Попытка	specialMarks = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text; Исключение КонецПопытки;
+	Попытка	locationProsperity = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:locationProsperity").text; Исключение КонецПопытки; 
+	
 	
 	Возврат Сам();
 	
