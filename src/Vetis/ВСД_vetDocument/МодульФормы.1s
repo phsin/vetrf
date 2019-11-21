@@ -271,7 +271,7 @@
 
 	ѕопытка 				
 		package = batch.selectSingleNode("*[local-name()='packageList']").selectNodes("dt:package"); 
-		тз”ровни”паковки = √ћ.”ровни”паковки_из_XML( package );
+		тз”ровни”паковки = √ћ2.”ровни”паковки_из_XML( package );
 	»сключение 	
 	 онецѕопытки;
 
@@ -429,7 +429,7 @@
 	//—писок физической упаковки. vd:packageList
 	ѕопытка 				
 		package = batch.selectSingleNode("*[local-name()='packageList']").selectNodes("dt:package"); 
-		тз”ровни”паковки = √ћ.”ровни”паковки_из_XML( package );
+		тз”ровни”паковки = √ћ2.”ровни”паковки_из_XML( package );
 	»сключение 	
 	 онецѕопытки;
 		
