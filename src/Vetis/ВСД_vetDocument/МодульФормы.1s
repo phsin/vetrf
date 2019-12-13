@@ -129,7 +129,7 @@
 			
 		// Маршрут Следования ЖД 17/07/18	 #1899 #1898
 		Попытка 
-			тзтзТочкиМаршрута = ГМ2.МаршрутСледования_из_XML(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:shipmentRoute").selectNodes("vd:routePoint")); 
+			тзТочкиМаршрута = ГМ2.МаршрутСледования_из_XML(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:shipmentRoute").selectNodes("vd:routePoint")); 
 			// ЖД При гашении Нужно указать Тип И № последнего ТС в Маршруте Следования - запишем данные в соотв реквизиты.
 			Если ТипЗначенияСтр(тзТочкиМаршрута) = "ТаблицаЗначений" Тогда
 				тзТочкиМаршрута.Сортировать("-НомерТочки"); // Возьмем № последнего ТС в точке где была перегрузка, т.е. № Авто сменился
