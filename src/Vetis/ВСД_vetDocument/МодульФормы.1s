@@ -1,0 +1,438 @@
+
+Перем ВСД_Док Экспорт;
+
+Перем тзПроизводители Экспорт;
+Перем тзУровниУпаковки Экспорт;
+Перем тзСвязанныеДокументы Экспорт;
+Перем тзТочкиМаршрута Экспорт;
+Перем НомерПартии Экспорт;
+
+Перем specialMarks Экспорт;
+Перем locationProsperity Экспорт;
+
+//Служебные функции
+Функция Этот(Конт) 	Возврат Конт; КонецФункции
+Функция Сам() 	Возврат Этот(Контекст); КонецФункции
+
+
+Процедура Конструктор()
+
+	тзПроизводители	= СоздатьОбъект("ТаблицаЗначений");
+	
+КонецПроцедуры
+
+Функция КлассСохраняемый()
+	Возврат 1;
+КонецФункции
+
+
+Функция СохранитьКлассВСтроку()
+	//
+	////Экземпляр = СоздатьОбъект("DynaValue");
+	//Экземпляр.ДобавитьСвойство("uuid",uuid);
+	//	
+	//Возврат Экземпляр.ВыгрузитьВСтроку();;
+	
+КонецФункции
+
+Процедура ЗагрузитьИзСтроки( стр )
+
+	//Экземпляр = СоздатьОбъект("DynaValue");
+	//Экземпляр.ЗагрузитьИзСтроки( стр );
+	//
+	//uuid = Экземпляр.uuid;
+	
+КонецПроцедуры
+
+Функция Заполнить( vetDocument, ДокОснование ) Экспорт 
+	
+	UUID = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
+	
+	ВСД_Док = ГМ2.НайтиВСДпоUUID( UUID );
+	ВСД_Док.applicationID = ГМ.Компонента.ApplicationId;	
+	Если (ПустоеЗначение(докОснование)=0) И 
+		 (докОснование <> ВСД_Док.ТекущийЭлемент())  Тогда
+		ВСД_Док.ДокОснование = докОснование;
+	КонецЕсли;
+	
+	Попытка		
+		ВСД_Док.Фирма = ГМ.ПолучитьФирмуИзКонтекста(ДокОснование);
+	Исключение
+	КонецПопытки;
+
+	Попытка ВСД_Док.Автор = ГМ.ПолучитьАвтора(); Исключение КонецПопытки;		
+	
+	ВСД_Док.UUID = UUID;
+
+	st = vetDocument.selectSingleNode("vd:vetDStatus").text;
+	ВСД_Док.СтатусВСД = Перечисление.ВСД_СтатусВСД.ЗначениеПоИдентификатору( st ); 
+	
+	// ищем Сведения об измененных ВСД.
+	Попытка ВСД_Док.ФормаВСД = vetDocument.selectSingleNode("vd:vetDForm").text;  Исключение КонецПопытки;
+	
+	ВСД_Док.ВидВСД = 2;  // = Электронный
+
+	Попытка ВСД_Док.типВСД =  vetDocument.selectSingleNode("vd:vetDType").text; Исключение КонецПопытки;
+
+   	Попытка ВСД_Док.ДатаДок = ГМ.СтрокаВДату(vetDocument.selectSingleNode("vd:issueDate").text); Исключение КонецПопытки;
+
+   	Попытка ВСД_Док.ВСДДата = ГМ.СтрокаВДату(vetDocument.selectSingleNode("vd:issueDate").text);	Исключение КонецПопытки;
+	Попытка	ВСД_Док.ВсдСерия = vetDocument.selectSingleNode("vd:issueSeries").text; Исключение КонецПопытки;
+	Попытка	ВСД_Док.ВСДНомер = vetDocument.selectSingleNode("vd:issueNumber").text; Исключение КонецПопытки;			
+
+	ЭтоТранспортныйВСД=0;
+	Попытка
+		batch = vetDocument.selectSingleNode("vd:certifiedBatch").selectSingleNode("vd:batch");  //Продуктивный ВСД
+	Исключение
+		Попытка
+			//Сертифицированная партия.Сведения о партии продукции.
+			batch = vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:batch");  
+			ЭтоТранспортныйВСД=1;
+		Исключение
+		 	batch = "";
+		КонецПопытки;
+	КонецПопытки;
+
+	Если ЭтоТранспортныйВСД = 1 Тогда
+		Попытка	ВСД_Док.Отправитель_ХозСубъект 	= ГМ.НайтиХСпоGUID(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignor").selectSingleNode("dt:businessEntity").selectSingleNode("bs:guid").text);	Исключение КонецПопытки;
+		Попытка ВСД_Док.Отправитель_Площадка 	= ГМ.НайтиПлощадку(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignor").selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text);	Исключение КонецПопытки;
+
+		Попытка	ВСД_Док.Получатель_ХозСубъект 	= ГМ.НайтиХСпоGUID(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignee").selectSingleNode("dt:businessEntity").selectSingleNode("bs:guid").text);	Исключение	КонецПопытки;
+		Попытка	ВСД_Док.Получатель_Площадка 	= ГМ.НайтиПлощадку(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignee").selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text);		Исключение	КонецПопытки;
+		Попытка ВСД_Док.Перевозчик_ХозСубъект 	= ГМ.НайтиХСпоGUID(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:broker").selectSingleNode("bs:guid").text); Исключение КонецПопытки;
+
+		Попытка
+			transportInfo = vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportInfo");
+			ВСД_Док.ТипТС = transportInfo.selectSingleNode("vd:transportType").text;//("*[local-name()='transportType'] ").text;
+			Если ВСД_Док.ТипТС = "1" Тогда
+				ВСД_Док.номеравто = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:vehicleNumber").text;
+				Попытка ВСД_Док.номерПолуприцепа = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:trailerNumber").text; Исключение КонецПопытки;
+				Попытка ВСД_Док.номерКонтейнера = transportInfo.selectSingleNode("vd:transportNumber").selectSingleNode("vd:containerNumber").text; Исключение КонецПопытки;
+			Иначеесли ВСД_Док.ТипТС = "2" Тогда
+				ВСД_Док.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='wagonNumber']").text;
+			Иначеесли ВСД_Док.ТипТС = "3" Тогда
+				ВСД_Док.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='flightNumber']").text;
+			Иначеесли (ВСД_Док.ТипТС = "4") ИЛИ (ВСД_Док.ТипТС = "5") ИЛИ (ВСД_Док.ТипТС = "6") Тогда
+				ВСД_Док.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='shipName']").text;
+//			Иначеесли ТЗВСД.ТипТС = "7" Тогда
+//					ТЗВСД.номеравто = transportInfo.selectSingleNode("*[local-name()='transportNumber'] ").selectSingleNode("*[local-name()='shipName']").text;
+
+			КонецЕсли;
+            //Попытка ТипТС = ТипТС; Исключение	КонецПопытки;
+		исключение	КонецПопытки;
+
+		Попытка	
+			ВСД_Док.ТермическоеСостояние = Перечисление.ВСД_ТермическиеУсловияПеревозки.ЗначениеПоИдентификатору(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:transportStorageType").text); 
+		Исключение	
+			//термическоесостояние = ГМ.СписокКонстант.Получить("ТермУсловияПеревозки")
+		КонецПопытки;
+			
+		// Маршрут Следования ЖД 17/07/18	 #1899 #1898
+		Попытка 
+			тзТочкиМаршрута = ГМ2.МаршрутСледования_из_XML(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:shipmentRoute").selectNodes("vd:routePoint")); 
+			// ЖД При гашении Нужно указать Тип И № последнего ТС в Маршруте Следования - запишем данные в соотв реквизиты.
+			Если ТипЗначенияСтр(тзТочкиМаршрута) = "ТаблицаЗначений" Тогда
+				тзТочкиМаршрута.Сортировать("-НомерТочки"); // Возьмем № последнего ТС в точке где была перегрузка, т.е. № Авто сменился
+				тзТочкиМаршрута.ВыбратьСтроки();
+				Пока тзТочкиМаршрута.ПолучитьСтроку() = 1 Цикл
+					Если тзТочкиМаршрута.Перегрузка = 1 Тогда
+						ВСД_Док.ТипТС				= Строка(тзТочкиМаршрута.ТипТранспорта);
+						ВСД_Док.номерКонтейнера 	= тзТочкиМаршрута.номерКонтейнера;
+						ВСД_Док.номеравто			= СокрЛП(тзТочкиМаршрута.номеравто) + СокрЛП(тзТочкиМаршрута.номерВагона) + СокрЛП(тзТочкиМаршрута.НомерАвиарейса)+ СокрЛП(тзТочкиМаршрута.НазваниеСудна);
+						ВСД_Док.номерПолуприцепа	= тзТочкиМаршрута.номерПрицепа;
+						Прервать;
+					КонецЕсли;
+				КонецЦикла;
+			КонецЕсли;
+			
+		Исключение						
+		КонецПопытки;
+			
+	КонецЕсли;
+
+	Попытка
+		productItem = batch.selectSingleNode("*[local-name()='productItem'] ");
+	Исключение
+		Сообщить("Не удалось получить элемент [productItem]","!");
+		productItem = "";
+	КонецПопытки;
+
+	//ЖД Для ГАШЕНИЯ  !!!!!
+	// productItem здесь -  в	Сведения о партии продукции.
+	// И в подветке Origin -     	vd:BatchOrigin 	[0..1] 	Сведения о происхождении продукции.
+	// Если здесь нет Артикула И ГТИНа, а в origin есть - нужно ставить !!!!
+
+	ВСД_Док.Продукция 	= ГМ.НайтиПродукцию(batch.selectSingleNode("vd:product").selectSingleNode("bs:guid").text);
+	ВСД_Док.ВидПродукции 	= ГМ.НайтиВидПродукции(batch.selectSingleNode("vd:subProduct").selectSingleNode("bs:guid").text);
+	ВСД_Док.Продукция_Элемент = ГМ.Найти_Продукция_Элемент2(productItem, ВСД_Док.Продукция, ВСД_Док.ВидПродукции);
+	Попытка
+		ВСД_Док.НаименованиеПродукции = productItem.selectSingleNode("*[local-name()='name']").text;
+	Исключение
+		ВСД_Док.НаименованиеПродукции = ВСД_Док.Продукция_Элемент.Наименование;
+	КонецПопытки;
+	ВСД_Док.Наименование = ВСД_Док.НаименованиеПродукции;
+
+	//Trade Identification Number (GTIN) - идентификационный номер продукции производителя.
+	Попытка ВСД_Док.GTIN = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:globalID").text;Исключение КонецПопытки;
+    //Артикул (код) продукции в соответствии с внутренним кодификатором производителя.
+	Попытка ВСД_Док.Артикул = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:code").text;Исключение КонецПопытки;
+
+	// Фасовка
+	Попытка ВСД_Док.packaging = batch.selectSingleNode("vd:productItem").selectSingleNode("dt:packaging"); Исключение packaging=""	КонецПопытки;
+	Попытка ВСД_Док.ФасовкаНаименование = packaging.selectSingleNode("dt:packagingType").selectSingleNode("dt:name").text; 	Исключение ФасовкаНаименование=""	КонецПопытки;
+	
+	Попытка ВСД_Док.ФасовкаНаименование = ФасовкаНаименование;Исключение	КонецПопытки;
+	Попытка ВСД_Док.ФасовкаФормаУпаковки = ГМ.НайтиФормуУпаковки( packaging.selectSingleNode("dt:packagingType").selectSingleNode("bs:guid").text,ФасовкаНаименование );	Исключение 	КонецПопытки;
+	Попытка	ВСД_Док.ФасовкаКоличество = Число(packaging.selectSingleNode("dt:quantity").text);	Исключение	КонецПопытки;
+	Попытка	ВСД_Док.ФасовкаОбъем = Число(packaging.selectSingleNode("dt:volume").text); Исключение	КонецПопытки;
+	Попытка	ВСД_Док.ФасовкаЕдиницаИзм = ГМ.НайтиЕдИзмерения(packaging.selectSingleNode("dt:unit").selectSingleNode("bs:guid").text);	Исключение 	КонецПопытки;
+
+	Попытка ВСД_Док.Количество = Число(batch.selectSingleNode("vd:volume").text); Исключение КонецПопытки;
+		
+	//!!!!
+	Попытка ВСД_Док.КоличествоПринять =  ВСД_Док.Количество; Исключение КонецПопытки;
+	Попытка ВСД_Док.КоличествоВозврат =0; Исключение КонецПопытки;
+
+	Попытка ВСД_Док.ЕдиницаИзмерения = ГМ.НайтиЕдИзмерения( batch.selectSingleNode("vd:unit").selectSingleNode("bs:guid").text  );Исключение 	КонецПопытки;
+
+	ДатаИзготовления1=""; ДатаИзготовления2="";	ДатаИзготовления="";
+	Попытка dateOfProduction = batch.selectSingleNode("vd:dateOfProduction");  Исключение	dateOfProduction =""; КонецПопытки;
+	ГМ.Дата_из_XML(dateOfProduction, ДатаИзготовления1, ДатаИзготовления2, ДатаИзготовления);
+
+	ВСД_Док.ДатаИзготовления1 = ДатаИзготовления1;
+	ВСД_Док.ДатаИзготовления2 = ДатаИзготовления2;
+	ВСД_Док.ДатаИзготовления =  ДатаИзготовления; 
+
+	ДатаСрокГодности1=""; ДатаСрокГодности2=""; ДатаСрокГодности="";
+	Попытка expiryDate = batch.selectSingleNode("vd:expiryDate");  Исключение expiryDate = "";	КонецПопытки; 
+	ГМ.Дата_из_XML(expiryDate, ДатаСрокГодности1, ДатаСрокГодности2, ДатаСрокГодности);
+
+	ВСД_Док.ДатаСрокГодности = ДатаСрокГодности; 
+	ВСД_Док.ДатаСрокГодности1 = ДатаСрокГодности1;
+	ВСД_Док.ДатаСрокГодности2 = ДатаСрокГодности2;
+	Попытка ВСД_Док.НомерПартии =  batch.selectSingleNode("vd:batchID").text; Исключение КонецПопытки; 
+	Попытка
+		сзНомерПартий = ЗначениеизСтроки( ГМ2.СписокНомеровПартий_из_XML(batch.selectNodes("vd:batchID")) );
+		Если сзНомерПартий.РазмерСписка() = 1 Тогда
+			НомерПартии = сзНомерПартий.ПолучитьЗначение(1);
+		ИначеЕсли сзНомерПартий.РазмерСписка() = 0 Тогда
+			НомерПартии = "";
+		Иначе
+			НомерПартии = сзНомерПартий;
+		КонецЕсли;
+	Исключение
+		Ошибка = "Не удалось прочитать список № Партий "+" ";
+		ГМ.СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам() );
+	КонецПопытки;
+
+    //<vd:batchID> 	bs:String255 	[1..*] 	Уникальный идентификатор производственной партии продукции. 	<vd:batchID>ПП64219</vd:batchID>
+
+	//Информация о предприятиях-производителях продукции.
+	//ПроизводителиСписок="";
+	Попытка 
+		тзПроизводители = ГМ2.Производители_из_XML(batch.selectSingleNode("vd:origin").selectNodes("vd:producer")); 
+
+		//А Если производителей несколько - берем первого
+	   	Если тзПроизводители.КоличествоСтрок()>0 Тогда
+   			ВСД_Док.Производитель_Площадка = тзПроизводители.ПолучитьЗначение(1,1);
+   		КонецЕсли;
+		
+   		//ПроизводителиСписок = тзПроизводители;
+	Исключение 
+	
+	КонецПопытки;
+   	
+   	//Это в ветке origin - !!!!!
+   	//В док-те нет таких реквизитов
+   	//Если ТипЗначенияСтр(тзРезультат) = "ТаблицаЗначений" Тогда
+		Попытка	ВСД_Док.Скоропортящийся = ?(batch.selectSingleNode("vd:perishable").text = "true",1,0);	Исключение 	КонецПопытки;
+		Попытка	ВСД_Док.GTIN 		=  batch.selectSingleNode("vd:origin").selectSingleNode("vd:productItem").selectSingleNode("dt:globalID").text; Исключение КонецПопытки;
+		Попытка ВСД_Док.Артикул 	= batch.selectSingleNode("vd:origin").selectSingleNode("vd:productItem").selectSingleNode("dt:code").text;  	Исключение КонецПопытки;
+		Попытка	ВСД_Док.Некачественный = ?(batch.selectSingleNode("vd:lowGradeCargo").text="true",1,0); Исключение	КонецПопытки;
+		Попытка ВСД_Док.Страна_GUID = batch.selectSingleNode("vd:origin").selectSingleNode("vd:country").selectSingleNode("bs:guid").text;	Исключение	КонецПопытки;
+
+		//Попытка ВСД_Док.ВладелецХС = ГМ.НайтиХСпоGUID( batch.selectSingleNode("vd:owner").selectSingleNode("bs:guid").text); Исключение	КонецПопытки;
+
+		//Если ПустоеЗначение(ВСД_Док.ВладелецХС)=1 Тогда // !!!! ВНИМАНИЕ
+		//	ВСД_Док.ВладелецХС = ГМ.Отправитель_ХозСубъект;
+		//КонецЕсли;
+	//КонецЕсли;
+
+	//Список физической упаковки. vd:packageList
+
+	Попытка 				
+		package = batch.selectSingleNode("*[local-name()='packageList']").selectNodes("dt:package"); 
+		тзУровниУпаковки = ГМ2.УровниУпаковки_из_XML( package );
+	Исключение 	
+	КонецПопытки;
+
+	Попытка ВСД_Док.cargoInspected = ?(vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:cargoInspected").text="true",1,0);	Исключение	КонецПопытки;
+    Попытка	ВСД_Док.РезультатыИсследований = Перечисление.ВСД2_РезультатИсследований.ЗначениеПоИдентификатору(vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:cargoExpertized").text);Исключение	КонецПопытки;
+		
+	Попытка	specialMarks = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text; Исключение КонецПопытки;
+	Попытка	locationProsperity = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:locationProsperity").text; Исключение КонецПопытки; 
+		
+	Попытка 
+		ЦельGuid = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:purpose").selectSingleNode("bs:guid").text;
+		ВСД_Док.Цель = ГМ.Справочник_НайтиПоGUID( "ВСД_Цель", ЦельGuid );
+	Исключение  КонецПопытки;
+		
+	// Связанные документы
+	Попытка 
+		тзСвязанныеДокументы = ГМ2.СвязанныеДокументы_из_XML( vetDocument.selectNodes("vd:referencedDocument"));
+
+		// http://help.vetrf.ru/wiki/DocumentType_v2.0				
+		стр = 0;
+		Если тзСвязанныеДокументы.НайтиЗначение(1,стр,"ТипДокумента") = 1 Тогда
+		ИначеЕсли тзСвязанныеДокументы.НайтиЗначение(2,стр,"ТипДокумента") = 1 Тогда
+		ИначеЕсли тзСвязанныеДокументы.НайтиЗначение(3,стр,"ТипДокумента") = 1 Тогда
+		ИначеЕсли тзСвязанныеДокументы.НайтиЗначение(4,стр,"ТипДокумента") = 1 Тогда
+		ИначеЕсли тзСвязанныеДокументы.НайтиЗначение(5,стр,"ТипДокумента") = 1 Тогда
+		Иначе
+			
+		КонецЕсли;
+		Если стр > 0 Тогда
+			тзСвязанныеДокументы.ПолучитьСтрокуПоНомеру(стр);
+			ВСД_Док.ттнСерия = тзСвязанныеДокументы.СерияДокумента;
+			ВСД_Док.ттнномер = тзСвязанныеДокументы.НомерДокумента;
+			ВСД_Док.ттндата = ГМ.СтрокаВДату( тзСвязанныеДокументы.ДатаДокумента );
+			Попытка ВСД_Док.ттнТип = тзСвязанныеДокументы.ТипДокумента; Исключение КонецПопытки;
+		КонецЕсли;
+		
+		СвязанныеДокументы = тзСвязанныеДокументы;
+		
+	Исключение 				
+	КонецПопытки;
+
+	
+	ВСД_Док.Записать();
+	Если ВСД_Док.СтатусВСД = Перечисление.ВСД_СтатусВСД.WITHDRAWN Тогда 
+		ВСД_Док.Удалить(0);
+	КонецЕсли;
+	ГМ.СообщитьИнфо("Записан "+ВСД_Док.Вид()+" от "+ВСД_Док.ДатаДок+" ["+ВСД_Док.uuid+"]", ВСД_Док.ТекущийЭлемент());
+
+
+	ВСД_Док.ИмяФайлаXML = ГМ2.ПолучитьИмяФайла_ВСД_XML( ВСД_Док.ТекущийЭлемент() );	
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+	objDom.appendChild( vetDocument );
+	objDom.save( ВСД_Док.ИмяФайлаXML );
+	
+	ВСД_Док.Записать();
+	
+	Возврат ВСД_Док.ТекущийЭлемент();
+	
+	
+КонецФункции
+
+Функция ЗаполнитьПоВСД( ВсдОснование ) Экспорт 
+	
+    objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+	objDom.load( ВсдОснование.ИмяФайлаXML );	
+    objDom.setProperty("SelectionNamespaces", "
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+		|xmlns:default='http://www.w3.org/2001/XMLSchema'
+		|xmlns:my='http://api.vetrf.ru/schema/cdm/application'
+		|xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'
+		|" );
+		
+	Попытка
+			
+		vetDocument = objDom.selectSingleNode("//*[local-name() = 'vetDocument']") ;
+	Исключение
+		ГМ.СообщитьОбОшибке("Не удалось загрузить ВСД из "+ВсдОснование.ИмяФайлаXML+"
+		|"+ОписаниеОшибки(), Сам());
+		Возврат Сам();
+	КонецПопытки;
+	
+	//тзРезультат.ДокВСД = ВСД_Док;
+	//тзРезультат.ДокВСД = ВСД_Класс;
+	UUID = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
+	
+	ЭтоТранспортныйВСД=0;
+	Попытка
+		batch = vetDocument.selectSingleNode("vd:certifiedBatch").selectSingleNode("vd:batch");  //Продуктивный ВСД
+	Исключение
+		Попытка
+			//Сертифицированная партия.Сведения о партии продукции.
+			batch = vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:batch");  
+			ЭтоТранспортныйВСД=1;
+		Исключение
+		 	batch = "";
+		КонецПопытки;
+	КонецПопытки;
+
+	Если ЭтоТранспортныйВСД = 1 Тогда
+		Попытка 
+			тзТочкиМаршрута = ГМ2.МаршрутСледования_из_XML(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:shipmentRoute").selectNodes("vd:routePoint")); 
+			// ЖД При гашении Нужно указать Тип И № последнего ТС в Маршруте Следования - запишем данные в соотв реквизиты.
+			Если ТипЗначенияСтр(тзТочкиМаршрута) = "ТаблицаЗначений" Тогда
+				тзТочкиМаршрута.Сортировать("-НомерТочки"); // Возьмем № последнего ТС в точке где была перегрузка, т.е. № Авто сменился
+				тзТочкиМаршрута.ВыбратьСтроки();
+				Пока тзТочкиМаршрута.ПолучитьСтроку() = 1 Цикл
+					Если тзТочкиМаршрута.Перегрузка = 1 Тогда
+						ТипТС				= Строка(тзТочкиМаршрута.ТипТранспорта);
+						номерКонтейнера 	= тзТочкиМаршрута.номерКонтейнера;
+						номеравто			= СокрЛП(тзТочкиМаршрута.номеравто) + СокрЛП(тзТочкиМаршрута.номерВагона) + СокрЛП(тзТочкиМаршрута.НомерАвиарейса)+ СокрЛП(тзТочкиМаршрута.НазваниеСудна);
+						номерПолуприцепа	= тзТочкиМаршрута.номерПрицепа;
+						Прервать;
+					КонецЕсли;
+				КонецЦикла;
+			КонецЕсли;
+		Исключение						
+		КонецПопытки;
+			
+	КонецЕсли;
+
+	Попытка
+		сзНомерПартий = ЗначениеизСтроки( ГМ2.СписокНомеровПартий_из_XML(batch.selectNodes("vd:batchID")) );
+		Если сзНомерПартий.РазмерСписка() = 1 Тогда
+			НомерПартии = сзНомерПартий.ПолучитьЗначение(1);
+		ИначеЕсли сзНомерПартий.РазмерСписка() = 0 Тогда
+			НомерПартии = "";
+		Иначе
+			НомерПартии = сзНомерПартий;
+		КонецЕсли;
+	Исключение
+		Ошибка = "Не удалось прочитать список № Партий "+" ";
+		ГМ.СообщитьОбОшибке(Ошибка + ОписаниеОшибки(), Сам() );
+	КонецПопытки;
+
+    //<vd:batchID> 	bs:String255 	[1..*] 	Уникальный идентификатор производственной партии продукции. 	<vd:batchID>ПП64219</vd:batchID>
+
+	//Информация о предприятиях-производителях продукции.
+	//ПроизводителиСписок="";
+	Попытка 
+		тзПроизводители = ГМ2.Производители_из_XML(batch.selectSingleNode("vd:origin").selectNodes("vd:producer")); 
+
+		//А Если производителей несколько - берем первого
+	   	//Если тзПроизводители.КоличествоСтрок()>0 Тогда
+   		//	Производитель_Площадка = тзПроизводители.ПолучитьЗначение(1,1);
+   		//КонецЕсли;
+		
+   		//ПроизводителиСписок = тзПроизводители;
+	Исключение 	
+	КонецПопытки;
+
+	//Список физической упаковки. vd:packageList
+	Попытка 				
+		package = batch.selectSingleNode("*[local-name()='packageList']").selectNodes("dt:package"); 
+		тзУровниУпаковки = ГМ2.УровниУпаковки_из_XML( package );
+	Исключение 	
+	КонецПопытки;
+		
+	// Связанные документы
+	Попытка 
+		тзСвязанныеДокументы = ГМ2.СвязанныеДокументы_из_XML( vetDocument.selectNodes("vd:referencedDocument"));		
+	Исключение 				
+	КонецПопытки;
+	
+	Попытка	specialMarks = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text; Исключение КонецПопытки;
+	Попытка	locationProsperity = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:locationProsperity").text; Исключение КонецПопытки; 
+	
+	
+	Возврат Сам();
+	
+КонецФункции

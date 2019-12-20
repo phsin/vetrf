@@ -42,3 +42,4 @@ sonar-project.properties
 .scannerwork 
 push-post.sh 
 push.bat
+*.vbs
