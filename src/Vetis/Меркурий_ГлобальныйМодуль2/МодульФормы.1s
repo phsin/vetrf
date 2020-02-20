@@ -346,7 +346,7 @@
 
 		ТекстЗапроса = "
 		|select
-	    |   ДокВСД.id [id $Справочник."+ВидДокумента+"]
+	    | ДокВСД.id [id $Справочник."+ВидДокумента+"]
 	    |from $Справочник."+ВидДокумента+" as ДокВСД (NOLOCK)
 	  	|where
 	  	|	( $ДокВСД.UUID = :uuid)
@@ -360,7 +360,7 @@
 		Запрос = ГМ.базаДанных.НовыйЗапрос();
 		ТекстЗапроса = "
 		|select
-	    |   ДокВСД.id [id $Справочник."+ВидДокумента+"]
+	    | ДокВСД.id [id $Справочник."+ВидДокумента+"]
 	    |from [Справочник."+ВидДокумента+"] as ДокВСД
 	  	|where
 	  	|	( ДокВСД.UUID = :uuid)
@@ -401,7 +401,7 @@
 
 		ТекстЗапроса = "
 		|select
-	    |   ДокВСД.idDoc [id $Документ."+ВидДокумента+"]
+	    | ДокВСД.idDoc [id $Документ."+ВидДокумента+"]
 	    |from $Документ."+ВидДокумента+" as ДокВСД (NOLOCK)
 	  	|where
 	  	|	( $ДокВСД.UUID = :uuid)
@@ -415,7 +415,7 @@
 		Запрос = ГМ.базаДанных.НовыйЗапрос();
 		ТекстЗапроса = "
 		|select
-	    |   ДокВСД.idDoc [id $Документ."+ВидДокумента+"]
+	    | ДокВСД.idDoc [id $Документ."+ВидДокумента+"]
 	    |from [Документ."+ВидДокумента+"] as ДокВСД
 	  	|where
 	  	|	( ДокВСД.UUID = :uuid)
@@ -828,27 +828,27 @@
 	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' 
 	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>	
-	|      <apldef:apiKey>"+ ГМ.ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ ГМ.ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
-	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
-	|        <apl:data>
-	|          <merc:getStockEntryByGuidRequest>
-	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ ГМ.ПолучитьКонстанту("param_intiator_login") +"</vd:login>
-	|            </merc:initiator>
-	|            <bs:guid>"+ ВыбПартия.guid +"</bs:guid>
-	|            <dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
-	|          </merc:getStockEntryByGuidRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>	
+	|<apldef:apiKey>"+ ГМ.ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ ГМ.ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
+	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
+	|<apl:data>
+	|<merc:getStockEntryByGuidRequest>
+	|<merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ ГМ.ПолучитьКонстанту("param_intiator_login") +"</vd:login>
+	|</merc:initiator>
+	|<bs:guid>"+ ВыбПартия.guid +"</bs:guid>
+	|<dt:enterpriseGuid>"+ВыбПартия.Получатель_Площадка.GUID+"</dt:enterpriseGuid>
+	|</merc:getStockEntryByGuidRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";	
 	Возврат Запрос;
@@ -1144,27 +1144,27 @@
 	| xmlns:apl='http://api.vetrf.ru/schema/cdm/application' 
 	| xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
 	| xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
-	|        <apl:data>
-	|          <merc:getVetDocumentByUuidRequest>
-	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:initiator>
-	|            <bs:uuid>"+ СокрЛП(док.UUID) +"</bs:uuid>
-	|            <dt:enterpriseGuid>"+ СокрЛП(Док.Отправитель_Площадка.GUID) +"</dt:enterpriseGuid>
-	|          </merc:getVetDocumentByUuidRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
+	|<apl:data>
+	|<merc:getVetDocumentByUuidRequest>
+	|<merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:initiator>
+	|<bs:uuid>"+ СокрЛП(док.UUID) +"</bs:uuid>
+	|<dt:enterpriseGuid>"+ СокрЛП(Док.Отправитель_Площадка.GUID) +"</dt:enterpriseGuid>
+	|</merc:getVetDocumentByUuidRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";
 	
@@ -1248,51 +1248,51 @@
 	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
 	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ГМ.СписокКонстант.Получить("param_api_key")+"</apldef:apiKey>
-	|      <apl:application>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ГМ.СписокКонстант.Получить("param_api_key")+"</apldef:apiKey>
+	|<apl:application>
 	//метод 2.1 пока не работает в продуктиве
-	|        <apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	//метод 2.0
-	//|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
-	|        <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
-	|        <apl:data>
-	|          <merc:getStockEntryListRequest>
-	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</vd:login>
-	|            </merc:initiator>
-	|            <bs:listOptions>
-	|              <bs:count>1000</bs:count>
-	|              <bs:offset>" + Смещение + "</bs:offset>
-	|            </bs:listOptions>
-	|            <dt:enterpriseGuid>"+СокрЛП(Отправитель_Площадка.GUID)+"</dt:enterpriseGuid>";
+	//|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
+	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
+	|<apl:data>
+	|<merc:getStockEntryListRequest>
+	|<merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</vd:login>
+	|</merc:initiator>
+	|<bs:listOptions>
+	|<bs:count>1000</bs:count>
+	|<bs:offset>" + Смещение + "</bs:offset>
+	|</bs:listOptions>
+	|<dt:enterpriseGuid>"+СокрЛП(Отправитель_Площадка.GUID)+"</dt:enterpriseGuid>";
 	Если (ПустоеЗначение(НачПериода) = 0) ИЛИ (НеНулевые = 1) Тогда
 		Запрос = Запрос +"
-    	|            <merc:searchPattern>";
+    	|<merc:searchPattern>";
 		Если НеНулевые = 1 Тогда
 			Запрос = Запрос +"
-	    	|              <vd:blankFilter>NOT_BLANK</vd:blankFilter>";
+	    	|<vd:blankFilter>NOT_BLANK</vd:blankFilter>";
 		КонецЕсли;
 		Если ПустоеЗначение(НачПериода) = 0 Тогда
 			Запрос = Запрос +"
-	    	|              <vd:receiptDateInterval>
-			|                 <bs:beginDate>"+ ГМ.Преобразовать_Дата_в_Строка(НачПериода, "T00:00:00") +"</bs:beginDate>
-			|                 <bs:endDate>"+ ГМ.Преобразовать_Дата_в_Строка(КонПериода, "T23:59:59") +"</bs:endDate>
-		    |              </vd:receiptDateInterval>";
+	    	|<vd:receiptDateInterval>
+			| <bs:beginDate>"+ ГМ.Преобразовать_Дата_в_Строка(НачПериода, "T00:00:00") +"</bs:beginDate>
+			| <bs:endDate>"+ ГМ.Преобразовать_Дата_в_Строка(КонПериода, "T23:59:59") +"</bs:endDate>
+		    |</vd:receiptDateInterval>";
 		КонецЕсли;
 		Запрос = Запрос +"
-    	|            </merc:searchPattern>";
+    	|</merc:searchPattern>";
 	КонецЕсли;
 	Запрос = Запрос +"
-	|          </merc:getStockEntryListRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|</merc:getStockEntryListRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";
 
@@ -1483,69 +1483,69 @@
 	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
 	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-	|      <apl:application>
-	//|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
-	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
-	|        <apl:data>
-	|          <merc:getVetDocumentListRequest>
-	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:initiator>
-	|            <bs:listOptions>
-	|              <bs:count>1000</bs:count>
-	|              <bs:offset>"+Смещение+"</bs:offset>
-	|            </bs:listOptions>
-	|            <vd:vetDocumentType>"+ vetDocumentType +"</vd:vetDocumentType>
-	|            <vd:vetDocumentStatus>"+ vetDocumentStatus +"</vd:vetDocumentStatus>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+	|<apl:application>
+	//|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
+	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
+	|<apl:data>
+	|<merc:getVetDocumentListRequest>
+	|<merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:initiator>
+	|<bs:listOptions>
+	|<bs:count>1000</bs:count>
+	|<bs:offset>"+Смещение+"</bs:offset>
+	|</bs:listOptions>
+	|<vd:vetDocumentType>"+ vetDocumentType +"</vd:vetDocumentType>
+	|<vd:vetDocumentStatus>"+ vetDocumentStatus +"</vd:vetDocumentStatus>
 	|";
 	//2.1
 	Если ПустоеЗначение(НачДата)=0 Тогда
 		Запрос=Запрос+"
-		|            <vd:issueDateInterval>
-		|                <bs:beginDate>"+ ГМ.Преобразовать_Дата_в_Строка( НачДата, "T00:00:00" ) +"</bs:beginDate>
-		|                <bs:endDate>"+ ГМ.Преобразовать_Дата_в_Строка( КонДата, "T23:59:59") +"</bs:endDate>
-		|            </vd:issueDateInterval>";
+		|<vd:issueDateInterval>
+		|<bs:beginDate>"+ ГМ.Преобразовать_Дата_в_Строка( НачДата, "T00:00:00" ) +"</bs:beginDate>
+		|<bs:endDate>"+ ГМ.Преобразовать_Дата_в_Строка( КонДата, "T23:59:59") +"</bs:endDate>
+		|</vd:issueDateInterval>";
 	КонецЕсли;
 
 	Если (ПустоеЗначение(Поставщик_ХозСубъект)=0) ИЛИ ( ПустоеЗначение(Поставщик_Площадка)=0 ) Тогда
 		Запрос=Запрос+" <vd:consignor>";
 		Если ПустоеЗначение(Поставщик_ХозСубъект)=0 Тогда
 			Запрос=Запрос+"
-			|                <dt:businessEntity>
-			|                    <bs:guid>"+ СокрЛП( Поставщик_ХозСубъект.GUID ) +"</bs:guid>
-			|                </dt:businessEntity>";
+			|<dt:businessEntity>
+			|<bs:guid>"+ СокрЛП( Поставщик_ХозСубъект.GUID ) +"</bs:guid>
+			|</dt:businessEntity>";
 		КонецЕсли;
 		Если ПустоеЗначение(Поставщик_Площадка)=0 Тогда
 			Запрос=Запрос+"
-			|                <dt:enterprise>
-			|                    <bs:guid>"+ СокрЛП(Поставщик_Площадка.GUID) +"</bs:guid>
-			|                </dt:enterprise>";
+			|<dt:enterprise>
+			|<bs:guid>"+ СокрЛП(Поставщик_Площадка.GUID) +"</bs:guid>
+			|</dt:enterprise>";
 		КонецЕсли;
 		Запрос=Запрос+" </vd:consignor>";
 	КонецЕсли;
 	Если ПустоеЗначение(НомерДок)=0 Тогда
 		Запрос=Запрос+"
-		|            <vd:referencedDocument>
-		|                <vd:issueNumber>"+ СокрЛП(НомерДок) +"</vd:issueNumber>
-		|                <vd:issueDate>"+ ДатаДок +"</vd:issueDate>
-		|                <vd:type>"+ ТипДок +"</vd:type>
-		|            </vd:referencedDocument>";
+		|<vd:referencedDocument>
+		|<vd:issueNumber>"+ СокрЛП(НомерДок) +"</vd:issueNumber>
+		|<vd:issueDate>"+ ДатаДок +"</vd:issueDate>
+		|<vd:type>"+ ТипДок +"</vd:type>
+		|</vd:referencedDocument>";
 	КонецЕсли;
 	//
 	Запрос=Запрос+"
-	|            <dt:enterpriseGuid>"+ СокрЛП(Площадка.GUID) +"</dt:enterpriseGuid>
-	|          </merc:getVetDocumentListRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|<dt:enterpriseGuid>"+ СокрЛП(Площадка.GUID) +"</dt:enterpriseGuid>
+	|</merc:getVetDocumentListRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";
 	Возврат Запрос;
@@ -1678,55 +1678,55 @@
 	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
 	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-	|        <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") +"</apl:issueDate>
-	|        <apl:data>
-	|          <merc:updateVeterinaryEventsRequest>
-	|            <merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:initiator>
-	|            <merc:enterprise>
-	|              <bs:guid>"+ СокрЛП(док.Партия.Производитель_Площадка.GUID) +"</bs:guid>
-	|            </merc:enterprise>
-	|            <vd:stockEntry>
-	|              <bs:guid>"+ СокрЛП( док.Партия.GUID ) +"</bs:guid>
-	|              <vd:vetEventList>
-	|                <vd:laboratoryResearch>
-	|                  <vd:actualDateTime>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаРезультата, "T00:00:00") +"</vd:actualDateTime>
-	|                  <vd:operator>
-	|                    <dt:name>" + СокрЛП(док.НаименованиеЛаборатории) + "</dt:name>
-	|                  </vd:operator>
-	|                  <vd:referencedDocument>
-	|                    <vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
-	|                    <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаОтбораПроб) +"</vd:issueDate>
-	|                    <vd:type>9</vd:type>
-	//|                    <vd:relationshipType>6</vd:relationshipType>
-	|                  </vd:referencedDocument>
-	|                  <vd:expertiseID>"+ СокрЛП(док.НомерЭкспертизы) +"</vd:expertiseID>
-	|                  <vd:disease>
-	|                    <dt:name>"+ СокрЛП(док.НаименованиеПоказателя) +"</dt:name>
-	|                  </vd:disease>
-	|                  <vd:method>
-	|                    <dt:name>"+ СокрЛП(док.МетодИсследования) +"</dt:name>
-	|                  </vd:method>
-						//Допустимые значения: UNKNOWN, POSITIVE, NEGATIVE
-	|                  <vd:result>"+ СокрЛП(док.РезультатИсследования.Идентификатор()) +"</vd:result>
-	|                  <vd:conclusion>"+ СокрЛП(док.Заключение)  +"</vd:conclusion>
-	|                </vd:laboratoryResearch>
-	|              </vd:vetEventList>
-	|            </vd:stockEntry>
-	|          </merc:updateVeterinaryEventsRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") +"</apl:issueDate>
+	|<apl:data>
+	|<merc:updateVeterinaryEventsRequest>
+	|<merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:initiator>
+	|<merc:enterprise>
+	|<bs:guid>"+ СокрЛП(док.Партия.Производитель_Площадка.GUID) +"</bs:guid>
+	|</merc:enterprise>
+	|<vd:stockEntry>
+	|<bs:guid>"+ СокрЛП( док.Партия.GUID ) +"</bs:guid>
+	|<vd:vetEventList>
+	|<vd:laboratoryResearch>
+	|<vd:actualDateTime>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаРезультата, "T00:00:00") +"</vd:actualDateTime>
+	|<vd:operator>
+	|<dt:name>" + СокрЛП(док.НаименованиеЛаборатории) + "</dt:name>
+	|</vd:operator>
+	|<vd:referencedDocument>
+	|<vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
+	|<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаОтбораПроб) +"</vd:issueDate>
+	|<vd:type>9</vd:type>
+	//|<vd:relationshipType>6</vd:relationshipType>
+	|</vd:referencedDocument>
+	|<vd:expertiseID>"+ СокрЛП(док.НомерЭкспертизы) +"</vd:expertiseID>
+	|<vd:disease>
+	|<dt:name>"+ СокрЛП(док.НаименованиеПоказателя) +"</dt:name>
+	|</vd:disease>
+	|<vd:method>
+	|<dt:name>"+ СокрЛП(док.МетодИсследования) +"</dt:name>
+	|</vd:method>
+	//Допустимые значения: UNKNOWN, POSITIVE, NEGATIVE
+	|<vd:result>"+ СокрЛП(док.РезультатИсследования.Идентификатор()) +"</vd:result>
+	|<vd:conclusion>"+ СокрЛП(док.Заключение)  +"</vd:conclusion>
+	|</vd:laboratoryResearch>
+	|</vd:vetEventList>
+	|</vd:stockEntry>
+	|</merc:updateVeterinaryEventsRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";
 
@@ -1818,108 +1818,108 @@
 		НомерСтроки=НомерСтроки+1;
 
 		запрос=запрос+"
-		|  <vd:routePoint>
-		|    <vd:sqnId>"+ НомерСтроки +"</vd:sqnId>
+		|<vd:routePoint>
+		|<vd:sqnId>"+ НомерСтроки +"</vd:sqnId>
 		|";
 		Если ПустоеЗначение( тзМаршрутДоставки.ВыбПлощадка.GUID )=0 Тогда
 			запрос=запрос+"
-			|    <vd:enterprise>
-			|      <bs:guid>"+ тзМаршрутДоставки.ВыбПлощадка.GUID +"</bs:guid>
-			|    </vd:enterprise>
+			|<vd:enterprise>
+			|<bs:guid>"+ тзМаршрутДоставки.ВыбПлощадка.GUID +"</bs:guid>
+			|</vd:enterprise>
 			|";
 		Иначе
 			запрос=запрос+"
-			|    <vd:location>
-			|      <dt:name>"+тзМаршрутДоставки.Название+"</dt:name>
-			|      <dt:address>";
+			|<vd:location>
+			|<dt:name>"+тзМаршрутДоставки.Название+"</dt:name>
+			|<dt:address>";
 			Если ПустоеЗначение(тзМаршрутДоставки.Страна) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:country>
-				|          <bs:guid>"+СокрЛП(тзМаршрутДоставки.Страна.guid)+"</bs:guid>
-				|        </dt:country>";
+				|<dt:country>
+				|<bs:guid>"+СокрЛП(тзМаршрутДоставки.Страна.guid)+"</bs:guid>
+				|</dt:country>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Регион) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:region>
-				|          <bs:guid>"+СокрЛП(тзМаршрутДоставки.Регион.guid)+"</bs:guid>
-				|        </dt:region>";
+				|<dt:region>
+				|<bs:guid>"+СокрЛП(тзМаршрутДоставки.Регион.guid)+"</bs:guid>
+				|</dt:region>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Район) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:district>
-				|          <bs:guid>"+СокрЛП(тзМаршрутДоставки.Район.guid)+"</bs:guid>
-				|        </dt:district>";
+				|<dt:district>
+				|<bs:guid>"+СокрЛП(тзМаршрутДоставки.Район.guid)+"</bs:guid>
+				|</dt:district>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Город) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:locality>
-				|          <bs:guid>"+СокрЛП(тзМаршрутДоставки.Город.guid)+"</bs:guid>
-				|        </dt:locality>";
+				|<dt:locality>
+				|<bs:guid>"+СокрЛП(тзМаршрутДоставки.Город.guid)+"</bs:guid>
+				|</dt:locality>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Улица) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:street>
-				|          <bs:guid>"+СокрЛП(тзМаршрутДоставки.Улица.guid)+"</bs:guid>
-				|        </dt:street>";
+				|<dt:street>
+				|<bs:guid>"+СокрЛП(тзМаршрутДоставки.Улица.guid)+"</bs:guid>
+				|</dt:street>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Дом) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:house>"+СокрЛП(тзМаршрутДоставки.Дом)+"</dt:house>";
+				|<dt:house>"+СокрЛП(тзМаршрутДоставки.Дом)+"</dt:house>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Строение) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:building>"+СокрЛП(тзМаршрутДоставки.Строение)+"</dt:building>";
+				|<dt:building>"+СокрЛП(тзМаршрутДоставки.Строение)+"</dt:building>";
 			КонецЕсли;
 			Если ПустоеЗначение(тзМаршрутДоставки.Помещение) = 0 Тогда
 				Запрос=Запрос+"
-				|        <dt:room>"+СокрЛП(тзМаршрутДоставки.Помещение)+"</dt:room>";
+				|<dt:room>"+СокрЛП(тзМаршрутДоставки.Помещение)+"</dt:room>";
 			КонецЕсли;
 
 			Запрос=Запрос+"
-			|      </dt:address>
-			|    </vd:location>
+			|</dt:address>
+			|</vd:location>
 			|";
 		КонецЕсли;
 		запрос=запрос+"
-		//|    <vd:transshipment>"+?(тзМаршрутДоставки.Перегрузка = 1,"true","false")+"</vd:transshipment>
+		//|<vd:transshipment>"+?(тзМаршрутДоставки.Перегрузка = 1,"true","false")+"</vd:transshipment>
 		//отражать будем только пункты перегрузки
-		|    <vd:transshipment>true</vd:transshipment>
-		|    <vd:nextTransport>
-		|      <vd:transportType>"+ тзМаршрутДоставки.ТипТранспорта +"</vd:transportType>
-		|        <vd:transportNumber>";
+		|<vd:transshipment>true</vd:transshipment>
+		|<vd:nextTransport>
+		|<vd:transportType>"+ тзМаршрутДоставки.ТипТранспорта +"</vd:transportType>
+		|<vd:transportNumber>";
 
 		Если ПустоеЗначение(тзМаршрутДоставки.номерКонтейнера) = 0 Тогда
 			Запрос=Запрос+"
-           	|          <vd:containerNumber>"+СокрЛП(тзМаршрутДоставки.номерКонтейнера)+"</vd:containerNumber>";
+           	|<vd:containerNumber>"+СокрЛП(тзМаршрутДоставки.номерКонтейнера)+"</vd:containerNumber>";
 		КонецЕсли;
 		Если ПустоеЗначение(тзМаршрутДоставки.НомерАвто) = 0 Тогда
 			Запрос=Запрос+"
-           	|          <vd:vehicleNumber>"+СокрЛП(тзМаршрутДоставки.НомерАвто)+"</vd:vehicleNumber>";
+           	|<vd:vehicleNumber>"+СокрЛП(тзМаршрутДоставки.НомерАвто)+"</vd:vehicleNumber>";
 		КонецЕсли;
 		Если ПустоеЗначение(тзМаршрутДоставки.номерприцепа) = 0 Тогда
 			Запрос=Запрос+"
-           	|          <vd:trailerNumber>"+СокрЛП(тзМаршрутДоставки.номерприцепа)+"</vd:trailerNumber>";
+           	|<vd:trailerNumber>"+СокрЛП(тзМаршрутДоставки.номерприцепа)+"</vd:trailerNumber>";
 		КонецЕсли;
 		Если ПустоеЗначение(тзМаршрутДоставки.номерВагона) = 0 Тогда
 			Запрос=Запрос+"
-           	|          <vd:wagonNumber>"+СокрЛП(тзМаршрутДоставки.номерВагона)+"</vd:wagonNumber>";
+           	|<vd:wagonNumber>"+СокрЛП(тзМаршрутДоставки.номерВагона)+"</vd:wagonNumber>";
 		КонецЕсли;
 		Если ПустоеЗначение(тзМаршрутДоставки.НазваниеСудна) = 0 Тогда
 			Запрос=Запрос+"
-           	|          <vd:shipName>"+СокрЛП(тзМаршрутДоставки.НазваниеСудна)+"</vd:shipName>";
+           	|<vd:shipName>"+СокрЛП(тзМаршрутДоставки.НазваниеСудна)+"</vd:shipName>";
 		КонецЕсли;
 		Если ПустоеЗначение(тзМаршрутДоставки.НомерАвиарейса) = 0 Тогда
 			Запрос=Запрос+"
-           	|          <vd:flightNumber>"+СокрЛП(тзМаршрутДоставки.НомерАвиарейса)+"</vd:flightNumber>";
+           	|<vd:flightNumber>"+СокрЛП(тзМаршрутДоставки.НомерАвиарейса)+"</vd:flightNumber>";
 		КонецЕсли;
 
 		Запрос=Запрос+"
-  	    |        </vd:transportNumber>";
+  	    |</vd:transportNumber>";
 
 
 		запрос=запрос+"
-		|    </vd:nextTransport>
-		|  </vd:routePoint>
+		|</vd:nextTransport>
+		|</vd:routePoint>
 		|";
 	КонецЦикла;
 
@@ -1961,28 +1961,28 @@
 		|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
 		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
 		|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-		|  <SOAP-ENV:Header/>
-		|  <SOAP-ENV:Body>
-		|    <apldef:submitApplicationRequest>
-		|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-		|      <apl:application>
-		|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-		|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-		|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка( ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
-		|        <apl:data>
-		|          <merc:checkShipmentRegionalizationRequest>
-		|            <merc:localTransactionId>" + ГМ.Компонента.GUID() + "</merc:localTransactionId>
-		|            <merc:initiator>
-		|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-		|            </merc:initiator>
+		|<SOAP-ENV:Header/>
+		|<SOAP-ENV:Body>
+		|<apldef:submitApplicationRequest>
+		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+		|<apl:application>
+		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка( ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
+		|<apl:data>
+		|<merc:checkShipmentRegionalizationRequest>
+		|<merc:localTransactionId>" + ГМ.Компонента.GUID() + "</merc:localTransactionId>
+		|<merc:initiator>
+		|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+		|</merc:initiator>
 		|";
 
 	тзВидыПродукции.ВыбратьСтроки();
 	Пока тзВидыПродукции.ПолучитьСтроку() = 1 Цикл
 		Запрос = Запрос+"
-		|            <dt:cargoType>
-		|              <bs:guid>"+ тзВидыПродукции.GUID +"</bs:guid>
-		|            </dt:cargoType>";
+		|<dt:cargoType>
+		|<bs:guid>"+ тзВидыПродукции.GUID +"</bs:guid>
+		|</dt:cargoType>";
 		
 	КонецЦикла;
 		
@@ -2005,28 +2005,28 @@
 	КонецЕсли;
 
 	Запрос = Запрос+"
-	|            <vd:shipmentRoute>
-	|              <vd:routePoint>
-	|                <vd:sqnId>1</vd:sqnId>
-	|                <vd:enterprise>
-	|                  <bs:guid>"+ Отправитель_Площадка +"</bs:guid>
-	|                </vd:enterprise>
-	|              </vd:routePoint>
+	|<vd:shipmentRoute>
+	|<vd:routePoint>
+	|<vd:sqnId>1</vd:sqnId>
+	|<vd:enterprise>
+	|<bs:guid>"+ Отправитель_Площадка +"</bs:guid>
+	|</vd:enterprise>
+	|</vd:routePoint>
 	|";
 	ЗапросМаршрут = Запрос_МаршрутДоставки( док, НомерСтроки );
 	Запрос=Запрос+ЗапросМаршрут+"
-	|              <vd:routePoint>
-	|                <vd:sqnId>"+ (НомерСтроки+1) +"</vd:sqnId>
-	|                <vd:enterprise>
-	|                  <bs:guid>"+ Получатель_Площадка +"</bs:guid>
-	|                </vd:enterprise>
-	|              </vd:routePoint>
-	|            </vd:shipmentRoute>
-	|          </merc:checkShipmentRegionalizationRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|<vd:routePoint>
+	|<vd:sqnId>"+ (НомерСтроки+1) +"</vd:sqnId>
+	|<vd:enterprise>
+	|<bs:guid>"+ Получатель_Площадка +"</bs:guid>
+	|</vd:enterprise>
+	|</vd:routePoint>
+	|</vd:shipmentRoute>
+	|</merc:checkShipmentRegionalizationRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";
 	Возврат Запрос;
@@ -2300,7 +2300,7 @@
 
     Если ЕстьСведенияОбУпаковках = 1 Тогда
 		consignment = consignment+ "
-		|                <vd:packageList>";
+		|<vd:packageList>";
         Для НомУровня=1 По УровнейВдок Цикл
 			Попытка
 				ГУИДУпак =  СокрЛП(Док.ПолучитьАтрибут("ФормаУпак"+НомУровня).GUID);
@@ -2312,12 +2312,12 @@
 			    Продолжить;
 			КонецЕсли;
 			consignment = consignment+ "
-			|                  <dt:package>
-			|                    <dt:level>"+НомУровня+"</dt:level>
-			|                    <dt:packingType>
-			|                      <bs:guid>"+ ГУИДУпак +"</bs:guid>
-			|                    </dt:packingType>
-			|                    <dt:quantity>"+ Док.ПолучитьАтрибут("КолВоУпак"+НомУровня) +"</dt:quantity>";
+			|<dt:package>
+			|<dt:level>"+НомУровня+"</dt:level>
+			|<dt:packingType>
+			|<bs:guid>"+ ГУИДУпак +"</bs:guid>
+			|</dt:packingType>
+			|<dt:quantity>"+ Док.ПолучитьАтрибут("КолВоУпак"+НомУровня) +"</dt:quantity>";
 
 			// Маркировки
 			мм=0;
@@ -2328,14 +2328,14 @@
 				КонецЕсли;
 				знМарк = СокрЛП(Док.ПолучитьАтрибут("ЗначениеМаркировки"+мм+"_"+НомУровня));
 				consignment = consignment+ "
-				|                    <dt:productMarks class='"+КлассМарк+"'>"+ ЗаменитьСпецСимволы( знМарк ) +"</dt:productMarks>";
+				|<dt:productMarks class='"+КлассМарк+"'>"+ ЗаменитьСпецСимволы( знМарк ) +"</dt:productMarks>";
 
 			КонецЦикла;
 			consignment = consignment+ "
-	   		|                  </dt:package>";
+	   		|</dt:package>";
 	    КонецЦикла;
 		consignment = consignment+ "
-		|                </vd:packageList>";
+		|</vd:packageList>";
 	КонецЕсли;
 	
 	Возврат  consignment;
@@ -2366,62 +2366,62 @@
   	|<SOAP-ENV:Header/>
   	|<SOAP-ENV:Body>
     |<apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
-	|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-	|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00", 1 ) + "</apl:issueDate>
-	|        <apl:data>
-	|          <merc:prepareOutgoingConsignmentRequest>
-	|            <merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:initiator>
+	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
+	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00", 1 ) + "</apl:issueDate>
+	|<apl:data>
+	|<merc:prepareOutgoingConsignmentRequest>
+	|<merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:initiator>
 	|";
 
 //************************
     delivery = "
-    |       <merc:delivery>";
+    | <merc:delivery>";
 
 	Если ПустоеЗначение(док.ТтнДата) = 0 Тогда   // Есть ТТН
     	delivery = delivery + "
-    	|          <vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>";
+    	|<vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата, "T00:00:00") + "</vd:deliveryDate>";
 	Иначе
     	delivery = delivery + "
-    	|          <vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</vd:deliveryDate>";
+    	|<vd:deliveryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</vd:deliveryDate>";
 	КонецЕсли;
 
     delivery = delivery + "
-    |          <vd:consignor>
-    |            <dt:businessEntity>
-    |              <bs:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</bs:guid>
-    |            </dt:businessEntity>
-    |            <dt:enterprise>
-    |              <bs:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</bs:guid>
-    |            </dt:enterprise>
-    |          </vd:consignor>
-    |          <vd:consignee>
-    |            <dt:businessEntity>
-    |              <bs:guid>"+ СокрЛП(док.Получатель_ХозСубъект.GUID) +"</bs:guid>
-    |            </dt:businessEntity>
-    |            <dt:enterprise>
-    |              <bs:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</bs:guid>
-    |            </dt:enterprise>";
+    |<vd:consignor>
+    |<dt:businessEntity>
+    |<bs:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</bs:guid>
+    |</dt:businessEntity>
+    |<dt:enterprise>
+    |<bs:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</bs:guid>
+    |</dt:enterprise>
+    |</vd:consignor>
+    |<vd:consignee>
+    |<dt:businessEntity>
+    |<bs:guid>"+ СокрЛП(док.Получатель_ХозСубъект.GUID) +"</bs:guid>
+    |</dt:businessEntity>
+    |<dt:enterprise>
+    |<bs:guid>"+ СокрЛП(док.Получатель_Площадка.GUID) +"</bs:guid>
+    |</dt:enterprise>";
 
 	//<dt:globalID>4607009526782</dt:globalID> 	dt:GLNType 	[0..*]  [ ... ] Global Location Number - уникальный номер площадки
 	delivery = delivery+"
-    |          </vd:consignee>";
+    |</vd:consignee>";
 
 	consignment="";
 	Док.ВыбратьСтроки();
 	Пока Док.ПолучитьСтроку() = 1 Цикл
-//        |      <vd:consignment id='id1'>
+//        |<vd:consignment id='id1'>
 		consignment = consignment+ "
-		|      <vd:consignment id='_" + Док.НомерСтроки + "'>";
+		|<vd:consignment id='_" + Док.НомерСтроки + "'>";
 
 		//Указание согласованного наименования И фасовки (указание записи журнала И productItem с наименованием/артикулом/GTIN получателя в запросе).
 			consignment = consignment+ "
-    	    |        <vd:productItem>";
+    	    |<vd:productItem>";
 			Если Док.Продукция_Элемент.ВидПродукции <> Док.Партия.ВидПродукции Тогда
 	    	    // При изменении Вида продукции у ProductItem ошибка при списании ранее полученной партии
 				// Указанное наименование продукции относится к другому виду продукции.				
@@ -2440,29 +2440,29 @@
 			
 			Если ПустоеЗначение(док.ТипФасовки)=0 Тогда
 				consignment = consignment+ "
-    	    	|          <dt:packaging>
-	        	|            <dt:packagingType>
-		        |              <bs:guid>"+ СокрЛП(док.ТипФасовки.GUID) +"</bs:guid>
+    	    	|<dt:packaging>
+	        	|<dt:packagingType>
+		        |<bs:guid>"+ СокрЛП(док.ТипФасовки.GUID) +"</bs:guid>
 		//						<dt:globalID>BE</dt:globalID> 	dt:PackingCodeType 	[0..1] 	Уникальный идентификатор упаковки.
-    		    |            </dt:packagingType>
-        		|            <dt:quantity>"+ док.КолВоЕдиницФасовки +"</dt:quantity>
-		        |            <dt:volume>"+ док.ОбъемЕдиницыФасовки +"</dt:volume>
-    		    |            <dt:unit>
-        		|              <bs:guid>"+ СокрЛП(док.ЕдИзмОбъемаФасовки.GUID) +"</bs:guid>
-		        |            </dt:unit>
-    		    |          </dt:packaging>";
+    		    |</dt:packagingType>
+        		|<dt:quantity>"+ док.КолВоЕдиницФасовки +"</dt:quantity>
+		        |<dt:volume>"+ док.ОбъемЕдиницыФасовки +"</dt:volume>
+    		    |<dt:unit>
+        		|<bs:guid>"+ СокрЛП(док.ЕдИзмОбъемаФасовки.GUID) +"</bs:guid>
+		        |</dt:unit>
+    		    |</dt:packaging>";
 			КонецЕсли;
 
 			consignment = consignment+ "
-    	    |        </vd:productItem>";
+    	    |</vd:productItem>";
 
 //		КонецЕсли;
 
 		consignment = consignment+ "
-		|        <vd:volume>"+ Док.Количество +"</vd:volume>
-        |        <vd:unit>
-        |          <bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</bs:guid>
-        |        </vd:unit>
+		|<vd:volume>"+ Док.Количество +"</vd:volume>
+        |<vd:unit>
+        |<bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</bs:guid>
+        |</vd:unit>
         |";
 
 		consignment = consignment+ " <vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo> ";
@@ -2472,16 +2472,16 @@
 		Если ПустоеЗначение(док.ВидПроисхожденияНепищевойПродукции)=0 Тогда
 			consignment = consignment+ "
 			|<vd:applicableClassifications>
-			|   <vd:nonFoodSource>"+ док.ВидПроисхожденияНепищевойПродукции.Идентификатор() +"</vd:nonFoodSource>
+			| <vd:nonFoodSource>"+ док.ВидПроисхожденияНепищевойПродукции.Идентификатор() +"</vd:nonFoodSource>
 			|</vd:applicableClassifications>";
 		КонецЕсли;
 
 
 		consignment = consignment+ "
-		|        <vd:sourceStockEntry>
-        |          <bs:guid>"+ СокрЛП(док.Партия.GUID) +"</bs:guid>
-        |        </vd:sourceStockEntry>
-        |      </vd:consignment>
+		|<vd:sourceStockEntry>
+        |<bs:guid>"+ СокрЛП(док.Партия.GUID) +"</bs:guid>
+        |</vd:sourceStockEntry>
+        |</vd:consignment>
 		|";
 	КонецЦикла; //По строкам документа
 	//Тип товарно-транспортной накладной.
@@ -2489,9 +2489,9 @@
 	ЗапросПодвал = "";
 	Если ПустоеЗначение(док.Перевозчик_ХозСубъект) = 0 Тогда
 	ЗапросПодвал = "
-        |      <vd:broker>
-        |        <bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
-        |      </vd:broker>";
+        |<vd:broker>
+        |<bs:guid>"+ СокрЛП(док.Перевозчик_ХозСубъект.GUID) +"</bs:guid>
+        |</vd:broker>";
 	КонецЕсли;
 
 	//ТермическоеСостояние="";
@@ -2502,27 +2502,27 @@
 	//КонецЕсли;
 	//
 	ЗапросПодвал = ЗапросПодвал+"
-    |      <vd:transportInfo>
-    |        <vd:transportType>1</vd:transportType>
-    |        <vd:transportNumber>";
+    |<vd:transportInfo>
+    |<vd:transportType>1</vd:transportType>
+    |<vd:transportNumber>";
 	
 	Если ПустоеЗначение(док.номерКонтейнера) = 0 Тогда
 		ЗапросПодвал = ЗапросПодвал+"
-    	|          <vd:containerNumber>"+ СокрЛП(док.номерКонтейнера) +"</vd:containerNumber>";
+    	|<vd:containerNumber>"+ СокрЛП(док.номерКонтейнера) +"</vd:containerNumber>";
 	КонецЕсли;
 	Если ПустоеЗначение(док.номерАвто) = 0 Тогда
 		ЗапросПодвал = ЗапросПодвал+"
-    	|          <vd:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</vd:vehicleNumber>";
+    	|<vd:vehicleNumber>"+ СокрЛП(док.номерАвто) +"</vd:vehicleNumber>";
 	КонецЕсли;
 	Если ПустоеЗначение(док.номерПолуприцепа) = 0 Тогда
 		ЗапросПодвал = ЗапросПодвал+"
-    	|          <vd:trailerNumber>"+ СокрЛП(док.номерПолуприцепа) +"</vd:trailerNumber>";
+    	|<vd:trailerNumber>"+ СокрЛП(док.номерПолуприцепа) +"</vd:trailerNumber>";
 	КонецЕсли;
 	
 	ЗапросПодвал = ЗапросПодвал+"
-    |        </vd:transportNumber>
-    |      </vd:transportInfo>
-    |      <vd:transportStorageType>"+ док.ТермическоеСостояние.Идентификатор() +"</vd:transportStorageType>";
+    |</vd:transportNumber>
+    |</vd:transportInfo>
+    |<vd:transportStorageType>"+ док.ТермическоеСостояние.Идентификатор() +"</vd:transportStorageType>";
 
 	ЗапросПодвал=ЗапросПодвал + "
 	|<vd:shipmentRoute>
@@ -2530,16 +2530,16 @@
 	|</vd:shipmentRoute> ";
 
 	ЗапросПодвал = ЗапросПодвал+"
-		|      <vd:accompanyingForms>";
+		|<vd:accompanyingForms>";
 
 	Если ПустоеЗначение(док.ТтнДата) = 0 Тогда	// Без ТТН
 		ЗапросПодвал = ЗапросПодвал+"
-        |        <vd:waybill>
-        |          <vd:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:issueSeries>
-        |          <vd:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:issueNumber>
-        |          <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:issueDate>
-        |          <vd:type>1</vd:type>
-        |        </vd:waybill>";
+        |<vd:waybill>
+        |<vd:issueSeries>"+ СокрЛП(док.ТтнСерия) +"</vd:issueSeries>
+        |<vd:issueNumber>"+ СокрЛП(док.ТтнНомер) +"</vd:issueNumber>
+        |<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТтнДата) +"</vd:issueDate>
+        |<vd:type>1</vd:type>
+        |</vd:waybill>";
 	КонецЕсли;
 
 	//!!! Цели в ТЧ документа
@@ -2547,14 +2547,14 @@
 	Пока Док.ПолучитьСтроку() = 1 Цикл
 
 		ЗапросПодвал = ЗапросПодвал+"
-	        |        <vd:vetCertificate for='_"+ док.НомерСтроки +"'>
-	        |          <vd:authentication>
-	        |            <vd:purpose>
-	        |              <bs:guid>"+ СокрЛП( док.Цель.Guid ) +"</bs:guid>
-	        |            </vd:purpose>
-	        |            <vd:cargoInspected>"+ ГМ.булево(док.cargoInspected) +"</vd:cargoInspected>
-			|            <vd:cargoExpertized>"+док.РезультатыИсследований.Идентификатор()+"</vd:cargoExpertized>
-			|            <vd:locationProsperity>"+ СокрЛП(док.Местность) +"</vd:locationProsperity>
+	        |<vd:vetCertificate for='_"+ док.НомерСтроки +"'>
+	        |<vd:authentication>
+	        |<vd:purpose>
+	        |<bs:guid>"+ СокрЛП( док.Цель.Guid ) +"</bs:guid>
+	        |</vd:purpose>
+	        |<vd:cargoInspected>"+ ГМ.булево(док.cargoInspected) +"</vd:cargoInspected>
+			|<vd:cargoExpertized>"+док.РезультатыИсследований.Идентификатор()+"</vd:cargoExpertized>
+			|<vd:locationProsperity>"+ СокрЛП(док.Местность) +"</vd:locationProsperity>
 			|";
 
 			Если ПустоеЗначение(тзУсловияПеревозки)=0 Тогда
@@ -2578,38 +2578,38 @@
 			КонецЕсли;
 			// + добавим из документа
 			ОсобыеОтметки = ОсобыеОтметки +" "+ СокрЛП(док.особыеотметки);
-			ЗапросПодвал = ЗапросПодвал+ ?(Пустоезначение(особыеотметки) = 0, "            <vd:specialMarks>"+ ОсобыеОтметки +"</vd:specialMarks>","");
+			ЗапросПодвал = ЗапросПодвал+ ?(Пустоезначение(особыеотметки) = 0, "<vd:specialMarks>"+ ОсобыеОтметки +"</vd:specialMarks>","");
 			
 		ЗапросПодвал = ЗапросПодвал+ "
-        |          </vd:authentication>
-        |        </vd:vetCertificate>";
+        |</vd:authentication>
+        |</vd:vetCertificate>";
 	КонецЦикла;
 
 		// Связанные документы
 		// http://help.vetrf.ru/wiki/DocumentType_v2.0
 		// тип 16 = Заказ, 6 = ТОРГ12,  1 = ТрН
-//        |          <vd:issueSeries>А</vd:issueSeries>
-//        |          <vd:issueDate>2017-09-26</vd:issueDate>
+//        |<vd:issueSeries>А</vd:issueSeries>
+//        |<vd:issueDate>2017-09-26</vd:issueDate>
 
 		СвязанныеДокументы = "";
 		Если ПустоеЗначение(Док.НомерЗаказаПокупателя) = 0 Тогда
 			СвязанныеДокументы = "
-			|        <vd:relatedDocument>
-    	    |          <vd:issueNumber>"+СокрЛП(док.НомерЗаказаПокупателя)+"</vd:issueNumber>
-			|          <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаЗаказаПокупателя) +"</vd:issueDate>
-    	    |          <vd:type>16</vd:type>
-        	|          <vd:relationshipType>1</vd:relationshipType>
+			|<vd:relatedDocument>
+    	    |<vd:issueNumber>"+СокрЛП(док.НомерЗаказаПокупателя)+"</vd:issueNumber>
+			|<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаЗаказаПокупателя) +"</vd:issueDate>
+    	    |<vd:type>16</vd:type>
+        	|<vd:relationshipType>1</vd:relationshipType>
 	        |	     </vd:relatedDocument>";
 		КонецЕсли;
 
 		Если ПустоеЗначение(Док.ТОРГ12Номер) = 0 Тогда
 	        СвязанныеДокументы = СвязанныеДокументы+ "
-	        |        <vd:relatedDocument>
-    	    |          <vd:issueNumber>"+СокрЛП(док.ТОРГ12Номер)+"</vd:issueNumber>
-	        |          <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТОРГ12Дата) +"</vd:issueDate>
-    	    |          <vd:type>6</vd:type>
-        	|          <vd:relationshipType>1</vd:relationshipType>
-	        |        </vd:relatedDocument>";
+	        |<vd:relatedDocument>
+    	    |<vd:issueNumber>"+СокрЛП(док.ТОРГ12Номер)+"</vd:issueNumber>
+	        |<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ТОРГ12Дата) +"</vd:issueDate>
+    	    |<vd:type>6</vd:type>
+        	|<vd:relationshipType>1</vd:relationshipType>
+	        |</vd:relatedDocument>";
         КонецЕсли;
 
 		//!!! UUID на основании аннулированного ВСД в ТЧ документа
@@ -2617,11 +2617,11 @@
 		Пока Док.ПолучитьСтроку() = 1 Цикл
 			Если ПустоеЗначение(Док.СвязанныйДокументВСД) = 0 Тогда
 				СвязанныеДокументы = СвязанныеДокументы+"
-				|        <vd:relatedDocument for='_"+ док.НомерСтроки +"'>
-	    	    |          <vd:issueNumber>"+СокрЛП( док.СвязанныйДокументВСД.UUID )+"</vd:issueNumber>
-				|          <vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.СвязанныйДокументВСД.ДатаДок) +"</vd:issueDate>
-	    	    |          <vd:type>11</vd:type>
-	        	|          <vd:relationshipType>2</vd:relationshipType>
+				|<vd:relatedDocument for='_"+ док.НомерСтроки +"'>
+	    	    |<vd:issueNumber>"+СокрЛП( док.СвязанныйДокументВСД.UUID )+"</vd:issueNumber>
+				|<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.СвязанныйДокументВСД.ДатаДок) +"</vd:issueDate>
+	    	    |<vd:type>11</vd:type>
+	        	|<vd:relationshipType>2</vd:relationshipType>
 		        |	     </vd:relatedDocument>";
 			КонецЕсли;
 		КонецЦикла;
@@ -2631,13 +2631,13 @@
 		КонецЕсли;
 
 	ЗапросПодвал = ЗапросПодвал+ "
-		|      </vd:accompanyingForms>
-        |    </merc:delivery>
-		|          </merc:prepareOutgoingConsignmentRequest>
-		|        </apl:data>
-		|      </apl:application>
-		|    </apldef:submitApplicationRequest>
-		|  </SOAP-ENV:Body>
+		|</vd:accompanyingForms>
+        |</merc:delivery>
+		|</merc:prepareOutgoingConsignmentRequest>
+		|</apl:data>
+		|</apl:application>
+		|</apldef:submitApplicationRequest>
+		|</SOAP-ENV:Body>
 		|</SOAP-ENV:Envelope>
 		|";
 
@@ -3056,36 +3056,36 @@
 	//}
 
 	Запрос ="<SOAP-ENV:Envelope
-		|      xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
-		|      xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
-		|      xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
-		|      xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
-		|      xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
-		|      xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
-		|      xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-		|  <SOAP-ENV:Header/>
-		|  <SOAP-ENV:Body>
-		|    <apldef:submitApplicationRequest>
-		|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-		|      <apl:application>
-		|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-		|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-		|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</apl:issueDate>
-		|        <apl:data>
-		|          <merc:registerProductionOperationRequest>
-		|            <merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
-		|            <merc:initiator>
-		|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-		|            </merc:initiator>
-		|            <merc:enterprise>
-		|              <bs:guid>"+ СокрЛП(док.Производитель_Площадка.GUID) +"</bs:guid>
-		|            </merc:enterprise>
-		|            <merc:productionOperation> ";
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+		|xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+		|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+		|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+		|<SOAP-ENV:Header/>
+		|<SOAP-ENV:Body>
+		|<apldef:submitApplicationRequest>
+		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+		|<apl:application>
+		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</apl:issueDate>
+		|<apl:data>
+		|<merc:registerProductionOperationRequest>
+		|<merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
+		|<merc:initiator>
+		|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+		|</merc:initiator>
+		|<merc:enterprise>
+		|<bs:guid>"+ СокрЛП(док.Производитель_Площадка.GUID) +"</bs:guid>
+		|</merc:enterprise>
+		|<merc:productionOperation> ";
 
 // НЗП
 		Если (ПустоеЗначение(Док.operationId) = 0) Тогда
 			Запрос=Запрос+"
-			|        <vd:operationId>"+ СокрЛП(Док.operationId) +"</vd:operationId>
+			|<vd:operationId>"+ СокрЛП(Док.operationId) +"</vd:operationId>
 			|";
 		КонецЕсли;
 
@@ -3097,13 +3097,13 @@
 			Если док.ВидДвижения=2 Тогда
 				Запрос=Запрос+"
 				| <vd:rawBatch>
-				|    <vd:sourceStockEntry>
-				|       <bs:guid>" + СокрЛП(док.Партия.guid) + "</bs:guid>
-				|    </vd:sourceStockEntry>
-				|    <vd:volume>"+ док.Количество +"</vd:volume>
-				|    <vd:unit>
-				|       <bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.Guid) +"</bs:guid>
-				|    </vd:unit>
+				|<vd:sourceStockEntry>
+				| <bs:guid>" + СокрЛП(док.Партия.guid) + "</bs:guid>
+				|</vd:sourceStockEntry>
+				|<vd:volume>"+ док.Количество +"</vd:volume>
+				|<vd:unit>
+				| <bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.Guid) +"</bs:guid>
+				|</vd:unit>
 				| </vd:rawBatch>
 				|";
 			КонецЕсли;
@@ -3116,70 +3116,70 @@
 		Если док.ВидДвижения=1 Тогда // Выпуск
 	
 			Запрос=Запрос+"
-				|              <vd:productiveBatch>
-				|                <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-				|                <vd:product>
-				|                  <bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
-				|                </vd:product>
-				|                <vd:subProduct>
-				|                  <bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
-				|                </vd:subProduct>
-				|                <vd:productItem>
+				|<vd:productiveBatch>
+				|<vd:productType>"+ док.Продукция.Тип +"</vd:productType>
+				|<vd:product>
+				|<bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
+				|</vd:product>
+				|<vd:subProduct>
+				|<bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
+				|</vd:subProduct>
+				|<vd:productItem>
 				// Обязательно должно быть заполнено хотя бы одно из полей: либо UUID, либо GUID. При указании обоих полей приоритет у UUID.
-				|                  <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>
-				|                </vd:productItem>
-				|                <vd:volume>"+ Док.Количество +"</vd:volume>
-				|                <vd:unit>
-				|                  <bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</bs:guid>
-				|                </vd:unit>";
-		//		|                <vd:dateOfProduction> ";
+				|<bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>
+				|</vd:productItem>
+				|<vd:volume>"+ Док.Количество +"</vd:volume>
+				|<vd:unit>
+				|<bs:guid>"+ СокрЛП(док.ЕдиницаИзмерения.GUID) +"</bs:guid>
+				|</vd:unit>";
+		//		|<vd:dateOfProduction> ";
 				//Может быть указана датой ИЛИ диапазоном дат. В случае точной даты выработки указывается только первая компонента - firstDate.
 				//Для скоропортящейся продукции обязательны к указанию год/месяц/день И могут быть указаны час/минута.
 				//Для не скоропортящейся продукции обязательны к указанию год/месяц И может быть указан день.
 				//Для не скоропортящейся продукции дата выработки И дата окончания срока годности должны быть заданы в одном формате
 				//	(например, Если дата выработки указывается как год/месяц, то указать дату окончания срока годности как год/месяц/день нельзя).
 	
-			Запрос = Запрос + ГМ.Изготовление_СрокГодности_в_XML(док, "vd");
+			Запрос = Запрос + ГМ.Изготовление_СрокГодности_в_XML(док, "vd" );
 	
 			//Уникальный идентификатор производственной партии продукции.
 			Запрос=Запрос+"
-			|                <vd:batchID>"+ СокрЛП( док.НомерПартии ) +"</vd:batchID>
-			|                <vd:perishable>"+ ГМ.булево(док.Скоропортящийся)+"</vd:perishable>
-			|                <vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo>
+			|<vd:batchID>"+ СокрЛП( док.НомерПартии ) +"</vd:batchID>
+			|<vd:perishable>"+ ГМ.булево(док.Скоропортящийся)+"</vd:perishable>
+			|<vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo>
 			|";
 		
 				
 			Запрос = Запрос + МаркировкаДокументаВЗапрос( Док );
 
 			Запрос=Запрос+"
-			|              </vd:productiveBatch>";
+			|</vd:productiveBatch>";
 		КонецЕсли; // производство
 
 
 	КонецЦикла;
     // завершение операции
 	Запрос=Запрос+"
-	|          <vd:finalizeOperation>"+ГМ.булево(док.ЗавершитьОперацию)+"</vd:finalizeOperation>";
+	|<vd:finalizeOperation>"+ГМ.булево(док.ЗавершитьОперацию)+"</vd:finalizeOperation>";
 
 
 	Запрос=Запрос+"
-	|            </merc:productionOperation>
-	|            <merc:vetDocument>
-	|              <vd:authentication>
-	|              <vd:cargoInspected>"+ ГМ.булево(док.cargoInspected) +"</vd:cargoInspected>";
+	|</merc:productionOperation>
+	|<merc:vetDocument>
+	|<vd:authentication>
+	|<vd:cargoInspected>"+ ГМ.булево(док.cargoInspected) +"</vd:cargoInspected>";
 	//				cargoExpertized = Проводилась ли ветсанэкспертиза.
 	//				Возможные значения: VSEFULL, VSERAW, UNFULFILLED
 	Запрос=Запрос+"
-	|                <vd:cargoExpertized>"+док.РезультатыИсследований.Идентификатор()+"</vd:cargoExpertized>";
-	Запрос = Запрос+ ?(Пустоезначение(док.особыеотметки) = 0, "              <vd:specialMarks>"+ СокрЛП(док.особыеотметки) +"</vd:specialMarks>","");
+	|<vd:cargoExpertized>"+док.РезультатыИсследований.Идентификатор()+"</vd:cargoExpertized>";
+	Запрос = Запрос+ ?(Пустоезначение(док.особыеотметки) = 0, "<vd:specialMarks>"+ СокрЛП(док.особыеотметки) +"</vd:specialMarks>","");
 	Запрос=Запрос+"
-	|              </vd:authentication>
-	|            </merc:vetDocument>
-	|          </merc:registerProductionOperationRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|</vd:authentication>
+	|</merc:vetDocument>
+	|</merc:registerProductionOperationRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>";
 
 	Возврат Запрос;
@@ -3231,13 +3231,18 @@
 			Предупреждение("не указано Количество в строке "+док.НомерСтроки,"!");
 			Результат = 0;
 		КонецЕсли;
-		Если док.Продукция_Элемент.Производитель_Площадка <> док.Производитель_площадка Тогда
-			Сообщить("в строке "+док.НомерСтроки+" Продукция производится на другой площадке!","!");
-			Результат = 0;
-		КонецЕсли;
-		Если док.Продукция_Элемент.Производитель_ХозСубъект <> док.Производитель_ХозСубъект Тогда
-			Сообщить("в строке "+док.НомерСтроки+" Ошибка MERC56534 = Хозяйствующий субъект должен являться фирмой производителем в записи продукции","!");
-			Результат = 0;
+
+		Если ( док.ВидДвижения=1) Тогда 
+
+			Если док.Продукция_Элемент.Производитель_Площадка <> док.Производитель_площадка Тогда
+				Сообщить("в строке "+док.НомерСтроки+" Продукция производится на другой площадке!","!");
+				Результат = 0;
+			КонецЕсли;
+			Если ( док.Продукция_Элемент.Производитель_ХозСубъект <> док.Производитель_ХозСубъект ) Тогда
+				Сообщить("в строке "+док.НомерСтроки+" Ошибка MERC56534 = Хозяйствующий субъект должен являться фирмой производителем в записи продукции","!");
+				Результат = 0;
+			КонецЕсли;
+			
 		КонецЕсли;
 
 	КонецЦикла;
@@ -3430,12 +3435,12 @@
 	|xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
 	|xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'>
-	|   <soapenv:Header/>
-	|   <soapenv:Body>
-	|      <ws:getProductItemByGuidRequest>
-	|         <bs:guid>"+ СокрЛП(продукция.GUID) +"</bs:guid>
-	|      </ws:getProductItemByGuidRequest>
-	|   </soapenv:Body>
+	| <soapenv:Header/>
+	| <soapenv:Body>
+	|<ws:getProductItemByGuidRequest>
+	| <bs:guid>"+ СокрЛП(продукция.GUID) +"</bs:guid>
+	|</ws:getProductItemByGuidRequest>
+	| </soapenv:Body>
 	|</soapenv:Envelope>
 	|";
 
@@ -3500,96 +3505,96 @@
 	//}
 
 	Запрос ="<SOAP-ENV:Envelope
-		|      xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
-		|      xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
-		|      xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
-		|      xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
-		|      xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
-		|      xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
-		|      xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-		|  <SOAP-ENV:Header/>
-		|  <SOAP-ENV:Body>
-		|    <apldef:submitApplicationRequest>
-		|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-		|      <apl:application>
-		|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-		|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-		|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
-		|        <apl:data>
-		|          <merc:modifyProducerStockListRequest>
-		|            <merc:localTransactionId>" + "[GUID]" + "</merc:localTransactionId>
-		|            <merc:initiator>
-		|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-		|            </merc:initiator>
-		|            <merc:modificationOperation>
-	    |          <vd:type>"+RegisterModificationType+"</vd:type>
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+		|xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+		|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+		|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+		|<SOAP-ENV:Header/>
+		|<SOAP-ENV:Body>
+		|<apldef:submitApplicationRequest>
+		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+		|<apl:application>
+		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
+		|<apl:data>
+		|<merc:modifyProducerStockListRequest>
+		|<merc:localTransactionId>" + "[GUID]" + "</merc:localTransactionId>
+		|<merc:initiator>
+		|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+		|</merc:initiator>
+		|<merc:modificationOperation>
+	    |<vd:type>"+RegisterModificationType+"</vd:type>
 		|";
 
 		Если RegisterModificationType = "DELETE" Тогда
 			Запрос = Запрос + "
-		    |          <vd:affectedList>
-		    |            <dt:productItem>";
+		    |<vd:affectedList>
+		    |<dt:productItem>";
 		    Если ПустоеЗначение(продукцияЭлемент.uuid) = 0 Тогда
 				Запрос = Запрос + "
-	    		|              <bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
+	    		|<bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
 			КонецЕсли;
 
 			Запрос = Запрос + "
-			|            </dt:productItem>
-		    |          </vd:affectedList>";
+			|</dt:productItem>
+		    |</vd:affectedList>";
 
 		Иначе
 			Запрос = Запрос + "
-		    |          <vd:resultingList>
-		    |            <dt:productItem>";
+		    |<vd:resultingList>
+		    |<dt:productItem>";
 
 			//При Модификации
 	//	    Если ПустоеЗначение(продукцияЭлемент.guid) = 0 Тогда
 	//			Запрос = Запрос + "
-	//    		|              <dt:guid>"+СокрЛП(продукцияЭлемент.guid)+"</dt:guid>";
+	//    		|<dt:guid>"+СокрЛП(продукцияЭлемент.guid)+"</dt:guid>";
 	//		КонецЕсли;
 
 		    Если ПустоеЗначение(продукцияЭлемент.uuid) = 0 Тогда
 				Запрос = Запрос + "
-	    		|              <bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
+	    		|<bs:uuid>"+СокрЛП(продукцияЭлемент.uuid)+"</bs:uuid>";
 			КонецЕсли;
 
 
 			Попытка //Нет пока такого реквизита в справочнике
 			    Если ПустоеЗначение(продукцияЭлемент.GTIN) = 0 Тогда
 					Запрос = Запрос + "
-	    			|              <dt:globalID>"+ продукцияЭлемент.GTIN +"</dt:globalID>";
+	    			|<dt:globalID>"+ продукцияЭлемент.GTIN +"</dt:globalID>";
 				КонецЕсли;
 			Исключение КонецПопытки;
 
 			Название = ЗаменитьСпецСимволы( продукцияЭлемент.Наименование );
 			Запрос = Запрос + "
-		    |              <dt:name>"+СокрЛП( Название )+"</dt:name>";
+		    |<dt:name>"+СокрЛП( Название )+"</dt:name>";
 		    Если ПустоеЗначение(продукцияЭлемент.Артикул) = 0 Тогда
 				Запрос = Запрос + "
-	    		|              <dt:code>"+СокрЛП(продукцияЭлемент.Артикул)+"</dt:code>";
+	    		|<dt:code>"+СокрЛП(продукцияЭлемент.Артикул)+"</dt:code>";
 			КонецЕсли;
 			Запрос = Запрос + "
-		    |              <dt:productType>"+продукцияЭлемент.Продукция.Тип+"</dt:productType>
-	    	|              <dt:product>
-		    |                <bs:guid>"+Сокрлп(продукцияЭлемент.Продукция.GUID)+"</bs:guid>
-	    	|              </dt:product>
-		    |              <dt:subProduct>
-	    	|                <bs:guid>"+Сокрлп(продукцияЭлемент.ВидПродукции.GUID)+"</bs:guid>
-		    |              </dt:subProduct>
-			|              <dt:correspondsToGost>"+ГМ.Булево(продукцияЭлемент.СоответствуетГОСТу)+"</dt:correspondsToGost>";
+		    |<dt:productType>"+продукцияЭлемент.Продукция.Тип+"</dt:productType>
+	    	|<dt:product>
+		    |<bs:guid>"+Сокрлп(продукцияЭлемент.Продукция.GUID)+"</bs:guid>
+	    	|</dt:product>
+		    |<dt:subProduct>
+	    	|<bs:guid>"+Сокрлп(продукцияЭлемент.ВидПродукции.GUID)+"</bs:guid>
+		    |</dt:subProduct>
+			|<dt:correspondsToGost>"+ГМ.Булево(продукцияЭлемент.СоответствуетГОСТу)+"</dt:correspondsToGost>";
 		    Если продукцияЭлемент.СоответствуетГОСТу = 1 Тогда
 				Запрос = Запрос + "
-		    	|              <dt:gost>"+СокрЛП(продукцияЭлемент.Гост)+"</dt:gost>";
+		    	|<dt:gost>"+СокрЛП(продукцияЭлемент.Гост)+"</dt:gost>";
 			КонецЕсли;
 			// ХС Производитель И владелец ТМ
 			Запрос = Запрос + "
-		    |              <dt:producer>
-	    	|                <bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
-		    |              </dt:producer>
-		    |              <dt:tmOwner>
-	    	|                <bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
-		    |              </dt:tmOwner>";
+		    |<dt:producer>
+	    	|<bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
+		    |</dt:producer>
+		    |<dt:tmOwner>
+	    	|<bs:guid>"+Сокрлп(ГМ.СписокКонстант.Получить("Отправитель_ХозСубъект").GUID)+"</bs:guid>
+		    |</dt:tmOwner>";
 
 
 	//45 	·········<dt:producing> 	dt:ProductItemProducing 	[0..*] 	Список площадок, на которых выпускается данная продукция.
@@ -3599,38 +3604,38 @@
 	//49 	············</dt:location>
 	//50 	·········</dt:producing>
 			Запрос = Запрос + "
-		    |              <dt:producing>
-			|                <dt:location>
-	    	|                   <bs:guid>"+Сокрлп(продукцияЭлемент.Площадка.GUID)+"</bs:guid>
-		    |                </dt:location>
-		    |              </dt:producing>";
+		    |<dt:producing>
+			|<dt:location>
+	    	| <bs:guid>"+Сокрлп(продукцияЭлемент.Площадка.GUID)+"</bs:guid>
+		    |</dt:location>
+		    |</dt:producing>";
 
 	// ЖД ФАСОВКА
 			Если ПустоеЗначение(продукцияЭлемент.ТипФасовки)= 0 Тогда
 			Запрос = Запрос + "
-			|              <dt:packaging>
-		    |                <dt:packagingType>
-	    	|                  <bs:guid>"+Сокрлп(продукцияЭлемент.ТипФасовки.GUID)+"</bs:guid>
-		    |                </dt:packagingType>
-	    	|                <dt:quantity>"+продукцияЭлемент.КолвоЕдиницФасовки+"</dt:quantity>
-		    |                <dt:volume>"+продукцияЭлемент.ОбъемЕдиницыФасовки+"</dt:volume>
-	    	|                <dt:unit>
-		    |                  <bs:guid>"+ СокрЛП(продукцияЭлемент.ЕдИзмОбъемаФасовки.Guid) +"</bs:guid>
-	    	|                </dt:unit>
-		    |              </dt:packaging>";
+			|<dt:packaging>
+		    |<dt:packagingType>
+	    	|<bs:guid>"+Сокрлп(продукцияЭлемент.ТипФасовки.GUID)+"</bs:guid>
+		    |</dt:packagingType>
+	    	|<dt:quantity>"+продукцияЭлемент.КолвоЕдиницФасовки+"</dt:quantity>
+		    |<dt:volume>"+продукцияЭлемент.ОбъемЕдиницыФасовки+"</dt:volume>
+	    	|<dt:unit>
+		    |<bs:guid>"+ СокрЛП(продукцияЭлемент.ЕдИзмОбъемаФасовки.Guid) +"</bs:guid>
+	    	|</dt:unit>
+		    |</dt:packaging>";
 
 			КонецЕсли;
 			Запрос = Запрос + "
-			|            </dt:productItem>
-		    |          </vd:resultingList>";
+			|</dt:productItem>
+		    |</vd:resultingList>";
 
 		КонецЕсли;
 
 		Запрос = Запрос + "
-	    |        </merc:modificationOperation>
-	    |      </merc:modifyProducerStockListRequest>
-	    |    </apl:data>
-	    |  </apl:application>
+	    |</merc:modificationOperation>
+	    |</merc:modifyProducerStockListRequest>
+	    |</apl:data>
+	    |</apl:application>
 	    |</apldef:submitApplicationRequest>
 		|</SOAP-ENV:Body>
 		|</SOAP-ENV:Envelope>";
@@ -3705,15 +3710,15 @@
 	|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
     |<soapenv:Header/>
     |<soapenv:Body>
-    |   <ws:getProductItemListRequest>
-    |      <bs:listOptions>
-    |         <bs:count>1000</bs:count>
-    |         <bs:offset>0</bs:offset>
-    |      </bs:listOptions>
-    |      <dt:enterprise>
-    |         <bs:guid>"+ СокрЛП(Площадка.GUID) +"</bs:guid>
-    |      </dt:enterprise>
-    |   </ws:getProductItemListRequest>
+    | <ws:getProductItemListRequest>
+    |<bs:listOptions>
+    | <bs:count>1000</bs:count>
+    | <bs:offset>0</bs:offset>
+    |</bs:listOptions>
+    |<dt:enterprise>
+    | <bs:guid>"+ СокрЛП(Площадка.GUID) +"</bs:guid>
+    |</dt:enterprise>
+    | </ws:getProductItemListRequest>
     |</soapenv:Body>
 	|</soapenv:Envelope>
 	|";
@@ -3759,31 +3764,31 @@
 	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
 	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
-	|        <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
-	|        <apl:data>
-	|          <merc:withdrawVetDocumentRequest>
-	|            <merc:localTransactionId>[GUID]</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</vd:login>
-	|            </merc:initiator>
-	|            <merc:vetDocumentId>"+ СокрЛП(док.UUID) +"</merc:vetDocumentId>
-	|            <merc:withdrawReason>"+ГМ.СписокКонстант.Получить("ПарамПричинаАннулирования")+"</merc:withdrawReason>
-	|            <merc:withdrawDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T23:59:59") +"</merc:withdrawDate>
-	|            <merc:specifiedPerson>
-	|              <vd:login>"+ ГМ.СписокКонстант.Получить("param_vetdoctor_login")+"</vd:login>
-	|            </merc:specifiedPerson>
-	|          </merc:withdrawVetDocumentRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
+	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
+	|<apl:data>
+	|<merc:withdrawVetDocumentRequest>
+	|<merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</vd:login>
+	|</merc:initiator>
+	|<merc:vetDocumentId>"+ СокрЛП(док.UUID) +"</merc:vetDocumentId>
+	|<merc:withdrawReason>"+ГМ.СписокКонстант.Получить("ПарамПричинаАннулирования")+"</merc:withdrawReason>
+	|<merc:withdrawDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T23:59:59") +"</merc:withdrawDate>
+	|<merc:specifiedPerson>
+	|<vd:login>"+ ГМ.СписокКонстант.Получить("param_vetdoctor_login")+"</vd:login>
+	|</merc:specifiedPerson>
+	|</merc:withdrawVetDocumentRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>";
 
 	Возврат Запрос;
@@ -3925,65 +3930,65 @@
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
   	|<SOAP-ENV:Header/>
   	|<SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
-	|        <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
-	|        <apl:data>
-	|          <merc:resolveDiscrepancyRequest>
-	|            <merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:initiator>
-	|            <merc:enterprise>
-	|              <bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
-	|            </merc:enterprise>
-	|            <merc:inventoryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</merc:inventoryDate>
-	|            <merc:responsible>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:responsible>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
+	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
+	|<apl:data>
+	|<merc:resolveDiscrepancyRequest>
+	|<merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:initiator>
+	|<merc:enterprise>
+	|<bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
+	|</merc:enterprise>
+	|<merc:inventoryDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</merc:inventoryDate>
+	|<merc:responsible>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:responsible>
 	|";
 	Док.ВыбратьСтроки();
 	Пока Док.ПолучитьСтроку() = 1 Цикл
 
 		Запрос = Запрос + "
-		|            <merc:stockDiscrepancy id='_"+ док.НомерСтроки +"'>
-		|              <vd:resultingList>
-		|                <vd:stockEntry>";
+		|<merc:stockDiscrepancy id='_"+ док.НомерСтроки +"'>
+		|<vd:resultingList>
+		|<vd:stockEntry>";
 	    Если ПустоеЗначение(Док.Партия)=0 Тогда // изменяем конкретную партию
 			Запрос = Запрос + "
-			|                <bs:uuid>" + СокрЛП(док.Партия.uuid) + "</bs:uuid>";
+			|<bs:uuid>" + СокрЛП(док.Партия.uuid) + "</bs:uuid>";
 			//На случай, когда ПродукцияЭлемент в Партии устаревший, возьмем данные из Партии
 		    Если док.Партия.Продукция_Элемент.ВидПродукции <> док.Партия.ВидПродукции Тогда
 				Запрос = Запрос + "
-				|                 <vd:batch>
-				|                    <vd:productType>"+ Док.Партия.Продукция.Тип +"</vd:productType>
-				|                    <vd:product>
-				|                      <bs:guid>"+ СокрЛП(Док.Партия.Продукция.GUID) +"</bs:guid>
-				|                    </vd:product>
-				|                    <vd:subProduct>
-				|                      <bs:guid>"+ СокрЛП(Док.Партия.ВидПродукции.GUID) +"</bs:guid>
-				|                    </vd:subProduct>
-				|                    <vd:productItem>";
+				| <vd:batch>
+				|<vd:productType>"+ Док.Партия.Продукция.Тип +"</vd:productType>
+				|<vd:product>
+				|<bs:guid>"+ СокрЛП(Док.Партия.Продукция.GUID) +"</bs:guid>
+				|</vd:product>
+				|<vd:subProduct>
+				|<bs:guid>"+ СокрЛП(Док.Партия.ВидПродукции.GUID) +"</bs:guid>
+				|</vd:subProduct>
+				|<vd:productItem>";
 			Иначе
 				Запрос = Запрос + "
-				|                 <vd:batch>
-				|                    <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-				|                    <vd:product>
-				|                      <bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
-				|                    </vd:product>
-				|                    <vd:subProduct>
-				|                      <bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
-				|                    </vd:subProduct>
-				|                    <vd:productItem>";
+				| <vd:batch>
+				|<vd:productType>"+ док.Продукция.Тип +"</vd:productType>
+				|<vd:product>
+				|<bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
+				|</vd:product>
+				|<vd:subProduct>
+				|<bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
+				|</vd:subProduct>
+				|<vd:productItem>";
 				Если ( Док.Продукция_Элемент.ПометкаУдаления() = 1 ) Тогда
 					//удаленные ProductItem отправляем без GUID
 					ГМ.СообщитьИнфо("в строке №"+ Док.НомерСтроки +" ВСД_Продукция_Элемент ["+ СокрЛП(Док.Продукция_Элемент.Наименование) +"] удален => отправляем с пустым GUID",док, "!");
 				ИначеЕсли ПустоеЗначение(док.Продукция_Элемент.GUID) = 0 Тогда
 					Запрос = Запрос+ "
-					|                      <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>";
+					|<bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>";
 				КонецЕсли;
 				
 				НазваниеПродукции = ЗаменитьСпецСимволы( док.НаименованиеПродукции );
@@ -3993,18 +3998,18 @@
 		    КонецЕсли;
 		Иначе
 			Запрос = Запрос + "
-			|                 <vd:batch>
-			|                    <vd:productType>"+ док.Продукция.Тип +"</vd:productType>
-			|                    <vd:product>
-			|                      <bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
-			|                    </vd:product>
-			|                    <vd:subProduct>
-			|                      <bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
-			|                    </vd:subProduct>
-			|                    <vd:productItem>";
+			| <vd:batch>
+			|<vd:productType>"+ док.Продукция.Тип +"</vd:productType>
+			|<vd:product>
+			|<bs:guid>"+ СокрЛП(док.Продукция.GUID) +"</bs:guid>
+			|</vd:product>
+			|<vd:subProduct>
+			|<bs:guid>"+ СокрЛП(док.ВидПродукции.GUID) +"</bs:guid>
+			|</vd:subProduct>
+			|<vd:productItem>";
 			Если ПустоеЗначение(док.Продукция_Элемент.GUID) = 0 Тогда
 				Запрос = Запрос+ "
-				|                      <bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>";
+				|<bs:guid>"+ СокрЛП(док.Продукция_Элемент.GUID) +"</bs:guid>";
 			КонецЕсли;
 			
 			НазваниеПродукции = ЗаменитьСпецСимволы( док.НаименованиеПродукции );
@@ -4015,82 +4020,82 @@
 
    		Если ПустоеЗначение(док.ТипФасовки)=0 Тогда
 			Запрос = Запрос+ "
-   	    	|          <dt:packaging>
-        	|            <dt:packagingType>
-	        |              <bs:guid>"+ СокрЛП(док.ТипФасовки.GUID) +"</bs:guid>
-   		    |            </dt:packagingType>
-       		|            <dt:quantity>"+ док.КолВоЕдиницФасовки +"</dt:quantity>
-	        |            <dt:volume>"+ док.ОбъемЕдиницыФасовки +"</dt:volume>
-   		    |            <dt:unit>
-       		|              <bs:guid>"+ СокрЛП(док.ЕдИзмОбъемаФасовки.GUID) +"</bs:guid>
-	        |            </dt:unit>
-   		    |          </dt:packaging>";
+   	    	|<dt:packaging>
+        	|<dt:packagingType>
+	        |<bs:guid>"+ СокрЛП(док.ТипФасовки.GUID) +"</bs:guid>
+   		    |</dt:packagingType>
+       		|<dt:quantity>"+ док.КолВоЕдиницФасовки +"</dt:quantity>
+	        |<dt:volume>"+ док.ОбъемЕдиницыФасовки +"</dt:volume>
+   		    |<dt:unit>
+       		|<bs:guid>"+ СокрЛП(док.ЕдИзмОбъемаФасовки.GUID) +"</bs:guid>
+	        |</dt:unit>
+   		    |</dt:packaging>";
 		КонецЕсли;
 
         Запрос = Запрос +"
-		|                   </vd:productItem>
-		|                    <vd:volume>"+ Док.Количество +"</vd:volume>
-		|                    <vd:unit>
-		|                      <bs:uuid>"+ СокрЛП(док.ЕдиницаИзмерения.UUID) +"</bs:uuid>
-		|                    </vd:unit>";
+		| </vd:productItem>
+		|<vd:volume>"+ Док.Количество +"</vd:volume>
+		|<vd:unit>
+		|<bs:uuid>"+ СокрЛП(док.ЕдиницаИзмерения.UUID) +"</bs:uuid>
+		|</vd:unit>";
 
 
 		Запрос = Запрос + ГМ.Изготовление_СрокГодности_в_XML(док, "vd");
 
 		Запрос=Запрос+"
-		|                    <vd:perishable>"+ ГМ.булево(док.Скоропортящийся)+"</vd:perishable>
-		|                    <vd:origin>";
+		|<vd:perishable>"+ ГМ.булево(док.Скоропортящийся)+"</vd:perishable>
+		|<vd:origin>";
 		Если (ПустоеЗначение(док.Производитель_Страна) = 0)Тогда
 			Запрос=Запрос+"
-			|                    <vd:country>
-			|                        <bs:uuid>"+СокрЛП(док.Производитель_Страна.uuid)+"</bs:uuid>
-			|                      </vd:country>";
+			|<vd:country>
+			|<bs:uuid>"+СокрЛП(док.Производитель_Страна.uuid)+"</bs:uuid>
+			|</vd:country>";
 		КонецЕсли;
 		Если (ПустоеЗначение(док.Производитель_Площадка.GUID) = 0)Тогда
 			Запрос=Запрос+"
-			|                       <vd:producer>
-			|                      	<dt:enterprise>
-			|                      	  <bs:guid>"+ СокрЛП(док.Производитель_Площадка.GUID) +"</bs:guid>
-			|                      	</dt:enterprise>
-			|                       <dt:role>PRODUCER</dt:role>
-			|                      </vd:producer>";
+			| <vd:producer>
+			|	<dt:enterprise>
+			|	  <bs:guid>"+ СокрЛП(док.Производитель_Площадка.GUID) +"</bs:guid>
+			|	</dt:enterprise>
+			| <dt:role>PRODUCER</dt:role>
+			|</vd:producer>";
 		КонецЕсли;
 		Запрос=Запрос+"
-		|                    </vd:origin>
-		|                    <vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo>";
+		|</vd:origin>
+		|<vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo>";
 
 		Запрос = Запрос + МаркировкаДокументаВЗапрос( Док );		
 
 		Запрос=Запрос+"
-		|                    <vd:owner>
-		|                      <bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
-		|                    </vd:owner>
-		|                  </vd:batch>
-		|                </vd:stockEntry>
-		|              </vd:resultingList>
-		|            </merc:stockDiscrepancy>
+		|<vd:owner>
+		|<bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
+		|</vd:owner>
+		|</vd:batch>
+		|</vd:stockEntry>
+		|</vd:resultingList>
+		|</merc:stockDiscrepancy>
 		|";
 	КонецЦикла;
 	Док.ВыбратьСтроки();
 	Пока Док.ПолучитьСтроку() = 1 Цикл
 		Запрос = Запрос + "
 
-		|            <merc:discrepancyReport for='_"+ док.НомерСтроки +"'>
-		|              <vd:issueNumber>"+ Док.НомерДок +"</vd:issueNumber>
-		|              <vd:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок) + "</vd:issueDate>
-		|              <vd:reason>
-		|                <vd:name>"+СокрЛП(док.ПричинаРасхождения)+"</vd:name>
-		|              </vd:reason>
-		|              <vd:description>"+СокрЛП(док.ОписаниеНесоответствия)+"</vd:description>
-		|            </merc:discrepancyReport>
+		|<merc:discrepancyReport for='_"+ док.НомерСтроки +"'>
+		|<vd:issueNumber>"+ Док.НомерДок +"</vd:issueNumber>
+		|<vd:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок) + "</vd:issueDate>
+		|<vd:reason>
+		|<vd:name>"+СокрЛП(док.ПричинаРасхождения)+"</vd:name>
+		|</vd:reason>
+		|<vd:description>"+СокрЛП(док.ОписаниеНесоответствия)+"</vd:description>
+		|</merc:discrepancyReport>
 		|";
 	КонецЦикла;
 	Запрос = Запрос + "
-	|          </merc:resolveDiscrepancyRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|</merc:resolveDiscrepancyRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>";
 
 	Возврат Запрос;
@@ -4334,28 +4339,28 @@
 	|xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
 	|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
-	|   <soapenv:Header/>
-	|   <soapenv:Body>
-	|      <ws:getRussianEnterpriseListRequest>
-	|     	<bs:listOptions>
-	|            <bs:count>"+Смещение+"</bs:count>
-	|            <bs:offset>0</bs:offset>
-	|        </bs:listOptions>
-	|     	<dt:enterprise>";
-//	|            <bs:guid>"+СокрЛП(ХС.GUID)+"</bs:guid>";
+	| <soapenv:Header/>
+	| <soapenv:Body>
+	|<ws:getRussianEnterpriseListRequest>
+	| 	<bs:listOptions>
+	|<bs:count>"+Смещение+"</bs:count>
+	|<bs:offset>0</bs:offset>
+	|</bs:listOptions>
+	| 	<dt:enterprise>";
+//	|<bs:guid>"+СокрЛП(ХС.GUID)+"</bs:guid>";
 	Если ПустоеЗначение(Название) = 0 Тогда
 	    Запрос = Запрос + "
-		|            <dt:name>"+СокрЛП(Название)+"</dt:name>";
+		|<dt:name>"+СокрЛП(Название)+"</dt:name>";
 	КонецЕсли;
 	Запрос = Запрос + "
-	|            <dt:address>
-	|               <dt:region>
-	|                  <bs:guid>"+СокрЛП(Регион.GUID)+"</bs:guid>
-	|               </dt:region>
-	|            </dt:address>
-	|        </dt:enterprise>
-	|      </ws:getRussianEnterpriseListRequest>
-	|   </soapenv:Body>
+	|<dt:address>
+	| <dt:region>
+	|<bs:guid>"+СокрЛП(Регион.GUID)+"</bs:guid>
+	| </dt:region>
+	|</dt:address>
+	|</dt:enterprise>
+	|</ws:getRussianEnterpriseListRequest>
+	| </soapenv:Body>
 	|</soapenv:Envelope>";
 	Возврат Запрос;
 КонецФункции
@@ -4573,77 +4578,77 @@
 	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
 	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
 	|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-	|  <SOAP-ENV:Header/>
-	|  <SOAP-ENV:Body>
-	|    <apldef:submitApplicationRequest>
-	|      <apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
-	|      <apl:application>
-	|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-	|        <apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
-	|        <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
-	|        <apl:data>
-	|          <merc:updateTransportMovementDetailsRequest>
-	|            <merc:localTransactionId>"+ СокрЛП(док.НомерДок) +"</merc:localTransactionId>
-	|            <merc:initiator>
-	|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-	|            </merc:initiator>
+	|<SOAP-ENV:Header/>
+	|<SOAP-ENV:Body>
+	|<apldef:submitApplicationRequest>
+	|<apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
+	|<apl:application>
+	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
+	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
+	|<apl:data>
+	|<merc:updateTransportMovementDetailsRequest>
+	|<merc:localTransactionId>"+ СокрЛП(док.НомерДок) +"</merc:localTransactionId>
+	|<merc:initiator>
+	|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+	|</merc:initiator>
 	|
-	|            <vd:deliveryParticipant>
-	|              <dt:businessEntity>
-	|                 <bs:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</bs:guid>
-	|              </dt:businessEntity>
-	|              <dt:enterprise>
-	|                <bs:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</bs:guid>
-	|              </dt:enterprise>
-	|            </vd:deliveryParticipant>
+	|<vd:deliveryParticipant>
+	|<dt:businessEntity>
+	| <bs:guid>"+СокрЛП(док.Отправитель_ХозСубъект.GUID)+"</bs:guid>
+	|</dt:businessEntity>
+	|<dt:enterprise>
+	|<bs:guid>"+ СокрЛП(док.Отправитель_Площадка.GUID) +"</bs:guid>
+	|</dt:enterprise>
+	|</vd:deliveryParticipant>
 	|";
 
 	//Запрос=Запрос+"
-	//	|            <vd:vetDocumentUuid>"+ док.ДокОснование.UUID +"</vd:vetDocumentUuid>
+	//	|<vd:vetDocumentUuid>"+ док.ДокОснование.UUID +"</vd:vetDocumentUuid>
 	//	|";
 
 	док.ВыбратьСтроки();
 	Пока док.ПолучитьСтроку() = 1 Цикл
 	Запрос=Запрос+"
-		|            <vd:vetDocumentUuid>"+ док.ВСД_Док.UUID +"</vd:vetDocumentUuid>
+		|<vd:vetDocumentUuid>"+ док.ВСД_Док.UUID +"</vd:vetDocumentUuid>
 		|";
 	КонецЦикла;
 
 	Запрос=Запрос+"
-	|            <vd:shipmentRoute>
+	|<vd:shipmentRoute>
 	|";
 	док.ВыбратьСтроки();
 	Пока док.ПолучитьСтроку() = 1 Цикл
 		Запрос=Запрос+"
-		|              <vd:routePoint>
-		|                <bs:uuid>"+ СокрЛП( док.ТочкаМаршрутаUUID ) +"</bs:uuid>
-		|                <vd:sqnId>"+ СокрЛП(док.SequenceNumber) +"</vd:sqnId>
-		|                <vd:nextTransport>
-		|                  <vd:transportType>"+ док.transportType +"</vd:transportType>
-		|                  <vd:transportNumber>";
+		|<vd:routePoint>
+		|<bs:uuid>"+ СокрЛП( док.ТочкаМаршрутаUUID ) +"</bs:uuid>
+		|<vd:sqnId>"+ СокрЛП(док.SequenceNumber) +"</vd:sqnId>
+		|<vd:nextTransport>
+		|<vd:transportType>"+ док.transportType +"</vd:transportType>
+		|<vd:transportNumber>";
 		//Попытка
 			Если док.transportType = 1 Тогда
 				 // Контейнер при наличии всегда первый
 				Если ПустоеЗначение(док.containerNumber) = 0 Тогда
 					Запрос=Запрос+"
-       				|          <vd:containerNumber>"+СокрЛП(док.containerNumber)+"</vd:containerNumber>";
+       				|<vd:containerNumber>"+СокрЛП(док.containerNumber)+"</vd:containerNumber>";
 				КонецЕсли;
 				Запрос=Запрос+"
-				|                    <vd:vehicleNumber>"+ СокрЛП(док.vehicleNumber) +"</vd:vehicleNumber>";
+				|<vd:vehicleNumber>"+ СокрЛП(док.vehicleNumber) +"</vd:vehicleNumber>";
 
 				Если ПустоеЗначение(док.trailerNumber) = 0 Тогда
 					Запрос=Запрос+"
-       				|          <vd:trailerNumber>"+СокрЛП(док.trailerNumber)+"</vd:trailerNumber>";
+       				|<vd:trailerNumber>"+СокрЛП(док.trailerNumber)+"</vd:trailerNumber>";
 				КонецЕсли;
 			ИначеЕсли док.transportType = 2 Тогда
 				Запрос=Запрос+"
-				|                    <vd:wagonNumber>"+ СокрЛП(док.wagonNumber) +"</vd:wagonNumber>";
+				|<vd:wagonNumber>"+ СокрЛП(док.wagonNumber) +"</vd:wagonNumber>";
 			ИначеЕсли док.transportType = 3 Тогда
 				Запрос=Запрос+"
-				|                    <vd:flightNumber>"+ СокрЛП(док.flightNumber) +"</vd:flightNumber>";
+				|<vd:flightNumber>"+ СокрЛП(док.flightNumber) +"</vd:flightNumber>";
 			ИначеЕсли (док.transportType = 4) ИЛИ (док.transportType = 5) ИЛИ (док.transportType = 6) Тогда
 				Запрос=Запрос+"
-				|                    <vd:shipName>"+ СокрЛП(док.shipName) +"</vd:shipName>";
+				|<vd:shipName>"+ СокрЛП(док.shipName) +"</vd:shipName>";
 			КонецЕсли;
 		//Исключение
 		//	Сообщить("Обновите конфигурацию - отсутствуют ревизиты тч в документе ВСД2_ОбновитьТранспорт");
@@ -4651,18 +4656,18 @@
 		//КонецПопытки;
 
 		Запрос=Запрос+"
-		|                  </vd:transportNumber>
-		|                </vd:nextTransport>
-		|              </vd:routePoint>
+		|</vd:transportNumber>
+		|</vd:nextTransport>
+		|</vd:routePoint>
 		|";
 	КонецЦикла;
 	Запрос=Запрос+"
-	|            </vd:shipmentRoute>
-	|          </merc:updateTransportMovementDetailsRequest>
-	|        </apl:data>
-	|      </apl:application>
-	|    </apldef:submitApplicationRequest>
-	|  </SOAP-ENV:Body>
+	|</vd:shipmentRoute>
+	|</merc:updateTransportMovementDetailsRequest>
+	|</apl:data>
+	|</apl:application>
+	|</apldef:submitApplicationRequest>
+	|</SOAP-ENV:Body>
 	|</SOAP-ENV:Envelope>
 	|";
 
@@ -4778,76 +4783,76 @@
 	//}
 
 	Запрос ="<SOAP-ENV:Envelope
-		|      xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
-		|      xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
-		|      xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
-		|      xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
-		|      xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
-		|      xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
-		|      xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
-		|  <SOAP-ENV:Header/>
-		|  <SOAP-ENV:Body>
-		|    <apldef:submitApplicationRequest>
-		|      <apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
-		|      <apl:application>
-		|        <apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
-		|        <apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
-		|        <apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.Датадок, "T00:00:00") + "</apl:issueDate>
-		|        <apl:data>
-		|          <merc:mergeStockEntriesRequest>
-		|            <merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
-		|            <merc:initiator>
-		|              <vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
-		|            </merc:initiator>
-		|            <merc:enterprise>
-		|              <bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
-		|            </merc:enterprise>
-		|            <merc:mergeOperation>
-		|              <vd:type>"+?(Док.ОперацияПрисоединения = 1,"ATTACH","MERGE")+"</vd:type>";
+		|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+		|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+		|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+		|xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
+		|xmlns:apl='http://api.vetrf.ru/schema/cdm/application'
+		|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+		|xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+		|<SOAP-ENV:Header/>
+		|<SOAP-ENV:Body>
+		|<apldef:submitApplicationRequest>
+		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
+		|<apl:application>
+		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
+		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.Датадок, "T00:00:00") + "</apl:issueDate>
+		|<apl:data>
+		|<merc:mergeStockEntriesRequest>
+		|<merc:localTransactionId>" + СокрЛП(док.НомерДок) + "</merc:localTransactionId>
+		|<merc:initiator>
+		|<vd:login>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_intiator_login") ) +"</vd:login>
+		|</merc:initiator>
+		|<merc:enterprise>
+		|<bs:guid>"+ СокрЛП(док.Владелец_Площадка.GUID) +"</bs:guid>
+		|</merc:enterprise>
+		|<merc:mergeOperation>
+		|<vd:type>"+?(Док.ОперацияПрисоединения = 1,"ATTACH","MERGE")+"</vd:type>";
 		Док.ВыбратьСтроки();
 		Пока Док.ПолучитьСтроку() = 1 Цикл
 			Запрос=Запрос+"
-			|    <vd:sourceStockEntry>
-			|       <bs:uuid>" + СокрЛП(Док.Партия.uuid) + "</bs:uuid>
-			|    </vd:sourceStockEntry>";
+			|<vd:sourceStockEntry>
+			| <bs:uuid>" + СокрЛП(Док.Партия.uuid) + "</bs:uuid>
+			|</vd:sourceStockEntry>";
 		КонецЦикла;
 		Если Док.ОперацияПрисоединения=0 Тогда
 			Запрос=Запрос+"
-			|      <vd:resultStockEntry>
-        	|        <vd:batch>
-        	|          <vd:subProduct>
-//        	|            <bs:uuid>a3cecd19-98ca-46f9-ecd5-90c41fd95e13</bs:uuid>
-        	|            <bs:guid>"+ СокрЛП(Док.ВСД_ПродукцияЭлемент.ВидПродукции.GUID) +"</bs:guid>
-        	|          </vd:subProduct>";
+			|<vd:resultStockEntry>
+        	|<vd:batch>
+        	|<vd:subProduct>
+//        	|<bs:uuid>a3cecd19-98ca-46f9-ecd5-90c41fd95e13</bs:uuid>
+        	|<bs:guid>"+ СокрЛП(Док.ВСД_ПродукцияЭлемент.ВидПродукции.GUID) +"</bs:guid>
+        	|</vd:subProduct>";
 			Запрос = Запрос + "
-        	|          <vd:productItem>";
+        	|<vd:productItem>";
 			Если ПустоеЗначение(Док.ВСД_ПродукцияЭлемент.guid) = 0 Тогда
 				Запрос = Запрос + "
-        		|            <bs:guid>" + СокрЛП(Док.ВСД_ПродукцияЭлемент.guid) + "</bs:guid>";
+        		|<bs:guid>" + СокрЛП(Док.ВСД_ПродукцияЭлемент.guid) + "</bs:guid>";
 			КонецЕсли;
 			Если ПустоеЗначение(Док.ВСД_ПродукцияЭлемент.GTIN) = 0 Тогда
 				Запрос = Запрос + "
-        		|            <dt:globalID>" + СокрЛП(Док.ВСД_ПродукцияЭлемент.GTIN) + "</dt:globalID>";
+        		|<dt:globalID>" + СокрЛП(Док.ВСД_ПродукцияЭлемент.GTIN) + "</dt:globalID>";
 			КонецЕсли;
 			Запрос = Запрос + "
-        	|            <dt:name>" + ЗаменитьСпецСимволы(Док.ВСД_ПродукцияЭлемент.Наименование) + "</dt:name>";
+        	|<dt:name>" + ЗаменитьСпецСимволы(Док.ВСД_ПродукцияЭлемент.Наименование) + "</dt:name>";
 			Если ПустоеЗначение(Док.ВСД_ПродукцияЭлемент.Артикул) = 0 Тогда
 				Запрос = Запрос + "
-        		|            <dt:code>" + СокрЛП(Док.ВСД_ПродукцияЭлемент.Артикул) + "</dt:code>";
+        		|<dt:code>" + СокрЛП(Док.ВСД_ПродукцияЭлемент.Артикул) + "</dt:code>";
 			КонецЕсли;
         	Запрос = Запрос + "
-        	|          </vd:productItem>";
+        	|</vd:productItem>";
 			Запрос=Запрос+"
-        	|        </vd:batch>
-        	|      </vd:resultStockEntry>";
+        	|</vd:batch>
+        	|</vd:resultStockEntry>";
 		КонецЕсли;
 		Запрос=Запрос+"
-		|            </merc:mergeOperation>
-		|          </merc:mergeStockEntriesRequest>
-		|        </apl:data>
-		|      </apl:application>
-		|    </apldef:submitApplicationRequest>
-		|  </SOAP-ENV:Body>
+		|</merc:mergeOperation>
+		|</merc:mergeStockEntriesRequest>
+		|</apl:data>
+		|</apl:application>
+		|</apldef:submitApplicationRequest>
+		|</SOAP-ENV:Body>
 		|</SOAP-ENV:Envelope>";
 
 	Возврат Запрос;
@@ -4935,9 +4940,9 @@
 	|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
 	|<soapenv:Header/>
 	|<soapenv:Body>
-	|   <ws:getBusinessEntityByGuidRequest>
-	|      <bs:guid>"+GUID+"</bs:guid>
-	|   </ws:getBusinessEntityByGuidRequest>
+	| <ws:getBusinessEntityByGuidRequest>
+	|<bs:guid>"+GUID+"</bs:guid>
+	| </ws:getBusinessEntityByGuidRequest>
 	|</soapenv:Body>
 	|</soapenv:Envelope>";
 
@@ -4961,7 +4966,6 @@
 	КонтДокумента.Отправитель_Площадка = ДокОснование.Отправитель_Площадка ;	
 	КонтДокумента.Получатель_ХозСубъект = ДокОснование.Получатель_ХозСубъект;
 	КонтДокумента.Получатель_Площадка = ДокОснование.Получатель_Площадка;
-	КонтДокумента.cargoExpertized = ДокОснование.cargoExpertized;
 	КонтДокумента.cargoInspected = ДокОснование.cargoInspected;
 	КонтДокумента.РезультатыИсследований = ДокОснование.РезультатыИсследований;
 	КонтДокумента.Местность = ДокОснование.Местность;
@@ -5077,7 +5081,6 @@
 		КонтДокумента.номерАвто = "Не используется";
 	КонецЕсли;
 	
-	//КонтДокумента.cargoExpertized = 1;
 	КонтДокумента.cargoInspected  = 1;		
 	КонтДокумента.Местность 		= ГМ.ПолучитьКонстанту("ВСД_Местность");
 	Если ГМ.ПолучитьКонстанту("ОсобыеОтметкиЗагружатьИзПараметров")<>1 Тогда 
@@ -5150,9 +5153,9 @@
 	|		  xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' >
 	|<soapenv:Header/>
 	|<soapenv:Body>
-	|   <ws:getEnterpriseByGuidRequest>
-	|      <bs:guid>"+GUID+"</bs:guid>
-	|   </ws:getEnterpriseByGuidRequest>
+	| <ws:getEnterpriseByGuidRequest>
+	|<bs:guid>"+GUID+"</bs:guid>
+	| </ws:getEnterpriseByGuidRequest>
 	|</soapenv:Body>
 	|</soapenv:Envelope>";
 
