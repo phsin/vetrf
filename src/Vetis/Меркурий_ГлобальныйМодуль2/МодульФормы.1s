@@ -722,10 +722,16 @@
         КонецЕсли;
         //}[+]_
 		
+		Попытка
+			ВСД_UUID = stockEntry.selectSingleNode("vd:vetDocument").selectSingleNode("bs:uuid").text;
+			ДокВсдОбъект = НайтиВСДпоUUID( ВСД_UUID, "ВСД_Док", 0 );
+			Партия.документВСД = ДокВсдОбъект.ТекущийЭлемент();
+		Исключение КонецПопытки;
+		
 		Партия.ИмяФайлаXML = ПолучитьИмяФайла_Партия_XML( Партия.ТекущийЭлемент() );	
     	objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
 		objDom.appendChild( stockEntry );
-		objDom.save( Партия.ИмяФайлаXML );	
+		objDom.save( Партия.ИмяФайлаXML );			
 		
 		Партия.Записать();		
 		
@@ -2465,7 +2471,7 @@
         |</vd:unit>
         |";
 
-		consignment = consignment+ " <vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo> ";
+		consignment = consignment+ "<vd:lowGradeCargo>"+ ГМ.булево(док.Некачественный)+"</vd:lowGradeCargo> ";
 		
 		consignment = consignment + МаркировкаДокументаВЗапрос( Док );
 		
