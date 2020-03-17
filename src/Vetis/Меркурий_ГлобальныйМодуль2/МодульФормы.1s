@@ -5148,7 +5148,7 @@
 
 // { Площадки v2.1
 
-Функция Площадка_ЗагрузитьПоGUID(GUID) Экспорт
+Функция Площадка_ЗагрузитьПоGUID( ВыбПлощадка, GUID, ХС="") Экспорт
 
 	Если ПустоеЗначение(GUID)=1 Тогда
 		Сообщить("Пустой GUID для поиска Площадки");
@@ -5174,9 +5174,110 @@
 
 	Сообщить(" Запрос GetEnterpriseByGUID [ "+СокрЛП(GUID)+" ]");
 
-	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
+	Результат = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
 
-	Возврат appID;
+	//Возврат appID;
+	
+    objDom=СоздатьОбъект("MSXML2.DOMDocument");
+    objDom.load( ГМ.Компонента.LogFilename );
+
+	Если ГМ.НайтиОшибки()>0 Тогда
+		Возврат Результат;
+	КонецЕсли;
+
+	СпрОбъект = СоздатьОбъект("Справочник.ВСД_Площадка");
+	СпрОбъект.НайтиЭлемент( ВыбПлощадка );
+
+	НачатьТранзакцию();
+	Попытка
+		
+		enterprise = objDom.selectSingleNode("//dt:enterprise") ;
+		
+		active = enterprise.selectSingleNode("bs:active").text;
+		Если Врег(active)="TRUE" Тогда  
+			СпрОбъект.active =1;
+			СпрОбъект.СнятьПометкуУдаления();
+		Иначе 
+			СпрОбъект.active =0;
+			СпрОбъект.Удалить(0);
+		КонецЕсли;
+	    СпрОбъект.Адрес = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:addressView").text;
+	    Попытка 
+			СтранаGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:country").selectSingleNode("bs:guid").text;
+			СтранаName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:country").selectSingleNode("dt:name").text;
+			СпрОбъект.Страна = Сам().НайтиСтрануПоGUID( СтранаGUID, СтранаName );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			regionGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:region").selectSingleNode("bs:guid").text;
+			regionName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:region").selectSingleNode("dt:name").text;
+			СпрОбъект.Регион = Сам().Справочник_НайтиПоGUID( "ВСД_Регион", regionGUID, regionName, СпрОбъект.Страна );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			districtGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:district").selectSingleNode("bs:guid").text;
+			districtName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:district").selectSingleNode("dt:name").text;
+			СпрОбъект.Район = Сам().Справочник_НайтиПоGUID( "ВСД_Район", districtGUID, districtName, СпрОбъект.Регион );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			localityGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:locality").selectSingleNode("bs:guid").text;
+			localityName = "";
+			СпрОбъект.Город = Сам().Справочник_НайтиПоGUID( "ВСД_Город", localityGUID, localityName, СпрОбъект.Регион );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			streetGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:street").selectSingleNode("bs:guid").text;
+			streetName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:street").selectSingleNode("dt:name").text;
+			СпрОбъект.Улица = Сам().Справочник_НайтиПоGUID( "ВСД_Улица", streetGUID, streetName, СпрОбъект.Город );
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Дом = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:house").text;
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Строение = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:building").text;
+		Исключение
+		КонецПопытки;
+	    Попытка 
+			СпрОбъект.Помещение = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:room").text;
+		Исключение
+		КонецПопытки;
+
+	    Попытка 
+			registryStatus = enterprise.selectSingleNode("dt:registryStatus").text;
+			СпрОбъект.Статус = Перечисление.ВСД_СтатусПлощадки.ЗначениеПоИдентификатору( registryStatus );			
+		Исключение
+			ГМ.СообщитьИнфо(ОписаниеОшибки());
+		КонецПопытки;
+		
+		СпрОбъект.Наименование = enterprise.selectSingleNode("dt:name").text;
+		СпрОбъект.GUID = enterprise.selectSingleNode("bs:guid").text;
+		СпрОбъект.UUID = enterprise.selectSingleNode("bs:uuid").text;
+	
+		ГМ.УдалитьXML( ГМ.Компонента.LogFilename);
+		
+		Если ПустоеЗначение(ХС)=0 Тогда			
+			СпрОбъект.GUIDХозСубъекта = ХС.GUID;			
+		Иначе						
+			Если ПустоеЗначение(ХС)=0 Тогда			
+				Сообщить("Не выбран ХозСубъект "+ СпрОбъект+" "+ СпрОбъект.Наименование +" "+СпрОбъект.Адрес );
+				//Сообщить("ХозСубъект не записан","!");			
+			КонецЕсли;
+		КонецЕсли;
+		Сообщить("Записан "+СпрОбъект.Вид()+" ["+СпрОбъект+"] GUID = "+ СпрОбъект.Guid+" Адрес: "+СпрОбъект.Адрес);					
+		СпрОбъект.Записать();
+		Результат = СпрОбъект.ТекущийЭлемент();
+		ЗафиксироватьТранзакцию();		
+		
+	Исключение
+		Сообщить("Площадка не найдена "+GUID,"!");
+		Сообщить(ОписаниеОшибки());
+	КонецПопытки;
+	
+	Возврат Результат;
+	
 КонецФункции
 
 
