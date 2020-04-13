@@ -2622,6 +2622,16 @@
 	        |</vd:relatedDocument>";
         КонецЕсли;
 
+		Если ПустоеЗначение(Док.УпдНомер) = 0 Тогда
+	        СвязанныеДокументы = СвязанныеДокументы+ "
+	        |<vd:relatedDocument>
+    	    |<vd:issueNumber>"+СокрЛП(док.УпдНомер)+"</vd:issueNumber>
+	        |<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.УпдДата) +"</vd:issueDate>
+    	    |<vd:type>23</vd:type>
+        	|<vd:relationshipType>1</vd:relationshipType>
+	        |</vd:relatedDocument>";
+        КонецЕсли;
+		
 		//!!! UUID на основании аннулированного ВСД в ТЧ документа
 		Док.ВыбратьСтроки();
 		Пока Док.ПолучитьСтроку() = 1 Цикл
