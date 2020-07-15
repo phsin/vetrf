@@ -5550,14 +5550,14 @@
 	ГМ.ПометитьНаУдалениеСправочник("ВСД_Страна");
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Страна");
-    countryList = objDom.selectNodes("//ikar:country") ;
+    countryList = objDom.selectNodes("//dt:country") ;
     Для i1 = 0 По countryList.length - 1 Цикл
         country=countryList.item(i1);
 
 		uuid = country.selectSingleNode("bs:uuid").text;
 		guid = country.selectSingleNode("bs:guid").text;
 		st = country.selectSingleNode("bs:status").text;
-		name = country.selectSingleNode("ikar:name").text;
+		name = country.selectSingleNode("dt:name").text;
 		//fullname = country.selectSingleNode("ikar:fullName").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
@@ -5631,15 +5631,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Регион");
-    regionList = objDom.selectNodes("//ikar:region") ;
+    regionList = objDom.selectNodes("//dt:region") ;
     Для i1 = 0 По regionList.length - 1 Цикл
         region=regionList.item(i1);
 
 		uuid = region.selectSingleNode("bs:uuid").text;
 		guid = region.selectSingleNode("bs:guid").text;
 		st = region.selectSingleNode("bs:status").text;
-		name = region.selectSingleNode("ikar:name").text;
-		view = region.selectSingleNode("ikar:view").text;
+		name = region.selectSingleNode("dt:name").text;
+		view = region.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Регион", guid, view, Страна );
 		
@@ -5704,15 +5704,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Район");
-    districtList = objDom.selectNodes("//ikar:district") ;
+    districtList = objDom.selectNodes("//dt:district") ;
     Для i1 = 0 По districtList.length - 1 Цикл
         district=districtList.item(i1);
 
 		uuid = district.selectSingleNode("bs:uuid").text;
 		guid = district.selectSingleNode("bs:guid").text;
 		st = district.selectSingleNode("bs:status").text;
-		name = district.selectSingleNode("ikar:name").text;
-		view = district.selectSingleNode("ikar:view").text;
+		name = district.selectSingleNode("dt:name").text;
+		view = district.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Район", guid, view, Регион );
 	КонецЦикла;
@@ -5764,15 +5764,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Город");
-    List = objDom.selectNodes("//ikar:locality") ;
+    List = objDom.selectNodes("//dt:locality") ;
     Для i1 = 0 По List.length - 1 Цикл
         item=List.item(i1);
 
 		uuid = item.selectSingleNode("bs:uuid").text;
 		guid = item.selectSingleNode("bs:guid").text;
 		st = item.selectSingleNode("bs:status").text;
-		name = item.selectSingleNode("ikar:name").text;
-		view = item.selectSingleNode("ikar:view").text;
+		name = item.selectSingleNode("dt:name").text;
+		view = item.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Город", guid, name, Регион );
 	КонецЦикла;
@@ -5836,15 +5836,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Город");
-    localityList = objDom.selectNodes("//ikar:locality") ;
+    localityList = objDom.selectNodes("//dt:locality") ;
     Для i1 = 0 По localityList.length - 1 Цикл
         locality=localityList.item(i1);
 
 		uuid = locality.selectSingleNode("bs:uuid").text;
 		guid = locality.selectSingleNode("bs:guid").text;
 		st = locality.selectSingleNode("bs:status").text;
-		name = locality.selectSingleNode("ikar:name").text;
-		view = locality.selectSingleNode("ikar:view").text;
+		name = locality.selectSingleNode("dt:name").text;
+		view = locality.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Город", guid, name, Район );
 
@@ -5899,15 +5899,15 @@
 
 	НачатьТранзакцию(); // Ускоримся
 	Спр = СоздатьОбъект("Справочник.ВСД_Улица");
-    List = objDom.selectNodes("//ikar:street") ;
+    List = objDom.selectNodes("//dt:street") ;
     Для i1 = 0 По List.length - 1 Цикл
         item=List.item(i1);
 
 		uuid = item.selectSingleNode("bs:uuid").text;
 		guid = item.selectSingleNode("bs:guid").text;
 		st = item.selectSingleNode("bs:status").text;
-		name = item.selectSingleNode("ikar:name").text;
-		view = item.selectSingleNode("ikar:view").text;
+		name = item.selectSingleNode("dt:name").text;
+		view = item.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Улица", guid, view, Город );
 		
