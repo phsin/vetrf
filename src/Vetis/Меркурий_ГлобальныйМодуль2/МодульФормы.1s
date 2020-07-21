@@ -114,7 +114,7 @@
 			// dt:quantity  	Количество единиц упаковки.
 			Попытка ТЗУровни.КолВо = Число(Узел.selectSingleNode("dt:quantity").text);Исключение  КонецПопытки;
 
-			Попытка ТЗУровни.Упаковка = ГМ.НайтиФормуУпаковки( Узел.selectSingleNode("dt:packingType").selectSingleNode("bs:guid").text, Узел.selectSingleNode("dt:packingType").selectSingleNode("dt:name").text); Исключение  КонецПопытки;
+			Попытка ТЗУровни.Упаковка = Сам().НайтиФормуУпаковки( Узел.selectSingleNode("dt:packingType").selectSingleNode("bs:guid").text, Узел.selectSingleNode("dt:packingType").selectSingleNode("dt:name").text); Исключение  КонецПопытки;
 
 			СзМаркировки = СоздатьОбъект("Списокзначений");
 			//Маркировка партии продукции. Например
