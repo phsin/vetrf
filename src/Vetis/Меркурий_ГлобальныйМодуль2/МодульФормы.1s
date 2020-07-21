@@ -5510,7 +5510,7 @@
 Функция ЗагрузитьСтраны_ЗапросXML( )
 	Запрос = "
 	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'>
 	|  <soapenv:Header/>
 	|  <soapenv:Body>
@@ -5533,7 +5533,7 @@
 
 	ЗапросXML = ЗагрузитьСтраны_ЗапросXML();
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/ikar/services/IkarService";
+    метод.Service = "platform/services/2.1/IkarService";
     метод.Action = "GetAllCountryList";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -5550,14 +5550,14 @@
 	ГМ.ПометитьНаУдалениеСправочник("ВСД_Страна");
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Страна");
-    countryList = objDom.selectNodes("//ikar:country") ;
+    countryList = objDom.selectNodes("//dt:country") ;
     Для i1 = 0 По countryList.length - 1 Цикл
         country=countryList.item(i1);
 
 		uuid = country.selectSingleNode("bs:uuid").text;
 		guid = country.selectSingleNode("bs:guid").text;
 		st = country.selectSingleNode("bs:status").text;
-		name = country.selectSingleNode("ikar:name").text;
+		name = country.selectSingleNode("dt:name").text;
 		//fullname = country.selectSingleNode("ikar:fullName").text;
 
 		Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
@@ -5582,9 +5582,9 @@
 Функция ЗагрузитьРегионы_ЗапросXML( guid )
 	Запрос = "
 	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
-	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
 	|  <soapenv:Header/>
 	|  <soapenv:Body>
 	|    <ws:getRegionListByCountryRequest>
@@ -5615,7 +5615,7 @@
 
 	ЗапросXML = ЗагрузитьРегионы_ЗапросXML( Страна.GUID );
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/ikar/services/IkarService";
+    метод.Service = "platform/services/2.1/IkarService";
     метод.Action = "RegionListByCountry";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -5631,15 +5631,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Регион");
-    regionList = objDom.selectNodes("//ikar:region") ;
+    regionList = objDom.selectNodes("//dt:region") ;
     Для i1 = 0 По regionList.length - 1 Цикл
         region=regionList.item(i1);
 
 		uuid = region.selectSingleNode("bs:uuid").text;
 		guid = region.selectSingleNode("bs:guid").text;
 		st = region.selectSingleNode("bs:status").text;
-		name = region.selectSingleNode("ikar:name").text;
-		view = region.selectSingleNode("ikar:view").text;
+		name = region.selectSingleNode("dt:name").text;
+		view = region.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Регион", guid, view, Страна );
 		
@@ -5653,9 +5653,9 @@
 Функция ЗагрузитьРайоны_ЗапросXML( guid )
 	Запрос = "
 	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
-	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
 	|  <soapenv:Header/>
 	|  <soapenv:Body>
 	|    <ws:getDistrictListByRegionRequest>
@@ -5689,7 +5689,7 @@
 
 	ЗапросXML = ЗагрузитьРайоны_ЗапросXML( Регион.GUID );
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/ikar/services/IkarService";
+    метод.Service = "platform/services/2.1/IkarService";
     метод.Action = "GetDistrictListByRegion";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -5704,15 +5704,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Район");
-    districtList = objDom.selectNodes("//ikar:district") ;
+    districtList = objDom.selectNodes("//dt:district") ;
     Для i1 = 0 По districtList.length - 1 Цикл
         district=districtList.item(i1);
 
 		uuid = district.selectSingleNode("bs:uuid").text;
 		guid = district.selectSingleNode("bs:guid").text;
 		st = district.selectSingleNode("bs:status").text;
-		name = district.selectSingleNode("ikar:name").text;
-		view = district.selectSingleNode("ikar:view").text;
+		name = district.selectSingleNode("dt:name").text;
+		view = district.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Район", guid, view, Регион );
 	КонецЦикла;
@@ -5725,9 +5725,9 @@
 Функция ЗагрузитьГорода_ЗапросXML( guid )
 	Запрос = "
 	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
-	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
 	|  <soapenv:Header/>
 	|  <soapenv:Body>
 	|    <ws:getLocalityListByRegionRequest>
@@ -5749,7 +5749,7 @@
 
 	ЗапросXML = ЗагрузитьГорода_ЗапросXML( Регион.GUID );
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/ikar/services/IkarService";
+    метод.Service = "platform/services/2.1/IkarService";
     метод.Action = "GetLocalityListByRegion";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -5764,15 +5764,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Город");
-    List = objDom.selectNodes("//ikar:locality") ;
+    List = objDom.selectNodes("//dt:locality") ;
     Для i1 = 0 По List.length - 1 Цикл
         item=List.item(i1);
 
 		uuid = item.selectSingleNode("bs:uuid").text;
 		guid = item.selectSingleNode("bs:guid").text;
 		st = item.selectSingleNode("bs:status").text;
-		name = item.selectSingleNode("ikar:name").text;
-		view = item.selectSingleNode("ikar:view").text;
+		name = item.selectSingleNode("dt:name").text;
+		view = item.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Город", guid, name, Регион );
 	КонецЦикла;
@@ -5785,9 +5785,9 @@
 Функция ЗагрузитьНаселенныеПунктыПоРайону_ЗапросXML( guid )
 	Запрос = "
 	|<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
-	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
 	|  <soapenv:Header/>
 	|  <soapenv:Body>
 	|    <ws:getLocalityListByDistrictRequest>
@@ -5821,7 +5821,7 @@
 
 	ЗапросXML = ЗагрузитьНаселенныеПунктыПоРайону_ЗапросXML( Район.GUID );
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/ikar/services/IkarService";
+    метод.Service = "platform/services/2.1/IkarService";
     метод.Action = "getLocalityListByDistrict";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -5836,15 +5836,15 @@
 	КонецЕсли;
 
 	Спр = СоздатьОбъект("Справочник.ВСД_Город");
-    localityList = objDom.selectNodes("//ikar:locality") ;
+    localityList = objDom.selectNodes("//dt:locality") ;
     Для i1 = 0 По localityList.length - 1 Цикл
         locality=localityList.item(i1);
 
 		uuid = locality.selectSingleNode("bs:uuid").text;
 		guid = locality.selectSingleNode("bs:guid").text;
 		st = locality.selectSingleNode("bs:status").text;
-		name = locality.selectSingleNode("ikar:name").text;
-		view = locality.selectSingleNode("ikar:view").text;
+		name = locality.selectSingleNode("dt:name").text;
+		view = locality.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Город", guid, name, Район );
 
@@ -5855,14 +5855,12 @@
 	Сообщить("Загрузка завершена");
 КонецФункции
 
-
-
 Функция Список_Улиц_ЗапросXML( Город, Смещение )
 
 	Запрос = "<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'
-	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/ikar/ws-definitions'
+	|                  xmlns:ws='http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2'
 	|                  xmlns:base='http://api.vetrf.ru/schema/cdm/base'
-	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/ikar'>
+	|                  xmlns:ikar='http://api.vetrf.ru/schema/cdm/dictionary/v2'>
 	|   <SOAP-ENV:Header/>
 	|   <SOAP-ENV:Body>
 	|      <ws:getStreetListByLocalityRequest>
@@ -5885,7 +5883,7 @@
 	ЗапросXML = Список_Улиц_ЗапросXML( Город, Смещение );
 
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/ikar/services/IkarService";
+    метод.Service = "platform/services/2.1/IkarService";
     метод.Action = "GetStreetListByLocality";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -5901,15 +5899,15 @@
 
 	НачатьТранзакцию(); // Ускоримся
 	Спр = СоздатьОбъект("Справочник.ВСД_Улица");
-    List = objDom.selectNodes("//ikar:street") ;
+    List = objDom.selectNodes("//dt:street") ;
     Для i1 = 0 По List.length - 1 Цикл
         item=List.item(i1);
 
 		uuid = item.selectSingleNode("bs:uuid").text;
 		guid = item.selectSingleNode("bs:guid").text;
 		st = item.selectSingleNode("bs:status").text;
-		name = item.selectSingleNode("ikar:name").text;
-		view = item.selectSingleNode("ikar:view").text;
+		name = item.selectSingleNode("dt:name").text;
+		view = item.selectSingleNode("dt:view").text;
 
 		ГМ.Справочник_НайтиПоGUID( "ВСД_Улица", guid, view, Город );
 		
