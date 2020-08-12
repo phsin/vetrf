@@ -1076,7 +1076,7 @@
 			//uuid = vetDocument.selectSingleNode("*[local-name()='uuid']").text;
 	
 			тзРезультат.НоваяСтрока();
-			тзРезультат.Пометка=1;
+			тзРезультат.Пометка=0;
 	
 			ВСД_Класс = СоздатьОбъект("ВСД_vetDocument");
 			тзРезультат.ДокВСД = ВСД_Класс.Заполнить( vetDocument, докОснование );
@@ -6134,7 +6134,7 @@
 
 	Спр = СоздатьОбъект("Справочник.ВСД_ЕдиницыИзмерения");
 
-    unitList = objDom.selectNodes("//com:unit") ;
+    unitList = objDom.selectNodes("//dt:unit") ;
     Для i1 = 0 По unitList.length - 1 Цикл
         unit=unitList.item(i1);
 
