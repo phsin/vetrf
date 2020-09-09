@@ -180,7 +180,7 @@
 		Возврат "";
     КонецЕсли;
 КонецФункции
-
+//}
 Функция СвязанныеДокументы_из_XML(DocList) Экспорт
 	// Связанные документы - м.б. несколько, для гашения в тестовой версии достаточно ТТН
 	// другие связанные документы не нашел куда включать в запросе на гашение
@@ -1744,29 +1744,62 @@
 	|</merc:enterprise>
 	|<vd:stockEntry>
 	|<bs:guid>"+ СокрЛП( док.Партия.GUID ) +"</bs:guid>
-	|<vd:vetEventList>
-	|<vd:laboratoryResearch>
-	|<vd:actualDateTime>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаРезультата, "T00:00:00") +"</vd:actualDateTime>
-	|<vd:operator>
-	|<dt:name>" + СокрЛП(док.НаименованиеЛаборатории) + "</dt:name>
-	|</vd:operator>
-	|<vd:referencedDocument>
-	|<vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
-	|<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаОтбораПроб) +"</vd:issueDate>
-	|<vd:type>9</vd:type>
-	//|<vd:relationshipType>6</vd:relationshipType>
-	|</vd:referencedDocument>
-	|<vd:expertiseID>"+ СокрЛП(док.НомерЭкспертизы) +"</vd:expertiseID>
-	|<vd:disease>
-	|<dt:name>"+ СокрЛП(док.НаименованиеПоказателя) +"</dt:name>
-	|</vd:disease>
-	|<vd:method>
-	|<dt:name>"+ СокрЛП(док.МетодИсследования) +"</dt:name>
-	|</vd:method>
-	//Допустимые значения: UNKNOWN, POSITIVE, NEGATIVE
-	|<vd:result>"+ СокрЛП(док.РезультатИсследования.Идентификатор()) +"</vd:result>
-	|<vd:conclusion>"+ СокрЛП(док.Заключение)  +"</vd:conclusion>
-	|</vd:laboratoryResearch>
+	|<vd:vetEventList>";
+	
+	Если док.Вид()="ВСД2_ЛабораторныеИсследования" Тогда 
+		Запрос = Запрос+"
+		|<vd:laboratoryResearch>
+		|<vd:actualDateTime>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаРезультата, "T00:00:00") +"</vd:actualDateTime>
+		|<vd:operator>
+		|<dt:name>" + СокрЛП(док.НаименованиеЛаборатории) + "</dt:name>
+		|</vd:operator>
+		|<vd:referencedDocument>
+		|<vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
+		|<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаОтбораПроб) +"</vd:issueDate>
+		|<vd:type>9</vd:type>
+		//|<vd:relationshipType>6</vd:relationshipType>
+		|</vd:referencedDocument>
+		|<vd:expertiseID>"+ СокрЛП(док.НомерЭкспертизы) +"</vd:expertiseID>
+		|<vd:disease>
+		|<dt:name>"+ СокрЛП(док.НаименованиеПоказателя) +"</dt:name>
+		|</vd:disease>
+		|<vd:method>
+		|<dt:name>"+ СокрЛП(док.МетодИсследования) +"</dt:name>
+		|</vd:method>
+		//Допустимые значения: UNKNOWN, POSITIVE, NEGATIVE
+		|<vd:result>"+ СокрЛП(док.РезультатИсследования.Идентификатор()) +"</vd:result>
+		|<vd:conclusion>"+ СокрЛП(док.Заключение)  +"</vd:conclusion>
+		|</vd:laboratoryResearch>";
+	Иначе
+		Док.ВыбратьСтроки();
+		Пока Док.ПолучитьСтроку() = 1 Цикл
+			Запрос = Запрос+"
+			|<vd:laboratoryResearch>
+			|<vd:actualDateTime>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаРезультата, "T00:00:00") +"</vd:actualDateTime>
+			|<vd:operator>
+			|<dt:name>" + СокрЛП(док.НаименованиеЛаборатории) + "</dt:name>
+			|</vd:operator>
+			|<vd:referencedDocument>
+			|<vd:issueNumber>"+ СокрЛП(док.НомерАктаОтбораПроб) +"</vd:issueNumber>
+			|<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаОтбораПроб) +"</vd:issueDate>
+			|<vd:type>9</vd:type>
+			//|<vd:relationshipType>6</vd:relationshipType>
+			|</vd:referencedDocument>
+			|<vd:expertiseID>"+ СокрЛП(док.НомерЭкспертизы) +"</vd:expertiseID>
+			|<vd:disease>
+			|<dt:name>"+ СокрЛП(док.НаименованиеПоказателя) +"</dt:name>
+			|</vd:disease>
+			|<vd:method>
+			|<dt:name>"+ СокрЛП(док.МетодИсследования) +"</dt:name>
+			|</vd:method>
+			//Допустимые значения: UNKNOWN, POSITIVE, NEGATIVE
+			|<vd:result>"+ СокрЛП(док.РезультатИсследования.Идентификатор()) +"</vd:result>
+			|<vd:conclusion>"+ СокрЛП(док.Заключение)  +"</vd:conclusion>
+			|</vd:laboratoryResearch>";			
+		КонецЦикла;	
+	КонецЕсли;
+	
+	Запрос = Запрос+"
 	|</vd:vetEventList>
 	|</vd:stockEntry>
 	|</merc:updateVeterinaryEventsRequest>
