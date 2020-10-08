@@ -5067,7 +5067,7 @@
 
 //}*************** Объединение Партий v2 Окончание
 
-//*************** ХС **************************
+//{*************** ХС **************************
 
 Функция ЗагрузитьХС(GUID) Экспорт
 
@@ -5146,6 +5146,9 @@
 	Возврат appID;
 	
 КонецФункции
+
+//}
+
 //*************** Заполнение документов **********************
 
 Функция ЗаполнитьВСД2_Транзакция_Корректировочный( КонтДокумента, ДокОснование ) Экспорт
@@ -5385,31 +5388,31 @@
 	    Попытка 
 			СтранаGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:country").selectSingleNode("bs:guid").text;
 			СтранаName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:country").selectSingleNode("dt:name").text;
-			СпрОбъект.Страна = Сам().НайтиСтрануПоGUID( СтранаGUID, СтранаName );
+			СпрОбъект.Страна = ГМ.НайтиСтрануПоGUID( СтранаGUID, СтранаName );
 		Исключение
 		КонецПопытки;
 	    Попытка 
 			regionGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:region").selectSingleNode("bs:guid").text;
 			regionName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:region").selectSingleNode("dt:name").text;
-			СпрОбъект.Регион = Сам().Справочник_НайтиПоGUID( "ВСД_Регион", regionGUID, regionName, СпрОбъект.Страна );
+			СпрОбъект.Регион = ГМ.Справочник_НайтиПоGUID( "ВСД_Регион", regionGUID, regionName, СпрОбъект.Страна );
 		Исключение
 		КонецПопытки;
 	    Попытка 
 			districtGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:district").selectSingleNode("bs:guid").text;
 			districtName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:district").selectSingleNode("dt:name").text;
-			СпрОбъект.Район = Сам().Справочник_НайтиПоGUID( "ВСД_Район", districtGUID, districtName, СпрОбъект.Регион );
+			СпрОбъект.Район = ГМ.Справочник_НайтиПоGUID( "ВСД_Район", districtGUID, districtName, СпрОбъект.Регион );
 		Исключение
 		КонецПопытки;
 	    Попытка 
 			localityGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:locality").selectSingleNode("bs:guid").text;
 			localityName = "";
-			СпрОбъект.Город = Сам().Справочник_НайтиПоGUID( "ВСД_Город", localityGUID, localityName, СпрОбъект.Регион );
+			СпрОбъект.Город = ГМ.Справочник_НайтиПоGUID( "ВСД_Город", localityGUID, localityName, СпрОбъект.Регион );
 		Исключение
 		КонецПопытки;
 	    Попытка 
 			streetGUID = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:street").selectSingleNode("bs:guid").text;
 			streetName = enterprise.selectSingleNode("dt:address").selectSingleNode("dt:street").selectSingleNode("dt:name").text;
-			СпрОбъект.Улица = Сам().Справочник_НайтиПоGUID( "ВСД_Улица", streetGUID, streetName, СпрОбъект.Город );
+			СпрОбъект.Улица = ГМ.Справочник_НайтиПоGUID( "ВСД_Улица", streetGUID, streetName, СпрОбъект.Город );
 		Исключение
 		КонецПопытки;
 	    Попытка 
