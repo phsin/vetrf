@@ -11,7 +11,8 @@
 Функция ПолучитьПартии2( спПараметрыФункции ) Экспорт Далее
 Функция ПолучитьИмяФайла_МаршрутДоставки(Док) Экспорт Далее
 Функция ПолучитьИмяФайлаРегионализация( Док ) Экспорт Далее
-	
+Функция НайтиПлощадку(Guid, Обновить=1) Экспорт Далее	
+
 //Служебные функции
 Функция Этот(Конт) 	Возврат Конт; КонецФункции
 Функция Сам() 	Возврат Этот(Контекст); КонецФункции
@@ -276,7 +277,7 @@
             Попытка ТЗточкиМаршрута.UUID					 = 		Узел.selectSingleNode("bs:uuid").text; Исключение КонецПопытки;
             Попытка ТЗточкиМаршрута.НомерТочки				 =		Узел.selectSingleNode("vd:sqnId").text; Исключение КонецПопытки;
 			Попытка Площадка_GUID = Узел.selectSingleNode("vd:enterprise").selectSingleNode("bs:guid").text; Исключение КонецПопытки;
-			Попытка ТЗточкиМаршрута.ВыбПлощадка				 =  	ГМ.НайтиПлощадку( Площадка_GUID ); Исключение КонецПопытки;
+			Попытка ТЗточкиМаршрута.ВыбПлощадка				 =  	НайтиПлощадку( Площадка_GUID ); Исключение КонецПопытки;
 			//Попытка ТЗточкиМаршрута.ПредприятиеНаименование	 =  	Узел.selectSingleNode("vd:enterprise").selectSingleNode("dt:name").text; Исключение КонецПопытки;
             Попытка ТЗточкиМаршрута.Перегрузка				 = 		?(Узел.selectSingleNode("vd:transshipment").text = "true",1,0); Исключение КонецПопытки;
             Попытка ТЗточкиМаршрута.ТипТранспорта			 = 		Число(Узел.selectSingleNode("vd:nextTransport").selectSingleNode("vd:transportType").text); Исключение КонецПопытки;
@@ -323,7 +324,7 @@
 	    Для l1 = 0 По ProducerList.length - 1 Цикл
 			ГУидПроизводителя = ProducerList.item(l1).selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text;
 			ТзПроизводителей.НоваяСтрока();
-			ТзПроизводителей.Площадка = ГМ.НайтиПлощадку(ГУидПроизводителя);
+			ТзПроизводителей.Площадка = НайтиПлощадку(ГУидПроизводителя);
 			Попытка ТзПроизводителей.Роль =  ProducerList.item(l1).selectSingleNode("dt:role").text; Исключение ТзПроизводителей.Роль = "PRODUCER"; КонецПопытки;
 			Попытка ТзПроизводителей.Имя =  ProducerList.item(l1).selectSingleNode("dt:name").text; Исключение ТзПроизводителей.Имя = ""; КонецПопытки;
 
@@ -2656,6 +2657,30 @@
 				//из параметров
 				ОсобыеОтметки = СокрЛП(ГМ.ПолучитьКонстанту("ВСД_ОсобыеОтметки"));
 			КонецЕсли;
+			Если ГМ.ПолучитьКонстанту("ОсобыеОтметкиЗагружатьИзПартии")=1 Тогда 
+				// из партии
+				ИмяФайла = док.Партия.документВСД.ИмяФайлаОтвет; 
+							
+				Сообщить("Загрузка Особых отметок из XML-файла: "+ИмяФайла);
+				Попытка 			
+					objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+					objDom.load(ИмяФайла);					
+					 
+					objDom.setProperty("SelectionNamespaces", "
+							|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+							|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+							|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+							|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+							|" );
+					vetDocumentlist = objDom.selectNodes("//merc:vetDocument") ;
+					Для i1 = 0 По vetDocumentlist.length - 1 Цикл
+						vetDocument=vetDocumentlist.item(i1);
+						specialMarks = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text;
+					КонецЦикла;
+				Исключение
+				КонецПопытки;
+				Попытка ОсобыеОтметки = ОсобыеОтметки +" "+ specialMarks; Исключение КонецПопытки;
+			КонецЕсли;
 			// + добавим из документа
 			ОсобыеОтметки = ОсобыеОтметки +" "+ СокрЛП(док.особыеотметки);
 			ЗапросПодвал = ЗапросПодвал+ ?(Пустоезначение(особыеотметки) = 0, "<vd:specialMarks>"+ ОсобыеОтметки +"</vd:specialMarks>","");
@@ -3498,7 +3523,7 @@
 		Попытка	СпрОбъект.ЕдИзмОбъемаФасовки = ГМ.НайтиЕдИзмерения(packaging.selectSingleNode("dt:unit").selectSingleNode("bs:guid").text);	Исключение 	КонецПопытки;
 
 		//Площадка(И) производитель(И) - Пока в 1 экземпляре
-		Попытка СпрОбъект.Площадка = ГМ.НайтиПлощадку(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
+		Попытка СпрОбъект.Площадка = НайтиПлощадку(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
 			//ГМ.ЗагрузитьПлощадкуПоGUID(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
 			
 		//Попытка СпрОбъект.Площадка = ГМ.НайтиПлощадку(productItem.selectSingleNode("dt:producing").selectSingleNode("dt:location").selectSingleNode("bs:guid").text);  Исключение	КонецПопытки;
@@ -5574,6 +5599,39 @@
 
 	Возврат appID;
 
+КонецФункции
+
+Функция НайтиПлощадку(Guid, Обновить=1) Экспорт
+
+	Рез = "";
+	Guid = СокрЛП(Guid);
+	Если ПустоеЗначение(Guid)=1 Тогда
+		Возврат "";
+	КонецЕсли;
+
+	Спр = СоздатьОбъект("Справочник.ВСД_Площадка");
+	Если Спр.НайтиПоРеквизиту("GUID",Guid,1)=1 Тогда
+		Рез = Спр.ТекущийЭлемент();
+		Если Спр.ПометкаУдаления() = 1 Тогда
+			Спр.СнятьПометкуУдаления();    
+		КонецЕсли;
+	Иначе
+		Сообщить("Площадка GUID ["+guid+"] не найдена: ","!");
+		Спр.Новый();
+		Спр.guid = guid;
+		Спр.Записать();
+		//создать площадку
+		Если Обновить=1 Тогда 
+			Рез = Площадка_ЗагрузитьПоGUID(Спр, guid);
+		КонецЕсли;
+
+	КонецЕсли;
+
+	Если ПустоеЗначение(Рез)=1 Тогда
+		Сообщить("ВСД_Площадка не найдена ["+Guid+"]","!");
+	КонецЕсли;
+
+	Возврат рез;
 КонецФункции
 // }
 
