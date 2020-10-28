@@ -2688,6 +2688,30 @@
 				КонецПопытки;
 				Попытка ОсобыеОтметки = ОсобыеОтметки +" "+ specialMarks; Исключение КонецПопытки;					
 			КонецЕсли;
+			Если ГМ.ПолучитьКонстанту("ОсобыеОтметкиЗагружатьИзПартии")=1 Тогда 
+				// из партии
+				ИмяФайла = док.Партия.документВСД.ИмяФайлаОтвет; 
+							
+				Сообщить("Загрузка Особых отметок из XML-файла: "+ИмяФайла);
+				Попытка 			
+					objDom=СоздатьОбъект("MSXML2.DOMDocument.6.0");
+					objDom.load(ИмяФайла);					
+					 
+					objDom.setProperty("SelectionNamespaces", "
+							|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2'
+							|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2'
+							|xmlns:bs='http://api.vetrf.ru/schema/cdm/base'
+							|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2'
+							|" );
+					vetDocumentlist = objDom.selectNodes("//merc:vetDocument") ;
+					Для i1 = 0 По vetDocumentlist.length - 1 Цикл
+						vetDocument=vetDocumentlist.item(i1);
+						specialMarks = vetDocument.selectSingleNode("vd:authentication").selectSingleNode("vd:specialMarks").text;
+					КонецЦикла;
+				Исключение
+				КонецПопытки;
+				Попытка ОсобыеОтметки = ОсобыеОтметки +" "+ specialMarks; Исключение КонецПопытки;
+			КонецЕсли;
 			// + добавим из документа
 			ОсобыеОтметки = ОсобыеОтметки +" "+ СокрЛП(док.особыеотметки);
 			ЗапросПодвал = ЗапросПодвал+ ?(Пустоезначение(особыеотметки) = 0, "<vd:specialMarks>"+ ОсобыеОтметки +"</vd:specialMarks>","");
