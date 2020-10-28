@@ -95,10 +95,10 @@
 
 	Если ЭтоТранспортныйВСД = 1 Тогда
 		Попытка	ВСД_Док.Отправитель_ХозСубъект 	= ГМ.НайтиХСпоGUID(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignor").selectSingleNode("dt:businessEntity").selectSingleNode("bs:guid").text);	Исключение КонецПопытки;
-		Попытка ВСД_Док.Отправитель_Площадка 	= ГМ.НайтиПлощадку(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignor").selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text);	Исключение КонецПопытки;
+		Попытка ВСД_Док.Отправитель_Площадка 	= ГМ2.НайтиПлощадку(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignor").selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text);	Исключение КонецПопытки;
 
 		Попытка	ВСД_Док.Получатель_ХозСубъект 	= ГМ.НайтиХСпоGUID(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignee").selectSingleNode("dt:businessEntity").selectSingleNode("bs:guid").text);	Исключение	КонецПопытки;
-		Попытка	ВСД_Док.Получатель_Площадка 	= ГМ.НайтиПлощадку(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignee").selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text);		Исключение	КонецПопытки;
+		Попытка	ВСД_Док.Получатель_Площадка 	= ГМ2.НайтиПлощадку(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:consignee").selectSingleNode("dt:enterprise").selectSingleNode("bs:guid").text);		Исключение	КонецПопытки;
 		Попытка ВСД_Док.Перевозчик_ХозСубъект 	= ГМ.НайтиХСпоGUID(vetDocument.selectSingleNode("vd:certifiedConsignment").selectSingleNode("vd:broker").selectSingleNode("bs:guid").text); Исключение КонецПопытки;
 
 		Попытка
