@@ -3493,13 +3493,19 @@
 
 		//st  	 = productItem.selectSingleNode("bs:status").text;
 		//prodType = productItem.selectSingleNode("dt:productType").text;
+		
+		guid = productItem.selectSingleNode("bs:guid").text;
 
 		СпрОбъект = СоздатьОбъект("Справочник.ВСД_Продукция_Элемент");
 		Если ПустоеЗначение(продукцияЭлемент)=0 Тогда
 			СпрОбъект.НайтиЭлемент(продукцияЭлемент);
 		Иначе
-
-			Если СпрОбъект.НайтиПоРеквизиту("GUID", productItem.selectSingleNode("bs:guid").text,1)=0 Тогда
+			// если указан GUID - ищем только по GUID 
+			Если ПустоеЗначение(guid)=0 Тогда 
+				Если СпрОбъект.НайтиПоРеквизиту("GUID", guid ,1)=0 Тогда
+					СпрОбъект.Новый();
+				КонецЕсли;
+			Иначе			
 				Если СпрОбъект.НайтиПоНаименованию( productItem.selectSingleNode("dt:name").text)=0 Тогда
 					СпрОбъект.Новый();
 				КонецЕсли;
@@ -3514,7 +3520,7 @@
 		СпрОбъект.Продукция = ГМ.НайтиПродукцию(productItem.selectSingleNode("dt:product").selectSingleNode("bs:guid").text);
 		СпрОбъект.ВидПродукции = ГМ.НайтиВидПродукции(productItem.selectSingleNode("dt:subProduct").selectSingleNode("bs:guid").text);
 		СпрОбъект.UUID = productItem.selectSingleNode("bs:uuid").text;
-		СпрОбъект.GUID = productItem.selectSingleNode("bs:guid").text;
+		СпрОбъект.GUID = guid;
 		Попытка СпрОбъект.СоответствуетГОСТу = ?(productItem.selectSingleNode("dt:correspondsToGost").text = "true",1,0); Исключение	КонецПопытки;
 		Попытка СпрОбъект.Гост = productItem.selectSingleNode("dt:gost").text; Исключение	КонецПопытки;
 		Попытка СпрОбъект.GTIN = productItem.selectSingleNode("dt:globalID").text; Исключение КонецПопытки;
