@@ -78,105 +78,102 @@
 
 Функция Создать_ХС_ЗапросXML()
 	ответ ="
-   |<SOAP-ENV:Envelope
-   |            xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'
-   |            xmlns:ws='http://api.vetrf.ru/schema/cdm/application/ws-definitions'
-   |            xmlns:app='http://api.vetrf.ru/schema/cdm/application'
-   |            xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/applications'
-   |            xmlns:base='http://api.vetrf.ru/schema/cdm/base'
-   |            xmlns:com='http://api.vetrf.ru/schema/cdm/argus/common'
-   |            xmlns:ent='http://api.vetrf.ru/schema/cdm/cerberus/enterprise'
-   |            xmlns:ik='http://api.vetrf.ru/schema/cdm/ikar'>
+   |<SOAP-ENV:Envelope xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+   |xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+   |xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+   |xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/ws-definitions' 
+   |xmlns:apl='http://api.vetrf.ru/schema/cdm/application' 
+   |xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+   |xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
    |   <SOAP-ENV:Header/>
    |   <SOAP-ENV:Body>
-   |      <ws:submitApplicationRequest>
-   |         <ws:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</ws:apiKey>
-   |         <app:application>
-   |            <app:serviceId>mercury-g2b.service</app:serviceId>
-   |            <app:issuerId>"+ ГМ.СписокКонстант.Получить("param_issuer_id")+"</app:issuerId>
-   |            <app:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</app:issueDate>
-   |            <app:data>
+   |      <apldef:submitApplicationRequest>
+   |         <apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
+   |         <apl:application>
+   |            <apl:serviceId>mercury-g2b.service</apl:serviceId>
+   |            <apl:issuerId>"+ ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
+   |            <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
+   |            <apl:data>
 	|      <merc:modifyBusinessEntityRequest>
 	|        <merc:localTransactionId>[GUID]</merc:localTransactionId>
 	|        <merc:initiator>
-	|          <com:login>"+ ГМ.СписокКонстант.Получить("param_intiator_login")+"</com:login>
+	|          <vd:login>"+ ГМ.СписокКонстант.Получить("param_intiator_login")+"</vd:login>
 	|        </merc:initiator>
 	|        <merc:modificationOperation>
-	|          <ent:type>FIND_OR_CREATE</ent:type>
-	|          <ent:affectedList count='0' total='0' offset='0' />
-	|          <ent:resultingList count='1' total='1' offset='0'>
+	|          <vd:type>FIND_OR_CREATE</vd:type>
+	|          <vd:affectedList count='0' total='0' offset='0' />
+	|          <vd:resultingList count='1' total='1' offset='0'>
 	|";
 
 	Если СтрДлина( СокрЛП(ИНН) ) = 12 Тогда
 		// ИП = физ лицо
 		ответ = ответ + "
-		|  <ent:businessEntity>
-        |  <ent:type>2</ent:type>
-		|    <ent:fio>"+ СокрЛП(ПолноеНаименование) +"</ent:fio>
-		|    <ent:inn>" + СокрЛП(ИНН) +"</ent:inn>
-		|    <ent:ogrn>" + СокрЛП(ОГРН) +"</ent:ogrn>
+		|  <dt:businessEntity>
+        |  <dt:type>2</dt:type>
+		|    <dt:fio>"+ СокрЛП(ПолноеНаименование) +"</dt:fio>
+		|    <dt:inn>" + СокрЛП(ИНН) +"</dt:inn>
+		|    <dt:ogrn>" + СокрЛП(ОГРН) +"</dt:ogrn>
 		|";
 
 	Иначе  //Юр лицо ООО
 		ответ = ответ + "
-		|            <ent:businessEntity>
-		|              <ent:type>1</ent:type>
-		|              <ent:name>"+ СокрЛП(ПолноеНаименование) +"</ent:name>
-		|              <ent:incorporationForm>
-		|                <ent:code>12300</ent:code>
-		|              </ent:incorporationForm>
-		|              <ent:fullName>"+ СокрЛП(ПолноеНаименование) +"</ent:fullName>
-		|              <ent:inn>" + СокрЛП(ИНН) +"</ent:inn>
-		|              <ent:kpp>" + СокрЛП(КПП) +"</ent:kpp>
-		|              <ent:ogrn>" + СокрЛП(ОГРН) +"</ent:ogrn>
+		|            <dt:businessEntity>
+		|              <dt:type>1</dt:type>
+		|              <dt:name>"+ СокрЛП(ПолноеНаименование) +"</dt:name>
+		|              <dt:incorporationForm>
+		|                <dt:code>12300</dt:code>
+		|              </dt:incorporationForm>
+		|              <dt:fullName>"+ СокрЛП(ПолноеНаименование) +"</dt:fullName>
+		|              <dt:inn>" + СокрЛП(ИНН) +"</dt:inn>
+		|              <dt:kpp>" + СокрЛП(КПП) +"</dt:kpp>
+		|              <dt:ogrn>" + СокрЛП(ОГРН) +"</dt:ogrn>
 		|";
 	КонецЕсли;
 
 	ответ=ответ+"
-		|              <ent:juridicalAddress>
-		|                <ik:country>
-		|                  <base:guid>"+ СокрЛП(Страна.GUID) +"</base:guid>
-		|                </ik:country>
-		|                <ik:federalDistrict />
-		|                <ik:region>
-		|                  <base:guid>"+ СокрЛП(Регион.GUID) +"</base:guid>
-		|                </ik:region> ";
+		|              <dt:juridicalAddress>
+		|                <dt:country>
+		|                  <bs:guid>"+ СокрЛП(Страна.GUID) +"</bs:guid>
+		|                </dt:country>
+		|                <dt:region>
+		|                  <bs:guid>"+ СокрЛП(Регион.GUID) +"</bs:guid>
+		|                </dt:region> ";
 		Если ПустоеЗначение(Район)=0 Тогда 
 			ответ=ответ+"
-			|                <ik:district>
-			|                  <base:guid>"+ СокрЛП(Район.GUID) +"</base:guid>
-			|                </ik:district> ";
+			|                <dt:district>
+			|                  <bs:guid>"+ СокрЛП(Район.GUID) +"</bs:guid>
+			|                </dt:district> ";
 		Иначе
 			ответ=ответ+"
-			|                <ik:district /> ";
+			|                <dt:district /> ";
 		КонецЕсли;
 		ответ=ответ+"
-		|                <ik:locality>
-		|                  <base:guid>"+ СокрЛП(Город.GUID) +"</base:guid>
-		|                </ik:locality>
-		|                <ik:subLocality />
+		|                <dt:locality>
+		|                  <bs:guid>"+ СокрЛП(Город.GUID) +"</bs:guid>
+		|                </dt:locality>
+		|                <dt:subLocality />
 		|";
 ;
 	Если ПустоеЗначение(Улица.GUID)=0 Тогда
 		Ответ=Ответ+"
-		|                <ik:street>
-		|                   <base:guid>"+ СокрЛП(Улица.GUID) +"</base:guid>
-		|                </ik:street>
+		|                <dt:street>
+		|                   <bs:guid>"+ СокрЛП(Улица.GUID) +"</bs:guid>
+		|                </dt:street>
 		|";
 	Иначе
-			Ответ=Ответ+"  <ik:street /> ";
+			Ответ=Ответ+"  <dt:street /> ";
 	КонецЕсли;
 	Ответ=Ответ+"
-	|                <ik:addressView>" + СокрЛП(Адрес) +"</ik:addressView>
-	|              </ent:juridicalAddress>
-	|            </ent:businessEntity>
-	|          </ent:resultingList>
-	|          <ent:reason>"+ СокрЛП(Причина) +"</ent:reason>
+	|                <dt:addressView>" + СокрЛП(Адрес) +"</dt:addressView>
+	|              </dt:juridicalAddress>
+	|            </dt:businessEntity>
+	|          </vd:resultingList>
+	|          <vd:reason>"+ СокрЛП(Причина) +"</vd:reason>
 	|        </merc:modificationOperation>
 	|      </merc:modifyBusinessEntityRequest>
-   |          </app:data>
-   |         </app:application>
-   |      </ws:submitApplicationRequest>
+   |          </apl:data>
+   |         </apl:application>
+   |      </apldef:submitApplicationRequest>
    |   </SOAP-ENV:Body>
    |</SOAP-ENV:Envelope>
    |";
@@ -230,7 +227,7 @@
 	ЗапросXML = Создать_ХС_ЗапросXML(  );
 
 	метод = ГМ.Компонента.GetMethod();
-    метод.Service = "platform/services/ApplicationManagementService";
+    метод.Service = "platform/services/2.0/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
 	//appID = ГМ.ОтправитьЗапросXML(ЗапросXML);
