@@ -247,7 +247,7 @@
             ТЗточкиМаршрута.НомерТочки	= Узел.selectSingleNode("sqnId").text;
 			//Площадка_GUID = Узел.selectSingleNode("enterprise").selectSingleNode("GUID").text;
 			Площадка_GUID = Узел.selectSingleNode("enterprise").selectSingleNode("GUIDtest").text;
-			Попытка ТЗточкиМаршрута.ВыбПлощадка	= ГМ.НайтиПлощадку( Площадка_GUID ); Исключение КонецПопытки;
+			Попытка ТЗточкиМаршрута.ВыбПлощадка	= ГМ2.НайтиПлощадку( Площадка_GUID ); Исключение КонецПопытки;
 			//Попытка ТЗточкиМаршрута.ПредприятиеНаименование	 =  	Узел.selectSingleNode("vd:enterprise").selectSingleNode("dt:name").text; Исключение КонецПопытки;
             ТЗточкиМаршрута.Перегрузка	= ?(Узел.selectSingleNode("transshipment").text = "true",1,0);
             ТЗточкиМаршрута.ТипТранспорта			 = 		Число(Узел.selectSingleNode("nextTransport").selectSingleNode("transportType").text);
