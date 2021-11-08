@@ -3,9 +3,9 @@
 
 Процедура ЗагрузитьГорода_НасПункты()
 	Если Район.Выбран() = 0 Тогда
-	    ГМ.ИнициализацияХС_ЗагрузитьГорода(Регион);
+	    ГМ2.ИнициализацияХС_ЗагрузитьГорода(Регион);
 	Иначе
-		ГМ.ИнициализацияХС_ЗагрузитьНаселенныеПунктыПоРайону(Район);
+		ГМ2.ИнициализацияХС_ЗагрузитьНаселенныеПунктыПоРайону(Район);
 	КонецЕсли;
 КонецПроцедуры
 
@@ -33,7 +33,16 @@
 		ОткрытьФорму("Справочник.ВСД_Город",ВремЭлем);
 		ФлагПродолжения = 0;
 	ИначеЕсли ЭлементДиалога = "Улица" Тогда
-		ВремЭлем = Город;
+		Если ПустоеЗначение(Город)=0 Тогда
+			ВремЭлем = Город;
+		ИначеЕсли ПустоеЗначение(Район)=0 Тогда
+			ВремЭлем = Район;
+		ИначеЕсли ПустоеЗначение(Регион)=0 Тогда
+			ВремЭлем = Регион;
+		Иначе
+			Сообщить("Выберите город");
+		КонецЕсли;
+		
 		ОткрытьФорму("Справочник.ВСД_Улица",ВремЭлем);
 		ФлагПродолжения = 0;
 	КонецЕсли;
@@ -279,7 +288,7 @@
 
 КонецПроцедуры
 
-Функция  СоздатьПлощадку_ЗапросXML(Площадка)
+Функция  СоздатьПлощадку_ЗапросXML_1_4(Площадка)
 
 	ЗапросXML = "
 	|<soapenv:Envelope
@@ -383,6 +392,108 @@
 	Возврат ЗапросXML;
 КонецФункции
 
+Функция  СоздатьПлощадку_ЗапросXML(Площадка)
+
+	ЗапросXML = "
+	|<soapenv:Envelope
+	|xmlns:dt='http://api.vetrf.ru/schema/cdm/dictionary/v2' 
+	|xmlns:bs='http://api.vetrf.ru/schema/cdm/base' 
+	|xmlns:merc='http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2' 
+	|xmlns:apldef='http://api.vetrf.ru/schema/cdm/application/apldef-definitions' 
+	|xmlns:apl='http://api.vetrf.ru/schema/cdm/application' 
+	|xmlns:vd='http://api.vetrf.ru/schema/cdm/mercury/vet-document/v2' 
+	|xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>
+	|   <soapenv:Body>
+	|      <apldef:submitApplicationRequest>
+	|         <apldef:apiKey>" + ГМ.ПолучитьКонстанту("param_api_key") + "</apldef:apiKey>
+	|         <apl:application>
+	|            <apl:serviceId>mercury-g2b.service</apl:serviceId>
+	|            <apl:issuerId>" + ГМ.ПолучитьКонстанту("param_issuer_id") + "</apl:issuerId>
+	|            <apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
+	|            <apl:data>
+	|                <merc:modifyEnterpriseRequest>
+	|                   <merc:localTransactionId>[GUID]</merc:localTransactionId>
+	|                   <merc:initiator>
+	|                      <vd:login>"+ГМ.СписокКонстант.Получить("param_intiator_login")+"</vd:login>
+	|                   </merc:initiator>
+	|                   <merc:modificationOperation>
+	|                       <vd:type>CREATE</vd:type>
+	|                       <vd:resultingList count='1' total='1' offset='0'>
+	|                       <dt:enterprise>
+	|                           <dt:name>"+СокрЛП(ПолноеНаименование)+"</dt:name>
+	|                           <dt:type>1</dt:type>
+	|              <dt:address>
+	|                <dt:country>
+	|                  <bs:guid>"+СокрЛП(Страна.GUID)+"</bs:guid>
+	|                </dt:country>";
+	Если ПустоеЗначение(Регион.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <dt:region>
+		|                  <bs:guid>"+СокрЛП(Регион.GUID)+"</bs:guid>
+		|                </dt:region>
+		|";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|                <dt:region> ";
+	КонецЕсли;
+	Если ПустоеЗначение(Район.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <dt:district>
+		|                  <bs:guid>"+СокрЛП(Район.GUID)+"</bs:guid>
+		|                </dt:district>
+		|";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|<dt:district />
+		|";
+	КонецЕсли;
+	Если ПустоеЗначение(Город.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <dt:locality>
+		|                  <bs:guid>"+СокрЛП(Город.GUID)+"</bs:guid>
+		|                </dt:locality> ";
+	Иначе
+		ЗапросXML=ЗапросXML+"
+		|                <dt:locality /> ";
+	КонецЕсли;
+	//ЗапросXML=ЗапросXML+"
+	//|                <dt:subLocality /> ";
+	Если ПустоеЗначение(Улица.GUID)=0 Тогда
+		ЗапросXML=ЗапросXML+"
+		|                <dt:street>
+		|                  <bs:guid>"+СокрЛП(Улица.GUID)+"</bs:guid>
+		|                </dt:street > ";
+	Иначе
+		//ЗапросXML=ЗапросXML+"
+		//|                <dt:street /> ";
+	КонецЕсли;
+	ЗапросXML=ЗапросXML+"
+	|                <dt:addressView>"+СокрЛП(Адрес)+"</dt:addressView>
+	|              </dt:address>
+	|                          <dt:activityList count='1' total='1' offset='0'>
+	|                             <dt:activity>
+	|                                 <dt:name>" + СокрЛП(Деятельность) + "</dt:name>
+	|                             </dt:activity>
+	|                         </dt:activityList>
+	|                         <dt:owner>
+	|                            <bs:guid>"+СокрЛП(Площадка.GuidХозСубъекта)+"</bs:guid>
+	|                         </dt:owner>
+	|                    </dt:enterprise>
+	|              </vd:resultingList>
+	//|              <vd:reason>"+ Причина +"</vd:reason>
+	|           </merc:modificationOperation>
+	|        </merc:modifyEnterpriseRequest>
+	|      </apl:data>
+	|    </apl:application>
+	|   </apldef:submitApplicationRequest>
+	| </soapenv:Body>
+	|</soapenv:Envelope>
+	|";
+
+	Возврат ЗапросXML;
+КонецФункции
+
+
 Процедура СоздатьПлощадку(Площадка)
 
 	Если ПустоеЗначение(Площадка.GuidХозСубъекта)=1 Тогда
@@ -448,11 +559,11 @@
 
 Процедура ЗагрузитьУлицы()
 	Если ПустоеЗначение(Город)=0 Тогда
-		ГМ.ИнициализацияХС_ЗагрузитьУлицы(  Город, 0 );
+		ГМ2.ИнициализацияХС_ЗагрузитьУлицы(  Город, 0 );
 	ИначеЕсли ПустоеЗначение(Район)=0 Тогда
-		ГМ.ИнициализацияХС_ЗагрузитьУлицы(  Район, 0 );
+		ГМ2.ИнициализацияХС_ЗагрузитьУлицы(  Район, 0 );
 	ИначеЕсли ПустоеЗначение(Регион)=0 Тогда
-		ГМ.ИнициализацияХС_ЗагрузитьУлицы(  Регион, 0 );
+		ГМ2.ИнициализацияХС_ЗагрузитьУлицы(  Регион, 0 );
 	Иначе
 		Сообщить("Выберите город");
 	КонецЕсли;
