@@ -618,12 +618,19 @@
 		last = stockEntry.selectSingleNode("bs:last").text;
 		uuid = stockEntry.selectSingleNode("bs:uuid").text;
 		guid = stockEntry.selectSingleNode("bs:guid").text;
-
+		st = stockEntry.selectSingleNode("bs:status").text;
+		
 		Партия = ГМ.НайтиПартиюПоGUID(guid);
 
 		Попытка Партия.active = ?( active="true",1,0) Исключение	КонецПопытки;
 		Попытка Партия.last = ?( last="true",1,0) Исключение	КонецПопытки;
-				
+		
+		Если st="201" Тогда
+			active="false";
+			Партия.Статус = st;
+			Партия.active = 0;
+		КонецЕсли;
+			
 		Если active="false" Тогда
 			Сообщить("Изменения в партию "+Партия+" uuid ["+uuid+"] не внесены. Признак партии = не активна","i");
 			Если Партия.Выбран()=1 Тогда 
@@ -633,7 +640,7 @@
 			Возврат Партия;
 		КонецЕсли;
 
-		st = stockEntry.selectSingleNode("bs:status").text;
+		
 		entryNumber = stockEntry.selectSingleNode("vd:entryNumber").text;
 		updateDate = stockEntry.selectSingleNode("bs:updateDate").text;
 		createDate = stockEntry.selectSingleNode("bs:createDate").text;
