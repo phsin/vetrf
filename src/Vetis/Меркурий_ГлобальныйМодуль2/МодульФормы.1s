@@ -2753,6 +2753,16 @@
     	    |<vd:type>23</vd:type>
         	|<vd:relationshipType>1</vd:relationshipType>
 	        |</vd:relatedDocument>";
+		КонецЕсли;
+		
+		Если ПустоеЗначение(Док.ВидСвязанногоДокумента) = 0 Тогда
+	        СвязанныеДокументы = СвязанныеДокументы+ "
+	        |<vd:relatedDocument>
+    	    |<vd:issueNumber>"+СокрЛП(док.НомерСвязанногоДокумента)+"</vd:issueNumber>
+	        |<vd:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаСвязанногоДокумента) +"</vd:issueDate>
+    	    |<vd:type>"+Сред(Док.ВидСвязанногоДокумента.Идентификатор(),4)+"</vd:type>
+        	|<vd:relationshipType>1</vd:relationshipType>
+	        |</vd:relatedDocument>";
         КонецЕсли;
 		
 		//!!! UUID на основании аннулированного ВСД в ТЧ документа
