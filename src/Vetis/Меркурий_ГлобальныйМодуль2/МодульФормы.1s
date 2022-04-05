@@ -919,7 +919,7 @@
 	
 	Сообщить("Отправляем запрос партий По GUID "+ВыбПартия);
 	ЗапросXML = Партии_ПоGUID_Запрос( ВыбПартия );	
-	Service = "platform/services/2.0/ApplicationManagementService";
+	Service = "platform/services/2.1/ApplicationManagementService";
 	Action = "submitApplicationRequest";	
 	
 	метод = ГМ.Компонента.GetMethod();
@@ -1243,7 +1243,7 @@
 		ЗапросXML = ЗагрузитьВСДпоUUID_ЗапросXML( тзДок.док );
 	
 		метод = ГМ.Компонента.GetMethod();
-		метод.Service = "platform/services/2.0/ApplicationManagementService";
+		метод.Service = "platform/services/2.1/ApplicationManagementService";
 	    метод.Action = "submitApplicationRequest";
 	
 		appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -1691,7 +1691,7 @@
 	КонецЕсли;
 	
 	метод = ГМ.Компонента.GetMethod();
-	метод.Service = "platform/services/2.0/ApplicationManagementService";
+	метод.Service = "platform/services/2.1/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -2355,7 +2355,7 @@
 	ЗапросXML = РегионализацияМаршрута_2_ЗапросXML(док);
 
 	метод = ГМ.Компонента.GetMethod();
-	метод.Service = "platform/services/2.0/ApplicationManagementService";
+	метод.Service = "platform/services/2.1/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -3849,7 +3849,7 @@
 	ЗапросXML = Изменить_Продукцию_ЗапросXML(продукцияЭлемент, RegisterModificationType);
 
 	метод = ГМ.Компонента.GetMethod();
-	метод.Service = "platform/services/2.0/ApplicationManagementService";
+	метод.Service = "platform/services/2.1/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
@@ -3989,7 +3989,7 @@
 	ЗапросXML = ВСД2_Аннулирование_ЗапросXML(док);
 
 	метод = ГМ.Компонента.GetMethod();
-	метод.Service = "platform/services/2.0/ApplicationManagementService";
+	метод.Service = "platform/services/2.1/ApplicationManagementService";
     метод.Action = "submitApplicationRequest";
 
 	appID = ГМ.ОтправитьЗапросSoap(ЗапросXML, метод);
