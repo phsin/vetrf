@@ -893,7 +893,7 @@
 	|<apldef:submitApplicationRequest>	
 	|<apldef:apiKey>"+ ГМ.ПолучитьКонстанту("param_api_key") +"</apldef:apiKey>
 	|<apl:application>
-	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ ГМ.ПолучитьКонстанту("param_issuer_id") +"</apl:issuerId>
 	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>	
 	|<apl:data>
@@ -1209,7 +1209,7 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 	|<apl:application>
-	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
 	|<apl:data>
@@ -1313,10 +1313,7 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ГМ.СписокКонстант.Получить("param_api_key")+"</apldef:apiKey>
 	|<apl:application>
-	//метод 2.1 пока не работает в продуктиве
 	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
-	//метод 2.0
-	//|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
 	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
 	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
 	|<apl:data>
@@ -1555,7 +1552,6 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 	|<apl:application>
-	//|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
 	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 	|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
@@ -1750,7 +1746,7 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 	|<apl:application>
-	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") +"</apl:issueDate>
 	|<apl:data>
@@ -2066,7 +2062,7 @@
 		|<apldef:submitApplicationRequest>
 		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 		|<apl:application>
-		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка( ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
 		|<apl:data>
@@ -3268,7 +3264,7 @@
 		|<apldef:submitApplicationRequest>
 		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 		|<apl:application>
-		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.ДатаДок, "T00:00:00") + "</apl:issueDate>
 		|<apl:data>
@@ -3729,7 +3725,7 @@
 		|<apldef:submitApplicationRequest>
 		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 		|<apl:application>
-		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") + "</apl:issueDate>
 		|<apl:data>
@@ -3981,7 +3977,7 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
 	|<apl:application>
-	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
 	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
 	|<apl:data>
@@ -4145,7 +4141,7 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
 	|<apl:application>
-	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
 	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
 	|<apl:data>
@@ -4855,7 +4851,7 @@
 	|<apldef:submitApplicationRequest>
 	|<apldef:apiKey>"+ ГМ.СписокКонстант.Получить("param_api_key") + "</apldef:apiKey>
 	|<apl:application>
-	|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+	|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 	|<apl:issuerId>"+ГМ.СписокКонстант.Получить("param_issuer_id")+"</apl:issuerId>
 	|<apl:issueDate>"+ ГМ.Преобразовать_Дата_в_Строка(ТекущаяДата(), "T00:00:00") +"</apl:issueDate>
 	|<apl:data>
@@ -5067,7 +5063,7 @@
 		|<apldef:submitApplicationRequest>
 		|<apldef:apiKey>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_api_key") ) +"</apldef:apiKey>
 		|<apl:application>
-		|<apl:serviceId>mercury-g2b.service:2.0</apl:serviceId>
+		|<apl:serviceId>mercury-g2b.service:2.1</apl:serviceId>
 		|<apl:issuerId>"+ СокрЛП( ГМ.СписокКонстант.Получить("param_issuer_id") ) +"</apl:issuerId>
 		|<apl:issueDate>" + ГМ.Преобразовать_Дата_в_Строка(док.Датадок, "T00:00:00") + "</apl:issueDate>
 		|<apl:data>
